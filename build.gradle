@@ -1,0 +1,213 @@
+apply plugin: 'java'
+apply plugin: 'war'
+apply plugin: 'gwt'
+apply plugin: 'eclipse'
+apply plugin: 'eclipse-wtp'
+apply plugin: 'org.akhikhl.gretty'
+//apply plugin: 'maven'
+
+version = '20171011'
+group = "muksihs"
+
+sourceCompatibility = 1.8
+compileJava.options.encoding = 'UTF-8'
+compileTestJava.options.encoding = 'UTF-8'
+
+farm {
+	webapp ':'
+}
+
+def RTJAR = '/usr/lib/jvm/java-8-openjdk-amd64/jre/lib/rt.jar';
+if (new File(RTJAR).exists()) {
+	compileJava.options.bootClasspath=RTJAR
+}
+
+buildscript {
+	repositories {
+        jcenter()
+        maven { url 'http://repo.spring.io/plugins-release' }
+    }
+    dependencies {
+        classpath 'org.wisepersist:gwt-gradle-plugin:1.+'
+        classpath 'org.akhikhl.gretty:gretty:+'
+    }
+}
+
+war {
+	archiveName (baseName+"."+extension)
+	rootSpec.exclude('**/*.class')
+	rootSpec.exclude('**/*.gwt.xml')
+}
+
+jar {
+	sourceSets.main.output.classesDir = new File(buildDir, "classes/main")
+	from project.sourceSets.main.allSource
+  	from project.sourceSets.main.output
+  	from ('src/main/resources')  
+}
+
+gretty {
+	httpPort = 8080;
+	servletContainer = 'tomcat8'
+	extraResourceBase 'build/gwt/out'
+	jvmArgs = ['-Dfile.encoding=UTF-8', '-Xmx1024M']
+}
+
+// In this section you declare where to find the dependencies of your project
+repositories {
+    jcenter()
+    maven { url 'https://jitpack.io' }
+}
+
+gwt {
+	logLevel = 'INFO'
+
+	maxHeapSize = "2048M";
+
+	gwtVersion='2.8.1'
+
+	modules 'muksihs.ipfs.photogallery.PhotoGallery'
+	
+	compiler {
+		ea = false //enable assert statements for testing result conditions
+		disableClassMetadata = false;
+		//
+		strict = true;
+		//style = "OBF";
+		style = "PRETTY";
+		localWorkers = 1;
+	}
+	
+	superDev {
+		noPrecompile = false;
+		failOnError = false;
+		bindAddress = "0.0.0.0";
+	}
+	
+	eclipse {
+		addGwtContainer = true;
+	}
+}
+
+configurations {
+  provided
+}
+
+dependencies {
+	providedCompile 'javax.servlet:javax.servlet-api:3.0.1'
+	providedCompile 'com.google.gwt:gwt-servlet:'+gwt.gwtVersion
+	
+	compile 'javax.ws.rs:javax.ws.rs-api:2.0.1'
+	
+	gwt 'com.google.gwt:gwt-user:'+gwt.gwtVersion
+	gwt 'org.fusesource.restygwt:restygwt:2.2.+'
+	gwt 'com.google.code.findbugs:jsr305:3.0.0' //required for restygwt compile
+	gwt 'de.knightsoft-net:gwt-commons-lang3:3.6-0'
+	gwt 'com.fasterxml.jackson.core:jackson-annotations:2.7.+'
+	
+	testCompile 'org.testng:testng:6.+'
+	testCompile 'org.seleniumhq.selenium:selenium-server:+'
+}
+ 
+sourceSets {
+  main {
+    compileClasspath += configurations.provided
+  }
+  test {
+    compileClasspath += configurations.provided
+    runtimeClasspath += configurations.provided
+  }
+}
+
+task "create-dirs" {
+	doLast{
+	sourceSets*.java.srcDirs*.each { it.mkdirs() }
+	sourceSets*.resources.srcDirs*.each { it.mkdirs() }
+}}
+
+task sourcesJar(type: Jar, dependsOn: classes) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+/*task javadocJar(type: Jar, dependsOn: javadoc) {
+	javadoc.failOnError=false
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+}*/
+
+artifacts {
+    archives sourcesJar
+    /*archives javadocJar*/
+}
+
+configurations.all {
+    resolutionStrategy.cacheChangingModulesFor 15, 'seconds'
+}
+
+eclipseJdt {
+	doLast{
+    File f = file('.settings/org.eclipse.core.resources.prefs')
+    f.write('eclipse.preferences.version=1\n')
+    f.append('encoding/<project>=utf-8')
+    f = file('.settings/org.eclipse.core.runtime.prefs')
+    f.write('eclipse.preferences.version=1\n')
+    f.append('line.separator=\\n\n')
+}}
+
+project.afterEvaluate {
+	// use jre lib matching version used by project, not the workspace default
+	if (sourceCompatibility != null) {
+		def target = project.sourceCompatibility.toString()
+		def containerPrefix = "org.eclipse.jdt.launching.JRE_CONTAINER"
+		def containerSuffix
+		if (target =~ /1.[4-5]/) {
+			containerSuffix = '/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/J2SE-' + target
+		} else if (target =~ /1.[6-8]/) {
+			containerSuffix = '/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-' + target
+		}
+		if (containerSuffix != null) {
+			project.eclipse.classpath {
+				containers.removeAll { it.startsWith(containerPrefix) }
+				containers.add(containerPrefix + containerSuffix)
+			}
+		}
+	}
+}
+
+eclipse {
+	project {
+		name = 'ipfs-photo-gallery'
+		referencedProjects
+		natures 'org.eclipse.buildship.core.gradleprojectnature'
+		webAppDirName = 'src/main/webapp'
+	}
+
+	classpath {
+		plusConfigurations += [configurations.provided]
+		containers += ['org.springsource.ide.eclipse.gradle.classpathcontainer']
+		downloadSources = true
+		downloadJavadoc = true
+	}
+
+	jdt {
+		sourceCompatibility=1.8
+		targetCompatibility=1.8
+	}
+
+	wtp {
+		facet {
+			facets = []
+			facet name: 'jst.java', version: '1.8'
+			facet name: 'jst.web', version: '3.0'
+		}
+	}
+}
+
+test {
+  useTestNG()
+  outputs.upToDateWhen { false }
+  dependsOn 'compileJava', 'compileGwt'
+  maxHeapSize = "1024m"
+}
+ 
