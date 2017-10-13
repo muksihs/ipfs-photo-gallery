@@ -6,14 +6,20 @@ import java.util.Iterator;
 import org.apache.commons.lang3.StringUtils;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.core.client.JsArray;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.FileUpload;
+import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.Widget;
 
+import gwt.material.design.client.constants.InputType;
 import gwt.material.design.client.ui.MaterialButton;
+import gwt.material.design.client.ui.MaterialInput;
 import gwt.material.design.client.ui.MaterialRadioButton;
 import muksihs.ipfs.photogallery.client.PostingTemplates;
 
@@ -30,12 +36,30 @@ public class MainView extends Composite {
 			rb1.addClickHandler((e) -> setColumns(1));
 			rb2.addClickHandler((e) -> setColumns(2));
 			rb4.addClickHandler((e) -> setColumns(4));
+			add.addClickHandler((e) -> upload());
 //			rb8.addClickHandler((e) -> setColumns(8));
 		});
 		Scheduler.get().scheduleDeferred(() -> {
 			rb4.setValue(true, true);
 			setColumns(4);
 		});
+	}
+
+	private Object upload() {
+		FileUpload fileUpload = new FileUpload();
+		fileUpload.getElement().setAttribute("multiple", "multiple");
+		RootPanel.get().add(fileUpload);
+		fileUpload.addChangeHandler((e)->{
+			GWT.log("fileupload-change: "+fileUpload.getFilename());
+			JsArray<JavaScriptObject> files = fileUpload.getElement().getPropertyJSO("files").cast();
+			if (files!=null) {
+				for (int ix=0; ix<files.length(); ix++) {
+					GWT.log(ix+": "+files.get(ix).toString());
+					GWT.log(ix+": "+files.get(ix).toSource());
+				}
+			}
+		});
+		return null;
 	}
 
 	private void setColumns(int columns) {
