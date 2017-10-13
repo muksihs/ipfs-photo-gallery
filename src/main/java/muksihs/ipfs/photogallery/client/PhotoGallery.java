@@ -60,7 +60,6 @@ public class PhotoGallery implements EntryPoint {
 				if (response.getStatusCode() == 200) {
 					g.setAlive(true);
 					g.setLatency(System.currentTimeMillis()-start);
-					GWT.log(g.getBaseUrl()+" ["+g.getLatency()+" ms]");
 				}
 				pingNextGateway(ig);
 			}
