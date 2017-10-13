@@ -6,7 +6,28 @@
  "https://raw.githubusercontent.com/gwtproject/gwt/master/distro-source/core/src/gwt-module.dtd">
 <module rename-to='PhotoGallery'>
 
-	<!-- shared code and libraries-->
+	<entry-point class='muksihs.ipfs.photogallery.client.PhotoGallery' />
+
+	<source path='client' />
+	<source path='shared' />
+	<source path='ui' />
+
+	<!-- UI -->
+	<inherits name="gwt.material.design.GwtMaterialWithJQuery" />
+	<inherits name="gwt.material.design.themes.ThemeBlue" />
+	<set-configuration-property name="CssResource.conversionMode"
+		value="strict" />
+	<!-- <inherits name="gwt.material.design.themes.ThemeAmber" /> -->
+	<!-- <inherits name="gwt.material.design.themes.ThemeBrown" /> -->
+	<!-- <inherits name="gwt.material.design.themes.ThemeGreen" /> -->
+	<!-- <inherits name="gwt.material.design.themes.ThemeGrey" /> -->
+	<!-- <inherits name="gwt.material.design.themes.ThemeOrange" /> -->
+	<!-- <inherits name="gwt.material.design.themes.ThemePink" /> -->
+	<!-- <inherits name="gwt.material.design.themes.ThemePurple" /> -->
+	<!-- <inherits name="gwt.material.design.themes.ThemeRed" /> -->
+	<!-- <inherits name="gwt.material.design.themes.ThemeYellow" /> -->
+
+	<!-- shared code and libraries -->
 	<inherits name='org.apache.commons.GWTCommonsLang3' />
 
 	<!-- ui stuff -->
@@ -16,14 +37,8 @@
 	<inherits name="org.fusesource.restygwt.RestyGWT" />
 	<set-property name="restygwt.encodeDecode.useGwtJackson"
 		value="true" />
-	<extend-configuration-property
-		name="gwtjackson.configuration.extension"
+	<extend-configuration-property name="gwtjackson.configuration.extension"
 		value="selenium.client.GwtJacksonConfiguration" />
-
-	<entry-point class='muksihs.ipfs.photogallery.client.PhotoGallery' />
-
-	<source path='client' />
-	<source path='shared' />
 
 	<inherits name="com.google.gwt.logging.Logging" />
 	<set-property name="gwt.logging.logLevel" value="INFO" />
@@ -38,5 +53,4 @@
 	<set-property-fallback name="user.agent" value="gecko1_8" />
 	<set-configuration-property name="user.agent.runtimeWarning"
 		value="false" />
-	<entry-point class="muksihs.ipfs.photogallery.client.PhotoGallery" />
 </module>

@@ -105,6 +105,9 @@ dependencies {
 	gwt 'de.knightsoft-net:gwt-commons-lang3:3.6-0'
 	gwt 'com.fasterxml.jackson.core:jackson-annotations:2.7.+'
 	
+	gwt 'com.github.gwtmaterialdesign:gwt-material:2.0+'
+	gwt 'com.github.gwtmaterialdesign:gwt-material-themes:2.0+'
+	
 	testCompile 'org.testng:testng:6.+'
 	testCompile 'org.seleniumhq.selenium:selenium-server:+'
 }
