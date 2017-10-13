@@ -108,6 +108,9 @@ dependencies {
 	gwt 'com.github.gwtmaterialdesign:gwt-material:2.0+'
 	gwt 'com.github.gwtmaterialdesign:gwt-material-themes:2.0+'
 	
+	gwt 'com.google.elemental2:elemental2-core:1.0.0-beta-1'
+	gwt 'com.google.elemental2:elemental2-dom:1.0.0-beta-1'
+	
 	testCompile 'org.testng:testng:6.+'
 	testCompile 'org.seleniumhq.selenium:selenium-server:+'
 }

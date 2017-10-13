@@ -135,7 +135,7 @@ public class MainView extends Composite {
 //	MaterialRadioButton rb8;
 
 	@UiField
-	MaterialButton add;
+	MaterialMultiFileUpload add;
 	@UiField
 	MaterialButton clear;
 	@UiField
