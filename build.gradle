@@ -85,7 +85,7 @@ gwt {
 	}
 	
 	eclipse {
-		addGwtContainer = true;
+		addGwtContainer = false;
 	}
 }
 

@@ -30,7 +30,7 @@ public class MainView extends Composite {
 			rb1.addClickHandler((e) -> setColumns(1));
 			rb2.addClickHandler((e) -> setColumns(2));
 			rb4.addClickHandler((e) -> setColumns(4));
-			rb8.addClickHandler((e) -> setColumns(8));
+//			rb8.addClickHandler((e) -> setColumns(8));
 		});
 		Scheduler.get().scheduleDeferred(() -> {
 			rb4.setValue(true, true);
@@ -58,7 +58,6 @@ public class MainView extends Composite {
 	private void updatePreview() {
 		int perRow;
 		String template=PostingTemplates.getInstance().templates().getText();
-//		preview.removeAllChildren();
 		perRow=columns;
 		switch (columns) {
 		case 1:
@@ -98,7 +97,7 @@ public class MainView extends Composite {
 			}
 			previewHtml.append(tmp);
 		}
-		preview.setInnerHTML(previewHtml.toString());
+		picPreview.setInnerHTML("<div>"+previewHtml.toString()+"</div>");
 		GWT.log(previewHtml.toString());
 	}
 
@@ -108,8 +107,8 @@ public class MainView extends Composite {
 	MaterialRadioButton rb2;
 	@UiField
 	MaterialRadioButton rb4;
-	@UiField
-	MaterialRadioButton rb8;
+//	@UiField
+//	MaterialRadioButton rb8;
 
 	@UiField
 	MaterialButton add;
@@ -121,7 +120,7 @@ public class MainView extends Composite {
 	MaterialButton generate;
 
 	@UiField
-	DivElement preview;
+	DivElement picPreview;
 
 	private int columns = 1;
 
