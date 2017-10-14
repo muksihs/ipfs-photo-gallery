@@ -1,9 +1,7 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
-	xmlns:g="urn:import:com.google.gwt.user.client.ui"
-	xmlns:m="urn:import:gwt.material.design.client.ui"
-	xmlns:x="urn:import:muksihs.ipfs.photogallery.ui"
-	>
+	xmlns:g="urn:import:com.google.gwt.user.client.ui" xmlns:m="urn:import:gwt.material.design.client.ui"
+	xmlns:x="urn:import:muksihs.ipfs.photogallery.ui">
 	<ui:style>
 	button {
 		margin: 3px;
@@ -31,7 +29,7 @@
 			<!-- </div> -->
 			<hr style='clear: left;' />
 			<div style='clear: left;width: auto'>
-				<x:MaterialMultiFileUpload ui:field="add"></x:MaterialMultiFileUpload>
+				<g:FileUpload ui:field="add"></g:FileUpload>
 			</div>
 			<div style='clear: left;width: auto'>
 				<m:MaterialButton ui:field="clear" text="Clear All"></m:MaterialButton>
@@ -40,6 +38,7 @@
 				<m:MaterialButton ui:field="edit" text="Edit Text"></m:MaterialButton>
 			</div>
 			<div style='clear: left;width: auto'>
+				<m:MaterialLabel>Add Images</m:MaterialLabel>
 				<m:MaterialButton ui:field="generate" text="Generate"></m:MaterialButton>
 			</div>
 			<hr style='clear: left;' />
