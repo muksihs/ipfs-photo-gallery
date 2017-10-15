@@ -155,6 +155,6 @@ public class MainView extends Composite {
 			previewHtml.append(tmp);
 		}
 		picPreview.setInnerHTML("<div>"+previewHtml.toString()+"</div>");
-		GWT.log(previewHtml.toString());
+//		GWT.log(previewHtml.toString());
 	}
 }

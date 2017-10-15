@@ -29,6 +29,7 @@
 			<!-- </div> -->
 			<hr style='clear: left;' />
 			<div style='clear: left;width: auto'>
+				<span>Add Images: </span>
 				<g:FileUpload ui:field="add"></g:FileUpload>
 			</div>
 			<div style='clear: left;width: auto'>
@@ -38,7 +39,6 @@
 				<m:MaterialButton ui:field="edit" text="Edit Text"></m:MaterialButton>
 			</div>
 			<div style='clear: left;width: auto'>
-				<m:MaterialLabel>Add Images</m:MaterialLabel>
 				<m:MaterialButton ui:field="generate" text="Generate"></m:MaterialButton>
 			</div>
 			<hr style='clear: left;' />
