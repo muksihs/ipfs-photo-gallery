@@ -19,6 +19,7 @@ import com.google.gwt.http.client.RequestException;
 import com.google.gwt.http.client.Response;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.user.client.Cookies;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.RootPanel;
 
 import muksihs.ipfs.photogallery.shared.Ipfs;
@@ -58,27 +59,43 @@ public class PhotoGallery implements EntryPoint {
 				GWT.log(g.getBaseUrl() + " [" + g.getLatency() + " ms], " + (g.isAlive() ? "ALIVE" : "DEAD"));
 			}
 			/*
-			 * rerun again if all writable gateways show as "dead", might have
-			 * been a bad connection interfering...
+			 * Check to see if we have at least one alive writable gateway
 			 */
 			for (IpfsGatewayEntry g : IpfsGateway.getGateways()) {
 				if (g.isAlive() && g.isWriteable()) {
+					/*
+					 * all is well, but schedule a retest in 5 minutes to keep
+					 * alive status up-to-date
+					 */
+					new Timer() {
+						@Override
+						public void run() {
+							Scheduler.get().scheduleDeferred(() -> pingGateways());
+						}
+					}.schedule((int) (5 * MINUTE));
 					return;
 				}
 			}
+			/*
+			 * rerun again if all writable gateways show as "dead", might have
+			 * been a bad Internet connection...
+			 */
 			Scheduler.get().scheduleDeferred(() -> pingGateways());
 			return;
 		}
 		long start = System.currentTimeMillis();
 		IpfsGatewayEntry g = ig.next();
-		String strExpires = Cookies.getCookie(cookieName(IPFS_GATEWAY_EXPIRES, g.getBaseUrl()));
+		String cookieNameExpires = cookieName(IPFS_GATEWAY_EXPIRES, g.getBaseUrl());
+		String cookieNameLatency = cookieName(IPFS_GATEWAY_LATENCY, g.getBaseUrl());
+		String cookieNameAlive = cookieName(IPFS_GATEWAY_ALIVE, g.getBaseUrl());
+		String strExpires = Cookies.getCookie(cookieNameExpires);
 		if (strExpires != null) {
 			try {
 				long expires = Long.valueOf(strExpires);
 				if (expires > g.getExpires()) {
-					String strLatency = Cookies.getCookie(cookieName(IPFS_GATEWAY_LATENCY, g.getBaseUrl()));
+					String strLatency = Cookies.getCookie(cookieNameLatency);
 					g.setLatency(Long.valueOf(strLatency));
-					String strAlive = Cookies.getCookie(cookieName(IPFS_GATEWAY_ALIVE, g.getBaseUrl()));
+					String strAlive = Cookies.getCookie(cookieNameAlive);
 					g.setAlive(Boolean.valueOf(strAlive));
 					pingNextGateway(ig);
 				}
@@ -99,12 +116,9 @@ public class PhotoGallery implements EntryPoint {
 					g.setLatency(System.currentTimeMillis() - start);
 					g.setExpires(System.currentTimeMillis() + 5l * MINUTE + new Random().nextInt((int) (5l * MINUTE)));
 					Date expires = new Date(g.getExpires());
-					Cookies.setCookie(cookieName(IPFS_GATEWAY_ALIVE, g.getBaseUrl()), g.isAlive() + "", expires, null,
-							"/", false);
-					Cookies.setCookie(cookieName(IPFS_GATEWAY_LATENCY, g.getBaseUrl()), g.getLatency() + "", expires,
-							null, "/", false);
-					Cookies.setCookie(cookieName(IPFS_GATEWAY_EXPIRES, g.getBaseUrl()), g.getExpires() + "", expires,
-							null, "/", false);
+					Cookies.setCookie(cookieNameAlive, g.isAlive() + "", expires, null, "/", false);
+					Cookies.setCookie(cookieNameLatency, g.getLatency() + "", expires, null, "/", false);
+					Cookies.setCookie(cookieNameExpires, g.getExpires() + "", expires, null, "/", false);
 				}
 				pingNextGateway(ig);
 			}
@@ -115,12 +129,9 @@ public class PhotoGallery implements EntryPoint {
 				g.setLatency(System.currentTimeMillis() - start);
 				g.setExpires(System.currentTimeMillis() + 5l * MINUTE + new Random().nextInt((int) (1l * MINUTE)));
 				Date expires = new Date(g.getExpires());
-				Cookies.setCookie(cookieName(IPFS_GATEWAY_ALIVE, g.getBaseUrl()), g.isAlive() + "", expires, null, "/",
-						false);
-				Cookies.setCookie(cookieName(IPFS_GATEWAY_LATENCY, g.getBaseUrl()), g.getLatency() + "", expires, null,
-						"/", false);
-				Cookies.setCookie(cookieName(IPFS_GATEWAY_EXPIRES, g.getBaseUrl()), g.getExpires() + "", expires, null,
-						"/", false);
+				Cookies.setCookie(cookieNameAlive, g.isAlive() + "", expires, null, "/", false);
+				Cookies.setCookie(cookieNameLatency, g.getLatency() + "", expires, null, "/", false);
+				Cookies.setCookie(cookieNameExpires, g.getExpires() + "", expires, null, "/", false);
 				pingNextGateway(ig);
 			}
 		});
