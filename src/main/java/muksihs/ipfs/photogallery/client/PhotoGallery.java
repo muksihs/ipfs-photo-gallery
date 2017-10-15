@@ -80,6 +80,7 @@ public class PhotoGallery implements EntryPoint {
 			 * rerun again if all writable gateways show as "dead", might have
 			 * been a bad Internet connection...
 			 */
+			resetGatewaysPingStatus();
 			Scheduler.get().scheduleDeferred(() -> pingGateways());
 			return;
 		}
@@ -138,6 +139,15 @@ public class PhotoGallery implements EntryPoint {
 		try {
 			rb.send();
 		} catch (RequestException e) {
+		}
+	}
+
+	private void resetGatewaysPingStatus() {
+		for (IpfsGatewayEntry g: IpfsGateway.getGateways()){
+			Date expires = new Date(0);
+			String cookieNameExpires = cookieName(IPFS_GATEWAY_EXPIRES, g.getBaseUrl());
+			g.setExpires(0);
+			Cookies.setCookie(cookieNameExpires, g.getExpires() + "", expires, null, "/", false);			
 		}
 	}
 
