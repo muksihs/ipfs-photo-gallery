@@ -32,7 +32,7 @@ public class PhotoGallery implements EntryPoint {
 	private static final String IPFS_GATEWAY_LATENCY = "-latency";
 	private static final String IPFS_GATEWAY_ALIVE = "-alive";
 	private static final long SECOND = 1000l;
-	private static final long MINUTE = SECOND*60l;
+	private static final long MINUTE = SECOND * 60l;
 
 	@Override
 	public void onModuleLoad() {
@@ -42,33 +42,43 @@ public class PhotoGallery implements EntryPoint {
 
 	private void pingNextGateway(Iterator<IpfsGatewayEntry> ig) {
 		if (!ig.hasNext()) {
-			Collections.sort(IpfsGateway.getGateways(), (a, b)->{
-				if (a.isAlive()==b.isAlive()) {
-					if (a.getLatency()==b.getLatency()){
+			Collections.sort(IpfsGateway.getGateways(), (a, b) -> {
+				if (a.isAlive() == b.isAlive()) {
+					if (a.getLatency() == b.getLatency()) {
 						return a.getBaseUrl().compareTo(b.getBaseUrl());
 					}
-					return Long.compare(a.getLatency(),b.getLatency());
+					return Long.compare(a.getLatency(), b.getLatency());
 				}
-				if (a.isAlive()==false) {
+				if (a.isAlive() == false) {
 					return 1;
 				}
 				return -1;
 			});
-			for (IpfsGatewayEntry g: IpfsGateway.getGateways()){
-				GWT.log(g.getBaseUrl()+" ["+g.getLatency()+" ms], "+(g.isAlive()?"ALIVE":"DEAD"));
+			for (IpfsGatewayEntry g : IpfsGateway.getGateways()) {
+				GWT.log(g.getBaseUrl() + " [" + g.getLatency() + " ms], " + (g.isAlive() ? "ALIVE" : "DEAD"));
 			}
+			/*
+			 * rerun again if all writable gateways show as "dead", might have
+			 * been a bad connection interfering...
+			 */
+			for (IpfsGatewayEntry g : IpfsGateway.getGateways()) {
+				if (g.isAlive() && g.isWriteable()) {
+					return;
+				}
+			}
+			Scheduler.get().scheduleDeferred(() -> pingGateways());
 			return;
 		}
 		long start = System.currentTimeMillis();
 		IpfsGatewayEntry g = ig.next();
-		String strExpires = Cookies.getCookie(cookieName(IPFS_GATEWAY_EXPIRES,g.getBaseUrl()));
-		if (strExpires!=null) {
+		String strExpires = Cookies.getCookie(cookieName(IPFS_GATEWAY_EXPIRES, g.getBaseUrl()));
+		if (strExpires != null) {
 			try {
 				long expires = Long.valueOf(strExpires);
-				if (expires>g.getExpires()) {
-					String strLatency = Cookies.getCookie(cookieName(IPFS_GATEWAY_LATENCY,g.getBaseUrl()));
+				if (expires > g.getExpires()) {
+					String strLatency = Cookies.getCookie(cookieName(IPFS_GATEWAY_LATENCY, g.getBaseUrl()));
 					g.setLatency(Long.valueOf(strLatency));
-					String strAlive = Cookies.getCookie(cookieName(IPFS_GATEWAY_ALIVE,g.getBaseUrl()));
+					String strAlive = Cookies.getCookie(cookieName(IPFS_GATEWAY_ALIVE, g.getBaseUrl()));
 					g.setAlive(Boolean.valueOf(strAlive));
 					pingNextGateway(ig);
 				}
@@ -86,11 +96,15 @@ public class PhotoGallery implements EntryPoint {
 			public void onResponseReceived(Request request, Response response) {
 				if (response.getStatusCode() == 200) {
 					g.setAlive(true);
-					g.setLatency(System.currentTimeMillis()-start);
-					g.setExpires(System.currentTimeMillis()+10l*MINUTE+new Random().nextInt((int) (10l*MINUTE)));
-					Cookies.setCookie(cookieName(IPFS_GATEWAY_ALIVE,g.getBaseUrl()), g.isAlive()+"", new Date(g.getExpires()), null, "/", false);
-					Cookies.setCookie(cookieName(IPFS_GATEWAY_LATENCY,g.getBaseUrl()), g.getLatency()+"", new Date(g.getExpires()), null, "/", false);
-					Cookies.setCookie(cookieName(IPFS_GATEWAY_EXPIRES,g.getBaseUrl()), g.getExpires()+"", new Date(g.getExpires()), null, "/", false);
+					g.setLatency(System.currentTimeMillis() - start);
+					g.setExpires(System.currentTimeMillis() + 5l * MINUTE + new Random().nextInt((int) (5l * MINUTE)));
+					Date expires = new Date(g.getExpires());
+					Cookies.setCookie(cookieName(IPFS_GATEWAY_ALIVE, g.getBaseUrl()), g.isAlive() + "", expires, null,
+							"/", false);
+					Cookies.setCookie(cookieName(IPFS_GATEWAY_LATENCY, g.getBaseUrl()), g.getLatency() + "", expires,
+							null, "/", false);
+					Cookies.setCookie(cookieName(IPFS_GATEWAY_EXPIRES, g.getBaseUrl()), g.getExpires() + "", expires,
+							null, "/", false);
 				}
 				pingNextGateway(ig);
 			}
@@ -98,11 +112,15 @@ public class PhotoGallery implements EntryPoint {
 			@Override
 			public void onError(Request request, Throwable exception) {
 				g.setAlive(false);
-				g.setLatency(System.currentTimeMillis()-start);
-				g.setExpires(System.currentTimeMillis()+5l*MINUTE+new Random().nextInt((int) (1l*MINUTE)));
-				Cookies.setCookie(cookieName(IPFS_GATEWAY_ALIVE,g.getBaseUrl()), g.isAlive()+"", new Date(g.getExpires()), null, "/", false);
-				Cookies.setCookie(cookieName(IPFS_GATEWAY_LATENCY,g.getBaseUrl()), g.getLatency()+"", new Date(g.getExpires()), null, "/", false);
-				Cookies.setCookie(cookieName(IPFS_GATEWAY_EXPIRES,g.getBaseUrl()), g.getExpires()+"", new Date(g.getExpires()), null, "/", false);
+				g.setLatency(System.currentTimeMillis() - start);
+				g.setExpires(System.currentTimeMillis() + 5l * MINUTE + new Random().nextInt((int) (1l * MINUTE)));
+				Date expires = new Date(g.getExpires());
+				Cookies.setCookie(cookieName(IPFS_GATEWAY_ALIVE, g.getBaseUrl()), g.isAlive() + "", expires, null, "/",
+						false);
+				Cookies.setCookie(cookieName(IPFS_GATEWAY_LATENCY, g.getBaseUrl()), g.getLatency() + "", expires, null,
+						"/", false);
+				Cookies.setCookie(cookieName(IPFS_GATEWAY_EXPIRES, g.getBaseUrl()), g.getExpires() + "", expires, null,
+						"/", false);
 				pingNextGateway(ig);
 			}
 		});
@@ -113,7 +131,7 @@ public class PhotoGallery implements EntryPoint {
 	}
 
 	private String cookieName(String dataTag, String baseUrl) {
-		return StringUtils.substringBetween(baseUrl, "//", "/")+"-"+dataTag;
+		return StringUtils.substringBetween(baseUrl, "//", "/") + "-" + dataTag;
 	}
 
 	private void pingGateways() {
