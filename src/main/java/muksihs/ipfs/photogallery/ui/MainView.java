@@ -8,29 +8,24 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
-import com.google.gwt.dom.builder.shared.FormBuilder;
 import com.google.gwt.dom.client.DivElement;
-import com.google.gwt.http.client.Request;
-import com.google.gwt.http.client.RequestBuilder;
-import com.google.gwt.http.client.RequestCallback;
-import com.google.gwt.http.client.Response;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FileUpload;
-import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.Widget;
 
 import elemental2.core.Function;
 import elemental2.dom.DomGlobal;
 import elemental2.dom.File;
 import elemental2.dom.FileList;
-import elemental2.dom.FormData;
 import elemental2.dom.HTMLInputElement;
 import elemental2.dom.ProgressEvent;
 import elemental2.dom.XMLHttpRequest;
-import elemental2.dom.XMLHttpRequest.OnloadCallbackFn;
+import elemental2.dom.XMLHttpRequest.OnloadendCallbackFn;
+import elemental2.dom.XMLHttpRequest.OnprogressCallbackFn;
+import elemental2.dom.XMLHttpRequestUpload;
 import gwt.material.design.client.ui.MaterialButton;
 import gwt.material.design.client.ui.MaterialRadioButton;
 import muksihs.ipfs.photogallery.client.PostingTemplates;
@@ -91,36 +86,37 @@ public class MainView extends Composite {
 				GWT.log("Have "+files.length+" files to upload.");
 				for (int ix=0; ix<files.length; ix++) {
 					File f = files.getAt(ix);
-					FormData formData = new FormData();
-				    formData.append("file", f.slice());
 				     
-				    XMLHttpRequest xmlHttpRequest = new XMLHttpRequest();
-				    IpfsGatewayEntry writable = new IpfsGateway().getWritable();
-					String postUrl = writable.getBaseUrl().replace(":hash", Ipfs.EMPTY_DIR);
-					GWT.log("Posting URL: "+postUrl);
-//				    xmlHttpRequest.onerror=new Function(writable){
-//						@Override
-//						public Object apply(Object... var_args) {
-//							for (Object o: var_args) {
-//								if (o instanceof IpfsGateway) {
-//									((IpfsGatewayEntry)o).setAlive(false);
-//								}
-//							}
-//							return super.apply(var_args);
-//						}
-//				    };
-				    OnloadCallbackFn onload=new OnloadCallbackFn() {
+				    XMLHttpRequest xhr = new XMLHttpRequest();
+				    IpfsGatewayEntry gw = new IpfsGateway().getWritable();
+					String url = gw.getBaseUrl().replace(":hash", Ipfs.EMPTY_DIR+"/"+f.name);
+					GWT.log("Posting URL: "+url);
+					OnloadendCallbackFn onloadend=new OnloadendCallbackFn() {
 						@Override
 						public void onInvoke(ProgressEvent p0) {
-							GWT.log(writable.getBaseUrl()+", "+"event: "+p0.type);
+							GWT.log("onloadend#state: "+xhr.readyState+", "+xhr.status);
+							GWT.log("upload#onprogress: "+p0.eventPhase+", "+p0.loaded+", "+p0.total+", "+p0.type);
+							GWT.log("onloadend#new hash: "+xhr.getResponseHeader(Ipfs.HEADER_IPFS_HASH));
+							GWT.log("onloadend#response headers: "+xhr.getAllResponseHeaders());
 						}
 					};
-					xmlHttpRequest.onload=onload;
+					xhr.onloadend=onloadend;
+					
+					xhr.upload.onprogress=new XMLHttpRequestUpload.OnprogressCallbackFn() {
+						@Override
+						public void onInvoke(ProgressEvent p0) {
+							GWT.log("onloadend#state: "+xhr.readyState+", "+xhr.status);
+							GWT.log("upload#onprogress: "+p0.eventPhase+", "+p0.loaded+", "+p0.total+", "+p0.type);
+							GWT.log("upload#response headers: "+xhr.getAllResponseHeaders());
+							GWT.log("upload#ipfs hash header: "+xhr.getResponseHeader(Ipfs.HEADER_IPFS_HASH));
+							GWT.log("upload#response URL: "+xhr.responseURL);
+						}
+					};
 					GWT.log("opening connection");
-					xmlHttpRequest.open("PUT", postUrl);
+					xhr.open("POST", url, true);
 					GWT.log("sending data");
-					xmlHttpRequest.send(formData);
-					GWT.log(f.name+" ["+f.type+"] "+f.lastModifiedDate);
+					xhr.send(f.slice());
+					GWT.log(f.name+" ["+f.type+"] "+new java.sql.Date((long) f.lastModified));
 				}
 				
 			});

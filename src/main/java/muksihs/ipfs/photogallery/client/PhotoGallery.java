@@ -55,9 +55,6 @@ public class PhotoGallery implements EntryPoint {
 				}
 				return -1;
 			});
-			for (IpfsGatewayEntry g : IpfsGateway.getGateways()) {
-				GWT.log(g.getBaseUrl() + " [" + g.getLatency() + " ms], " + (g.isAlive() ? "ALIVE" : "DEAD"));
-			}
 			/*
 			 * Check to see if we have at least one alive writable gateway
 			 */
@@ -72,7 +69,7 @@ public class PhotoGallery implements EntryPoint {
 						public void run() {
 							Scheduler.get().scheduleDeferred(() -> pingGateways());
 						}
-					}.schedule((int) (5 * MINUTE));
+					}.schedule((int) (1 * MINUTE));
 					return;
 				}
 			}
@@ -93,7 +90,7 @@ public class PhotoGallery implements EntryPoint {
 		if (strExpires != null) {
 			try {
 				long expires = Long.valueOf(strExpires);
-				if (expires > g.getExpires()) {
+				if (expires > System.currentTimeMillis()) {
 					String strLatency = Cookies.getCookie(cookieNameLatency);
 					g.setLatency(Long.valueOf(strLatency));
 					String strAlive = Cookies.getCookie(cookieNameAlive);
@@ -104,7 +101,6 @@ public class PhotoGallery implements EntryPoint {
 			} catch (NumberFormatException e) {
 			}
 		}
-		GWT.log("Pinging: " + g.getBaseUrl());
 		String pingUrl = g.getBaseUrl().replace(":hash", Ipfs.EMPTY_DIR);
 		RequestBuilder rb = new RequestBuilder(RequestBuilder.HEAD, pingUrl);
 		rb.setTimeoutMillis(1000);
@@ -115,7 +111,7 @@ public class PhotoGallery implements EntryPoint {
 				if (response.getStatusCode() == 200) {
 					g.setAlive(true);
 					g.setLatency(System.currentTimeMillis() - start);
-					g.setExpires(System.currentTimeMillis() + 5l * MINUTE + new Random().nextInt((int) (5l * MINUTE)));
+					g.setExpires(System.currentTimeMillis() + 15l * MINUTE + new Random().nextInt((int) (15l * MINUTE)));
 					Date expires = new Date(g.getExpires());
 					Cookies.setCookie(cookieNameAlive, g.isAlive() + "", expires, null, "/", false);
 					Cookies.setCookie(cookieNameLatency, g.getLatency() + "", expires, null, "/", false);
@@ -128,7 +124,7 @@ public class PhotoGallery implements EntryPoint {
 			public void onError(Request request, Throwable exception) {
 				g.setAlive(false);
 				g.setLatency(System.currentTimeMillis() - start);
-				g.setExpires(System.currentTimeMillis() + 5l * MINUTE + new Random().nextInt((int) (1l * MINUTE)));
+				g.setExpires(System.currentTimeMillis() + 15l * MINUTE + new Random().nextInt((int) (15l * MINUTE)));
 				Date expires = new Date(g.getExpires());
 				Cookies.setCookie(cookieNameAlive, g.isAlive() + "", expires, null, "/", false);
 				Cookies.setCookie(cookieNameLatency, g.getLatency() + "", expires, null, "/", false);
@@ -156,7 +152,6 @@ public class PhotoGallery implements EntryPoint {
 	}
 
 	private void pingGateways() {
-		GWT.log("pingGateways");
 		Iterator<IpfsGatewayEntry> ig = IpfsGateway.getGateways().iterator();
 		pingNextGateway(ig);
 	}
