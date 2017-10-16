@@ -117,6 +117,8 @@ dependencies {
 	gwt 'com.google.elemental2:elemental2-media:1.0.0-beta-1'
 	gwt 'com.google.elemental2:elemental2-webstorage:1.0.0-beta-1'
 	
+	//compile 'org.mitre.dsmiley.httpproxy:smiley-http-proxy-servlet:1.9'
+	
 	testCompile 'org.testng:testng:6.+'
 	testCompile 'org.seleniumhq.selenium:selenium-server:+'
 }
