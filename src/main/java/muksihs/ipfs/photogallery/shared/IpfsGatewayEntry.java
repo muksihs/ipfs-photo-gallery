@@ -6,6 +6,17 @@ public class IpfsGatewayEntry {
 	public long getLatency() {
 		return latency;
 	}
+	
+	private int fails=0;
+	public void fail(){
+		fails++;
+		if (fails>3) {
+			setAlive(false);
+		}
+	}
+	public void resetFail(){
+		fails=0;
+	}
 
 	public void setLatency(long latency) {
 		this.latency = latency;
@@ -66,6 +77,9 @@ public class IpfsGatewayEntry {
 	}
 	public void setAlive(boolean alive) {
 		this.alive = alive;
+		if (alive) {
+			fails=0;
+		}
 	}
 	public String getBaseUrl() {
 		return baseUrl;

@@ -1,0 +1,7 @@
+[
+	"http://localhost:8080/ipfs-photo-gallery/ipfs/1/:hash",
+	"http://localhost:8080/ipfs-photo-gallery/ipfs/2/:hash",
+	"http://localhost:8080/ipfs-photo-gallery/ipfs/3/:hash",
+	"http://localhost:8080/ipfs-photo-gallery/ipfs/4/:hash",
+	"http://localhost:8080/ipfs-photo-gallery/ipfs/5/:hash"
+]

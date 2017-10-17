@@ -28,10 +28,17 @@ public class IpfsGateway {
 		return null;
 	}
 	public IpfsGatewayEntry getAny() {
+		Collections.shuffle(gateways);
 		Iterator<IpfsGatewayEntry> ig = gateways.iterator();
 		while(ig.hasNext()) {
 			IpfsGatewayEntry g = ig.next();
 			if (!g.isAlive()) {
+				continue;
+			}
+			if (g.getBaseUrl().contains("//127.")){
+				continue;
+			}
+			if (g.getBaseUrl().contains("localhost:")){
 				continue;
 			}
 			return g;

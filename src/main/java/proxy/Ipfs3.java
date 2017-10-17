@@ -6,12 +6,12 @@ import javax.servlet.annotation.WebServlet;
 import org.mitre.dsmiley.httpproxy.ProxyServlet;
 
 @WebServlet(initParams = { //
-		@WebInitParam(name = "targetUri", value = "https://ipfs.works/ipfs"), //
+		@WebInitParam(name = "targetUri", value = ProxyList.GW3), //
 		@WebInitParam(name = ProxyServlet.P_LOG, value = "true"), //
 		@WebInitParam(name = ProxyServlet.P_HANDLEREDIRECTS, value = "true"),
-		@WebInitParam(name = ProxyServlet.P_PRESERVECOOKIES, value="true"),
+		@WebInitParam(name = ProxyServlet.P_PRESERVECOOKIES, value="false"),
 		@WebInitParam(name = ProxyServlet.P_PRESERVEHOST, value="false")//
-}, loadOnStartup = 1, urlPatterns = "/ipfs/*")
+}, loadOnStartup = 1, urlPatterns = "/ipfs/3/*")
 @SuppressWarnings("serial")
-public class Proxy extends ProxyServlet {
+public class Ipfs3 extends ProxyServlet {
 }

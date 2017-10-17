@@ -149,7 +149,9 @@ public class PhotoGallery implements EntryPoint {
 	}
 
 	private String cookieName(String dataTag, String baseUrl) {
-		return StringUtils.substringBetween(baseUrl, "//", "/") + "-" + dataTag;
+		baseUrl = StringUtils.substringBefore(baseUrl, ":hash");
+		baseUrl = StringUtils.substringAfter(baseUrl, "//");
+		return baseUrl + dataTag;
 	}
 
 	private void pingGateways() {
@@ -164,7 +166,7 @@ public class PhotoGallery implements EntryPoint {
 		List<IpfsGatewayEntry> gateways = new ArrayList<>();
 		String host = Window.Location.getHost();
 		if (host.equals("localhost:8080")||host.equals("127.0.0.1:8080")){
-			tmp = "{ \"list\": [\""+Window.Location.getHref()+"/ipfs/:hash\"]}";
+			tmp = "{ \"list\":"+g.proxyGateways().getText()+"}";
 		} else {
 			tmp = "{ \"list\":" + g.writableGateways().getText() + "}";
 		}
