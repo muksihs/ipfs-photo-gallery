@@ -20,6 +20,7 @@ import com.google.gwt.http.client.Response;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.user.client.Cookies;
 import com.google.gwt.user.client.Timer;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.RootPanel;
 
 import muksihs.ipfs.photogallery.shared.Ipfs;
@@ -161,7 +162,12 @@ public class PhotoGallery implements EntryPoint {
 		StringList list;
 		Gateways g = GWT.create(Gateways.class);
 		List<IpfsGatewayEntry> gateways = new ArrayList<>();
-		tmp = "{ \"list\":" + g.writableGateways().getText() + "}";
+		String host = Window.Location.getHost();
+		if (host.equals("localhost:8080")||host.equals("127.0.0.1:8080")){
+			tmp = "{ \"list\": [\""+Window.Location.getHref()+"/ipfs/:hash\"]}";
+		} else {
+			tmp = "{ \"list\":" + g.writableGateways().getText() + "}";
+		}
 		list = StringListCodec.instance().decode(JSONParser.parseStrict(tmp));
 		nextGateway: for (String e : list.getList()) {
 			Iterator<IpfsGatewayEntry> ig = gateways.iterator();
