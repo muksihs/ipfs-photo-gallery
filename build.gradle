@@ -6,7 +6,7 @@ apply plugin: 'eclipse-wtp'
 apply plugin: 'org.akhikhl.gretty'
 //apply plugin: 'maven'
 
-version = '20171011'
+version = '20171018'
 group = "muksihs"
 
 sourceCompatibility = 1.8

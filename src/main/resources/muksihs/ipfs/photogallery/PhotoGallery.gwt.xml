@@ -52,8 +52,8 @@
 	<set-property name="gwt.logging.systemHandler" value="ENABLED" />
 
 	<!-- One True Permutation to rule them all -->
-	<set-property name="user.agent" value="gecko1_8" />
-	<set-property-fallback name="user.agent" value="gecko1_8" />
+	<set-property name="user.agent" value="safari" />
+	<set-property-fallback name="user.agent" value="safari" />
 	<set-configuration-property name="user.agent.runtimeWarning"
 		value="false" />
 </module>
