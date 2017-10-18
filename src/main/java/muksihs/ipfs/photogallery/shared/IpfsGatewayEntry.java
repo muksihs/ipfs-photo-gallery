@@ -10,7 +10,7 @@ public class IpfsGatewayEntry {
 	private int fails=0;
 	public void fail(){
 		fails++;
-		if (fails>3) {
+		if (fails>2) {
 			setAlive(false);
 		}
 	}

@@ -162,7 +162,8 @@ public class MainView extends Composite {
 		}
 
 		File f = files.getAt(ix);
-		filename.setText(f.name + " (" + NumberFormat.getDecimalFormat().format(Math.ceil(f.size / 1024)) + " KB)");
+		String size = NumberFormat.getDecimalFormat().format(Math.ceil(f.size / 1024)) + " KB";
+		filename.setText(f.name + " (" + size + ") ["+(ix+1)+" of "+files.length+"]");
 		filename.setTitle(f.name + ": " + (new java.sql.Date((long) f.lastModified)).toString() + ", "
 				+ Math.ceil(f.size / 1024) + " KB");
 		XMLHttpRequest xhr = new XMLHttpRequest();

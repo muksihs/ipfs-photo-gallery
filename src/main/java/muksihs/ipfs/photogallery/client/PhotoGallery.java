@@ -109,7 +109,7 @@ public class PhotoGallery implements EntryPoint {
 			}
 		}
 		String pingUrl = g.getBaseUrl().replace(":hash", Ipfs.EMPTY_DIR);
-		RequestBuilder rb = new RequestBuilder(RequestBuilder.GET, pingUrl);
+		RequestBuilder rb = new RequestBuilder(RequestBuilder.HEAD, pingUrl);
 		rb.setTimeoutMillis(1000);
 		g.setAlive(false);
 		rb.setCallback(new RequestCallback() {
