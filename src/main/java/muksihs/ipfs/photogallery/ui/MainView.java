@@ -195,6 +195,7 @@ public class MainView extends Composite {
 				String newHash = xhr.getResponseHeader(Ipfs.HEADER_IPFS_HASH);
 				// the first successful GET becomes the assigned URL
 				final HTMLImageElement[] imgs = new HTMLImageElement[4];
+				final int[] failCount = {0};
 				boolean[] loaded = { false };
 				Set<String> already = new HashSet<>();
 				for (int iy = 0; iy < imgs.length; iy++) {
@@ -217,7 +218,9 @@ public class MainView extends Composite {
 							img.onload = (e) -> null;
 							GWT.log("IMG GET FAILED (abort): " + img.src);
 							fetchGw.fail();
-							if (Arrays.stream(imgs).allMatch((e) -> e == null)) {
+							failCount[0]++;
+							if (failCount[0]>=imgs.length) {
+								Scheduler.get().scheduleDeferred(()->PhotoGallery.resetGatewaysPingStatus());
 								Scheduler.get().scheduleDeferred(() -> putImage(hash, files, ix));
 							}
 							return null;
@@ -234,7 +237,9 @@ public class MainView extends Composite {
 							}
 							GWT.log("IMG GET FAILED (error): " + img.src);
 							fetchGw.fail();
-							if (Arrays.stream(imgs).allMatch((e) -> e == null)) {
+							failCount[0]++;
+							if (failCount[0]>=imgs.length) {
+								Scheduler.get().scheduleDeferred(()->PhotoGallery.resetGatewaysPingStatus());
 								Scheduler.get().scheduleDeferred(() -> putImage(hash, files, ix));
 							}
 							return null;

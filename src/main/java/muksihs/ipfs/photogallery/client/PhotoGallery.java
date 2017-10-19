@@ -143,7 +143,7 @@ public class PhotoGallery implements EntryPoint {
 		}
 	}
 
-	private void resetGatewaysPingStatus() {
+	public static void resetGatewaysPingStatus() {
 		for (IpfsGatewayEntry g : IpfsGateway.getGateways()) {
 			g.setExpires(System.currentTimeMillis());
 			cacheIpfsGatewayStatus(g);
