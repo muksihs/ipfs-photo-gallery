@@ -215,8 +215,6 @@ public class MainView extends Composite {
 							img.onabort = (e) -> null;
 							img.onerror = (e) -> null;
 							img.onload = (e) -> null;
-							img.removeAttribute("src");
-							img.removeAttribute("srcset");
 							GWT.log("IMG GET FAILED (abort): " + img.src);
 							fetchGw.fail();
 							if (Arrays.stream(imgs).allMatch((e) -> e == null)) {
@@ -253,10 +251,11 @@ public class MainView extends Composite {
 								if (i == null) {
 									continue;
 								}
-								i.onabort = (e) -> null;
-								i.onerror = (e) -> null;
-								i.onload = (e) -> null;
-								i.remove();
+								i.onabort = (e) -> {GWT.log("abort: "+i.src); return null;};
+								i.onerror = (e) -> {GWT.log("error: "+i.src); return null;};
+								i.onload = (e) -> {GWT.log("onload: "+i.src); return null;};
+								i.removeAttribute("src");
+								i.removeAttribute("srcset");
 							}
 							last = fetchGw;
 							fetchGw.resetFail();
@@ -266,7 +265,7 @@ public class MainView extends Composite {
 							return null;
 						}
 					};
-					img.src = picUrl;
+					img.setAttribute("src",picUrl);
 				}
 			}
 		};

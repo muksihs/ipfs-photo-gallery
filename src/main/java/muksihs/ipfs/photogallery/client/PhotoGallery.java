@@ -68,7 +68,7 @@ public class PhotoGallery implements EntryPoint {
 			for (IpfsGatewayEntry g : IpfsGateway.getGateways()) {
 				if (g.isAlive() && g.isWriteable()) {
 					/*
-					 * all is well, but schedule a retest in 5 minutes to keep
+					 * all is well, but schedule a retest in 10 seconds to keep
 					 * alive status up-to-date
 					 */
 					new Timer() {
@@ -76,7 +76,7 @@ public class PhotoGallery implements EntryPoint {
 						public void run() {
 							Scheduler.get().scheduleDeferred(() -> pingGateways());
 						}
-					}.schedule((int) (1 * MINUTE));
+					}.schedule((int) (10 * SECOND));
 					return;
 				}
 			}
@@ -145,10 +145,8 @@ public class PhotoGallery implements EntryPoint {
 
 	private void resetGatewaysPingStatus() {
 		for (IpfsGatewayEntry g : IpfsGateway.getGateways()) {
-			Date expires = new Date(0);
-			String cookieNameExpires = cookieName(IPFS_GATEWAY_EXPIRES, g.getBaseUrl());
-			g.setExpires(0);
-			Cookies.setCookie(cookieNameExpires, g.getExpires() + "", expires, null, "/", false);
+			g.setExpires(System.currentTimeMillis());
+			cacheIpfsGatewayStatus(g);
 		}
 	}
 
@@ -211,12 +209,14 @@ public class PhotoGallery implements EntryPoint {
 	}
 
 	public static void cacheIpfsGatewayStatus(IpfsGatewayEntry g) {
-		Date expires = new Date(g.getExpires());
-		String cookieNameExpires = cookieName(IPFS_GATEWAY_EXPIRES, g.getBaseUrl());
-		String cookieNameLatency = cookieName(IPFS_GATEWAY_LATENCY, g.getBaseUrl());
-		String cookieNameAlive = cookieName(IPFS_GATEWAY_ALIVE, g.getBaseUrl());
-		Cookies.setCookie(cookieNameAlive, g.isAlive() + "", expires, null, "/", false);
-		Cookies.setCookie(cookieNameLatency, g.getLatency() + "", expires, null, "/", false);
-		Cookies.setCookie(cookieNameExpires, g.getExpires() + "", expires, null, "/", false);
+		Scheduler.get().scheduleDeferred(() -> {
+			Date expires = new Date(g.getExpires());
+			String cookieNameExpires = cookieName(IPFS_GATEWAY_EXPIRES, g.getBaseUrl());
+			String cookieNameLatency = cookieName(IPFS_GATEWAY_LATENCY, g.getBaseUrl());
+			String cookieNameAlive = cookieName(IPFS_GATEWAY_ALIVE, g.getBaseUrl());
+			Cookies.setCookie(cookieNameAlive, g.isAlive() + "", expires, null, "/", false);
+			Cookies.setCookie(cookieNameLatency, g.getLatency() + "", expires, null, "/", false);
+			Cookies.setCookie(cookieNameExpires, g.getExpires() + "", expires, null, "/", false);
+		});
 	}
 }
