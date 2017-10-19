@@ -1,8 +1,11 @@
 package muksihs.ipfs.photogallery.ui;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -107,6 +110,7 @@ public class MainView extends Composite {
 				FileList files = x.files;
 				GWT.log("Have " + files.length + " files to upload.");
 				link.setEnabled(false);
+				add.setEnabled(false);
 				putImage(Ipfs.EMPTY_DIR, files, 0);
 			});
 		});
@@ -119,9 +123,11 @@ public class MainView extends Composite {
 		edit.setEnabled(false);
 		add.setEnabled(false);
 		Scheduler.get().scheduleFixedDelay(() -> {
-			add.setEnabled(IpfsGateway.isReady());
-			return true;
-		}, 10000);
+			boolean ready = IpfsGateway.isReady();
+			add.setEnabled(ready);
+			Scheduler.get().scheduleDeferred(() -> updatePreview());
+			return !ready;
+		}, 1000);
 	}
 
 	@UiField
@@ -133,16 +139,13 @@ public class MainView extends Composite {
 				+ "\n" //
 				+ "<div class='pull-right'>" //
 				+ aHref + "Muksihs' IPFS Photo Gallery Maker</a>" //
-						+ "<br/>@muksihs" //
-						+ "</div>" //
-						+ "\n</html>";
+				+ "<br/>@muksihs" //
+				+ "</div>" //
+				+ "\n</html>";
 		text = text.replace("\t", "  ");
 		text = text.replaceAll("\n+", "\n");
 		steemitText.setText(text);
 	}
-
-	int maxRetries = 5;
-	int retries = maxRetries;;
 
 	private IpfsGatewayEntry last = new IpfsGateway().getAny();
 
@@ -157,13 +160,14 @@ public class MainView extends Composite {
 			link.setEnabled(true);
 			link.setHref(finalUrl);
 			link.getElement().setAttribute("target", "_blank");
-			Scheduler.get().scheduleDeferred(()->showSteemitHtml());
+			Scheduler.get().scheduleDeferred(() -> showSteemitHtml());
+			add.setEnabled(true);
 			return;
 		}
 
 		File f = files.getAt(ix);
 		String size = NumberFormat.getDecimalFormat().format(Math.ceil(f.size / 1024)) + " KB";
-		filename.setText(f.name + " (" + size + ") ["+(ix+1)+" of "+files.length+"]");
+		filename.setText(f.name + " (" + size + ") [" + (ix + 1) + " of " + files.length + "]");
 		filename.setTitle(f.name + ": " + (new java.sql.Date((long) f.lastModified)).toString() + ", "
 				+ Math.ceil(f.size / 1024) + " KB");
 		XMLHttpRequest xhr = new XMLHttpRequest();
@@ -171,9 +175,6 @@ public class MainView extends Composite {
 		GWT.log("PUT: " + url);
 
 		xhr.onloadend = new OnloadendCallbackFn() {
-			private OnloadendCallbackFn _self = this;
-			private int loadRetries = 5;
-
 			@Override
 			public void onInvoke(ProgressEvent onloadendEvent) {
 				progress.setType(ProgressType.INDETERMINATE);
@@ -191,65 +192,82 @@ public class MainView extends Composite {
 					}
 					return;
 				}
-				IpfsGatewayEntry fetchGw = new IpfsGateway().getAny();
 				String newHash = xhr.getResponseHeader(Ipfs.HEADER_IPFS_HASH);
-				HTMLImageElement img = (HTMLImageElement) DomGlobal.document.createElement("img");
-				String picUrl = fetchGw.getBaseUrl().replace(":hash", newHash) + "/" + URL.encode(f.name);
-				img.src = picUrl;
-				img.srcset = picUrl;
-				img.onabort = new OnabortCallbackFn() {
-					@Override
-					public Object onInvoke(Event onabortEvent) {
-						fetchGw.fail();
-						GWT.log("IMG GET FAILED (abort): " + img.src);
-						if (loadRetries-- > 0) {
-							_self.onInvoke(onloadendEvent);
-							img.remove();
+				// the first successful GET becomes the assigned URL
+				final HTMLImageElement[] imgs = new HTMLImageElement[4];
+				boolean[] loaded = { false };
+				Set<String> already = new HashSet<>();
+				for (int iy = 0; iy < imgs.length; iy++) {
+					IpfsGatewayEntry fetchGw = new IpfsGateway().getAnyReadonly();
+					String picUrl = fetchGw.getBaseUrl().replace(":hash", newHash) + "/" + URL.encode(f.name);
+					if (already.contains(picUrl)) {
+						continue;
+					}
+					already.add(picUrl);
+					final HTMLImageElement img = (HTMLImageElement) DomGlobal.document.createElement("img");
+					imgs[iy] = img;
+					img.onabort = new OnabortCallbackFn() {
+						@Override
+						public Object onInvoke(Event onabortEvent) {
+							if (loaded[0]) {
+								return null;
+							}
+							img.onabort = (e) -> null;
+							img.onerror = (e) -> null;
+							img.onload = (e) -> null;
+							img.removeAttribute("src");
+							img.removeAttribute("srcset");
+							GWT.log("IMG GET FAILED (abort): " + img.src);
+							fetchGw.fail();
+							if (Arrays.stream(imgs).allMatch((e) -> e == null)) {
+								Scheduler.get().scheduleDeferred(() -> putImage(hash, files, ix));
+							}
 							return null;
 						}
-						if (retries-- > 0) {
-							Scheduler.get().scheduleDeferred(() -> putImage(hash, files, ix));
-						} else {
-							retries = maxRetries;
-							Scheduler.get().scheduleDeferred(() -> putImage(newHash, files, ix + 1));
-						}
-						img.remove();
-						return null;
-					}
-				};
-				img.onerror = new OnerrorCallbackFn() {
-					@Override
-					public Object onInvoke(Event onerrorEvent) {
-						fetchGw.fail();
-						GWT.log("IMG GET FAILED (error): " + img.src);
-						if (loadRetries-- > 0) {
-							_self.onInvoke(onloadendEvent);
-							img.remove();
+					};
+					img.onerror = new OnerrorCallbackFn() {
+						@Override
+						public Object onInvoke(Event onerrorEvent) {
+							img.onabort = (e) -> null;
+							img.onerror = (e) -> null;
+							img.onload = (e) -> null;
+							if (loaded[0]) {
+								return null;
+							}
+							GWT.log("IMG GET FAILED (error): " + img.src);
+							fetchGw.fail();
+							if (Arrays.stream(imgs).allMatch((e) -> e == null)) {
+								Scheduler.get().scheduleDeferred(() -> putImage(hash, files, ix));
+							}
 							return null;
 						}
-						if (retries-- > 0) {
-							Scheduler.get().scheduleDeferred(() -> putImage(hash, files, ix));
-						} else {
-							retries = maxRetries;
+					};
+					img.onload = new OnloadCallbackFn() {
+						@Override
+						public Object onInvoke(Event onloadevent) {
+							if (loaded[0]) {
+								return null;
+							}
+							loaded[0] = true;
+							for (HTMLImageElement i : imgs) {
+								if (i == null) {
+									continue;
+								}
+								i.onabort = (e) -> null;
+								i.onerror = (e) -> null;
+								i.onload = (e) -> null;
+								i.remove();
+							}
+							last = fetchGw;
+							fetchGw.resetFail();
+							pics.add(picUrl);
+							Scheduler.get().scheduleDeferred(() -> updatePreview());
 							Scheduler.get().scheduleDeferred(() -> putImage(newHash, files, ix + 1));
+							return null;
 						}
-						img.remove();
-						return null;
-					}
-				};
-				img.onload = new OnloadCallbackFn() {
-					@Override
-					public Object onInvoke(Event onloadevent) {
-						last = fetchGw;
-						fetchGw.resetFail();
-						pics.add(picUrl);
-						retries = maxRetries;
-						Scheduler.get().scheduleDeferred(() -> updatePreview());
-						Scheduler.get().scheduleDeferred(() -> putImage(newHash, files, ix + 1));
-						img.remove();
-						return null;
-					}
-				};
+					};
+					img.src = picUrl;
+				}
 			}
 		};
 

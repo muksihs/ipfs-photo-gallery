@@ -1,11 +1,14 @@
 package muksihs.ipfs.photogallery.shared;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
 public class IpfsGateway {
-	private static List<IpfsGatewayEntry> gateways;
+	private static List<IpfsGatewayEntry> gateways = new ArrayList<>();
+
+	private static List<IpfsGatewayEntry> shuffled = new ArrayList<>();
 
 	public static List<IpfsGatewayEntry> getGateways() {
 		return gateways;
@@ -16,37 +19,81 @@ public class IpfsGateway {
 	}
 
 	public IpfsGatewayEntry getWritable() {
-		Collections.shuffle(gateways);
-		Iterator<IpfsGatewayEntry> ig = gateways.iterator();
-		while (ig.hasNext()) {
-			IpfsGatewayEntry g = ig.next();
-			if (!g.isAlive()) {
-				continue;
+		synchronized (shuffled) {
+			if (!gateways.stream().anyMatch((g) -> g.isAlive() && g.isWriteable())) {
+				return null;
 			}
-			if (g.isWriteable()) {
+			if (shuffled.isEmpty()) {
+				shuffled.addAll(gateways);
+				Collections.shuffle(shuffled);
+			}
+			if (shuffled.isEmpty()) {
+				return null;
+			}
+			IpfsGatewayEntry g = shuffled.remove(0);
+			if (g.isAlive() && g.isWriteable()) {
 				return g;
 			}
+			return getWritable();
 		}
-		return null;
 	}
 
 	public IpfsGatewayEntry getAny() {
-		Collections.shuffle(gateways);
-		Iterator<IpfsGatewayEntry> ig = gateways.iterator();
-		while (ig.hasNext()) {
-			IpfsGatewayEntry g = ig.next();
-			if (!g.isAlive()) {
-				continue;
+		synchronized (shuffled) {
+			if (!gateways.stream().anyMatch((g) -> g.isAlive())) {
+				return null;
 			}
-			if (g.getBaseUrl().contains("//127.")) {
-				continue;
+			if (shuffled.isEmpty()) {
+				shuffled.addAll(gateways);
+				Collections.shuffle(shuffled);
 			}
-			if (g.getBaseUrl().contains("localhost:")) {
-				continue;
+			if (shuffled.isEmpty()) {
+				return null;
 			}
-			return g;
+			IpfsGatewayEntry g = shuffled.remove(0);
+			if (g.getBaseUrl().contains("//127.")){
+				return getAny();
+			}
+			if (g.getBaseUrl().contains("//localhost/")){
+				return getAny();
+			}
+			if (g.getBaseUrl().contains("//localhost:")){
+				return getAny();
+			}
+			if (g.isAlive() && !g.isWriteable()) {
+				return g;
+			}
+			return getAny();
 		}
-		return null;
+	}
+
+	public IpfsGatewayEntry getAnyReadonly() {
+		synchronized (shuffled) {
+			if (!gateways.stream().anyMatch((g) -> g.isAlive() && !g.isWriteable())) {
+				return getAny();
+			}
+			if (shuffled.isEmpty()) {
+				shuffled.addAll(gateways);
+				Collections.shuffle(shuffled);
+			}
+			if (shuffled.isEmpty()) {
+				return null;
+			}
+			IpfsGatewayEntry g = shuffled.remove(0);
+			if (g.getBaseUrl().contains("//127.")){
+				return getAnyReadonly();
+			}
+			if (g.getBaseUrl().contains("//localhost/")){
+				return getAnyReadonly();
+			}
+			if (g.getBaseUrl().contains("//localhost:")){
+				return getAnyReadonly();
+			}
+			if (g.isAlive() && !g.isWriteable()) {
+				return g;
+			}
+			return getAnyReadonly();
+		}
 	}
 
 	/**
