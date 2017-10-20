@@ -68,7 +68,33 @@ public class MainView extends Composite {
 
 	private static MainViewUiBinder uiBinder = GWT.create(MainViewUiBinder.class);
 
-	private List<String> pics = new ArrayList<>();
+	private List<ImageUrl> pics = new ArrayList<>();
+
+	public static class ImageUrl {
+		private String thumb;
+		private String image;
+
+		public ImageUrl(String thumb, String image) {
+			this.setThumb(thumb);
+			this.setImage(image);
+		}
+
+		public String getThumb() {
+			return thumb;
+		}
+
+		public void setThumb(String thumb) {
+			this.thumb = thumb;
+		}
+
+		public String getImage() {
+			return image;
+		}
+
+		public void setImage(String image) {
+			this.image = image;
+		}
+	}
 
 	@UiField
 	MaterialLabel filename;
@@ -233,7 +259,7 @@ public class MainView extends Composite {
 									return;
 								}
 								String newHash = xhr.getResponseHeader(Ipfs.HEADER_IPFS_HASH);
-								if (newHash==null||newHash.trim().isEmpty()) {
+								if (newHash == null || newHash.trim().isEmpty()) {
 									retryPutImage(hash, files, ix);
 									return;
 								}
@@ -322,10 +348,10 @@ public class MainView extends Composite {
 							+ URL.encode(prefix + "-" + f.name);
 					String thumbUrl = fetchGw.getBaseUrl().replace(":hash", newHash) + "/thumb/"
 							+ URL.encode(prefix + "-" + f.name);
-					if (already.contains(picUrl)) {
+					if (already.contains(thumbUrl)) {
 						continue;
 					}
-					already.add(picUrl);
+					already.add(thumbUrl);
 					final HTMLImageElement img = (HTMLImageElement) DomGlobal.document.createElement("img");
 					imgs[iy] = img;
 					img.onabort = new OnabortCallbackFn() {
@@ -394,7 +420,7 @@ public class MainView extends Composite {
 							}
 							last = fetchGw;
 							fetchGw.resetFail();
-							pics.add(picUrl);
+							pics.add(new ImageUrl(thumbUrl, picUrl));
 							Scheduler.get().scheduleDeferred(() -> updatePreview());
 							Scheduler.get().scheduleDeferred(() -> putImage(newHash, files, ix + 1));
 							return null;
@@ -465,7 +491,7 @@ public class MainView extends Composite {
 			perRow = 2;
 			template = StringUtils.substringBetween(template, "<!-- 2 -->", "<!--");
 		}
-		Iterator<String> iPics = pics.iterator();
+		Iterator<ImageUrl> iPics = pics.iterator();
 		StringBuilder previewHtml = new StringBuilder();
 		String tmp = template;
 		int cell = 0;
@@ -476,11 +502,12 @@ public class MainView extends Composite {
 				tmp = template;
 				cell = 1;
 			}
-			String pic = iPics.next();
+			ImageUrl pic = iPics.next();
 			// set img src and a href values.
-			tmp = tmp.replace("_IMG" + cell + "_", pic);
+			tmp = tmp.replace("href=\"_IMG" + cell + "_", "href=\"" + pic.getImage());
+			tmp = tmp.replace("src=\"_IMG" + cell + "_", "src=\"" + pic.getThumb());
 			// set alt text values.
-			String name = StringUtils.substringAfterLast(pic, "/");
+			String name = StringUtils.substringAfterLast(pic.getImage(), "/");
 			String basename = StringUtils.substringBeforeLast(name, ".");
 			tmp = tmp.replace("_ALT" + cell + "_", basename);
 		}
