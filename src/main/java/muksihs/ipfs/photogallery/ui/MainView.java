@@ -54,11 +54,11 @@ import muksihs.ipfs.photogallery.shared.IpfsGateway;
 import muksihs.ipfs.photogallery.shared.IpfsGatewayEntry;
 
 public class MainView extends Composite {
-	
+
 	private static final int KB = 1024;
 
-	private static final double maxSize=1024;
-	
+	private static final double maxSize = 840;
+
 	private static final double jpgQuality = 0.7;
 
 	private static final String PLACEHOLDER_HASH = "QmQ4keX7r9YnoARDgq4YJBqRwABcfXsnnE8EkD5EnjtLVH";
@@ -186,12 +186,12 @@ public class MainView extends Composite {
 
 		HTMLImageElement thumbImg = (HTMLImageElement) DomGlobal.document.createElement("img");
 		FileReader r = new FileReader();
-		r.onabort = (e2) ->retryPutImage(hash, files, ix);
-		r.onerror = (e2) ->retryPutImage(hash, files, ix);
+		r.onabort = (e2) -> retryPutImage(hash, files, ix);
+		r.onerror = (e2) -> retryPutImage(hash, files, ix);
 		r.onloadend = (e) -> {
 			// load the image
-			thumbImg.onabort = (e2) ->retryPutImage(hash, files, ix);
-			thumbImg.onerror = (e2) ->retryPutImage(hash, files, ix);
+			thumbImg.onabort = (e2) -> retryPutImage(hash, files, ix);
+			thumbImg.onerror = (e2) -> retryPutImage(hash, files, ix);
 			thumbImg.onload = (e2) -> {
 				double scale;
 				double w = thumbImg.width;
@@ -208,11 +208,11 @@ public class MainView extends Composite {
 				thumb.height = thumbImg.height * scale;
 				CanvasRenderingContext2D ctx = (CanvasRenderingContext2D) (Object) thumb.getContext("2d");
 				ctx.drawImage(thumbImg, 0, 0, thumbImg.width * scale, thumbImg.height * scale);
-				String mime = thumbImg.src.startsWith("data:image/png")?"image/png":"image/jpeg";
+				String mime = thumbImg.src.startsWith("data:image/png") ? "image/png" : "image/jpeg";
 				thumb.toBlob(new ToBlobCallbackFn() {
 					@Override
 					public Object onInvoke(Blob p0) {
-						GWT.log("thumb type: "+p0.type);
+						GWT.log("thumb type: " + p0.type);
 						// post thumbnail image
 						String baseUrl = putGw.getBaseUrl();
 						String xhrUrl = baseUrl.replace(":hash", hash) + "/thumb/" + URL.encode(prefix + "-" + f.name);
@@ -233,6 +233,10 @@ public class MainView extends Composite {
 									return;
 								}
 								String newHash = xhr.getResponseHeader(Ipfs.HEADER_IPFS_HASH);
+								if (newHash==null||newHash.trim().isEmpty()) {
+									retryPutImage(hash, files, ix);
+									return;
+								}
 								_putImage(newHash, files, ix);
 							}
 						};
@@ -248,13 +252,13 @@ public class MainView extends Composite {
 		};
 		r.readAsDataURL(f.slice());
 	}
-	
+
 	public Object retryPutImage(String hash, FileList files, int ix) {
-		GWT.log("retryImage: "+files.getAt(ix).name);
+		GWT.log("retryImage: " + files.getAt(ix).name);
 		new Timer() {
 			@Override
 			public void run() {
-				Scheduler.get().scheduleDeferred(() -> putImage(hash, files, ix));
+				putImage(hash, files, ix);
 			}
 		}.schedule(3000);
 		return null;
@@ -297,12 +301,13 @@ public class MainView extends Composite {
 					GWT.log("PUT failed.");
 					putGw.fail();
 					retryPutImage(hash, files, ix);
-//					if (xhr.status == 413) {
-//						GWT.log("BLACKLISTING: " + putGw.getBaseUrl());
-//						putGw.setAlive(false);
-//						putGw.setExpires(System.currentTimeMillis() + 24 * 60l * PhotoGallery.MINUTE);
-//						PhotoGallery.cacheIpfsGatewayStatus(putGw);
-//					}
+					// if (xhr.status == 413) {
+					// GWT.log("BLACKLISTING: " + putGw.getBaseUrl());
+					// putGw.setAlive(false);
+					// putGw.setExpires(System.currentTimeMillis() + 24 * 60l *
+					// PhotoGallery.MINUTE);
+					// PhotoGallery.cacheIpfsGatewayStatus(putGw);
+					// }
 					return;
 				}
 				String newHash = xhr.getResponseHeader(Ipfs.HEADER_IPFS_HASH);
@@ -313,8 +318,10 @@ public class MainView extends Composite {
 				Set<String> already = new HashSet<>();
 				for (int iy = 0; iy < imgs.length; iy++) {
 					IpfsGatewayEntry fetchGw = new IpfsGateway().getAnyReadonly();
-					String picUrl = fetchGw.getBaseUrl().replace(":hash", newHash) + "/" + URL.encode(prefix + "-"+f.name);
-					String thumbUrl = fetchGw.getBaseUrl().replace(":hash", newHash) + "/thumb/" + URL.encode(prefix + "-"+f.name);
+					String picUrl = fetchGw.getBaseUrl().replace(":hash", newHash) + "/"
+							+ URL.encode(prefix + "-" + f.name);
+					String thumbUrl = fetchGw.getBaseUrl().replace(":hash", newHash) + "/thumb/"
+							+ URL.encode(prefix + "-" + f.name);
 					if (already.contains(picUrl)) {
 						continue;
 					}
@@ -414,7 +421,10 @@ public class MainView extends Composite {
 	}
 
 	public String zeroPadded(int length, int ix) {
-		return StringUtils.repeat("0", (int) length - String.valueOf((int) ix).length()) + String.valueOf((int) ix);
+		ix++;
+		int zeroCount = String.valueOf((int) length).length();
+		int digitCount = String.valueOf((int) ix).length();
+		return StringUtils.repeat("0", zeroCount - digitCount) + String.valueOf((int) ix);
 	}
 
 	@Override

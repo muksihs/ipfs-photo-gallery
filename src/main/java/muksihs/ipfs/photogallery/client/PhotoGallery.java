@@ -169,6 +169,9 @@ public class PhotoGallery implements EntryPoint {
 		Gateways g = GWT.create(Gateways.class);
 		List<IpfsGatewayEntry> gateways = new ArrayList<>();
 		String host = Window.Location.getHost();
+		/*
+		 * First populate writable gateways.
+		 */
 		if (host.equals("localhost:8080") || host.equals("127.0.0.1:8080")) {
 			tmp = "{ \"list\":" + g.proxyGateways().getText() + "}";
 		} else {
@@ -193,6 +196,14 @@ public class PhotoGallery implements EntryPoint {
 			}
 			gateways.add(new IpfsGatewayEntry(e, true));
 		}
+		/*
+		 * stash one of the writable gateways as a fallback
+		 */
+		Collections.shuffle(gateways);
+		IpfsGateway.setFallbackPutGateway(gateways.get(0));
+		/*
+		 * Add all other gateways now.
+		 */
 		tmp = "{ \"list\":" + g.gateways().getText() + "}";
 		list = StringListCodec.instance().decode(JSONParser.parseStrict(tmp));
 		nextGateway: for (String e : list.getList()) {

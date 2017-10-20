@@ -10,6 +10,8 @@ public class IpfsGateway {
 
 	private static List<IpfsGatewayEntry> shuffled = new ArrayList<>();
 
+	private static IpfsGatewayEntry fallbackPutGateway;
+
 	public static List<IpfsGatewayEntry> getGateways() {
 		return gateways;
 	}
@@ -21,14 +23,14 @@ public class IpfsGateway {
 	public IpfsGatewayEntry getWritable() {
 		synchronized (shuffled) {
 			if (!gateways.stream().anyMatch((g) -> g.isAlive() && g.isWriteable())) {
-				return null;
+				return getFallbackPutGateway();
 			}
 			if (shuffled.isEmpty()) {
 				shuffled.addAll(gateways);
 				Collections.shuffle(shuffled);
 			}
 			if (shuffled.isEmpty()) {
-				return null;
+				return getFallbackPutGateway();
 			}
 			IpfsGatewayEntry g = shuffled.remove(0);
 			if (g.isAlive() && g.isWriteable()) {
@@ -114,5 +116,13 @@ public class IpfsGateway {
 			}
 		}
 		return false;
+	}
+
+	public static IpfsGatewayEntry getFallbackPutGateway() {
+		return fallbackPutGateway;
+	}
+
+	public static void setFallbackPutGateway(IpfsGatewayEntry fallbackPutGateway) {
+		IpfsGateway.fallbackPutGateway = fallbackPutGateway;
 	}
 }
