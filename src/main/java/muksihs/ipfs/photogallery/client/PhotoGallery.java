@@ -48,6 +48,7 @@ public class PhotoGallery implements EntryPoint {
 		Scheduler.get().scheduleDeferred(() -> RootPanel.get().add(new MainView()));
 	}
 
+	private Timer watch;
 	private void pingNextGateway(Iterator<IpfsGatewayEntry> ig) {
 		if (!ig.hasNext()) {
 			Collections.sort(IpfsGateway.getGateways(), (a, b) -> {
@@ -68,15 +69,19 @@ public class PhotoGallery implements EntryPoint {
 			for (IpfsGatewayEntry g : IpfsGateway.getGateways()) {
 				if (g.isAlive() && g.isWriteable()) {
 					/*
-					 * all is well, but schedule a retest in 10 seconds to keep
+					 * all is well, but schedule a retest in 1 minute to keep
 					 * alive status up-to-date
 					 */
-					new Timer() {
+					if (watch!=null) {
+						watch.cancel();
+					}
+					watch = new Timer() {
 						@Override
 						public void run() {
 							Scheduler.get().scheduleDeferred(() -> pingGateways());
 						}
-					}.schedule((int) (10 * SECOND));
+					};
+					watch.schedule((int) (60 * SECOND));
 					return;
 				}
 			}
@@ -130,10 +135,7 @@ public class PhotoGallery implements EntryPoint {
 				g.setAlive(false);
 				g.setLatency(System.currentTimeMillis() - start);
 				g.setExpires(System.currentTimeMillis() + 15l * MINUTE + new Random().nextInt((int) (15l * MINUTE)));
-				Date expires = new Date(g.getExpires());
-				Cookies.setCookie(cookieNameAlive, g.isAlive() + "", expires, null, "/", false);
-				Cookies.setCookie(cookieNameLatency, g.getLatency() + "", expires, null, "/", false);
-				Cookies.setCookie(cookieNameExpires, g.getExpires() + "", expires, null, "/", false);
+				cacheIpfsGatewayStatus(g);
 				pingNextGateway(ig);
 			}
 		});

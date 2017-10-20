@@ -1,7 +1,6 @@
 package muksihs.ipfs.photogallery.ui;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -16,6 +15,7 @@ import com.google.gwt.http.client.URL;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.Window.Location;
 import com.google.gwt.user.client.ui.Composite;
@@ -23,11 +23,16 @@ import com.google.gwt.user.client.ui.FileUpload;
 import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.Widget;
 
+import elemental2.dom.Blob;
+import elemental2.dom.CanvasRenderingContext2D;
 import elemental2.dom.DomGlobal;
 import elemental2.dom.Element.OnabortCallbackFn;
 import elemental2.dom.Event;
 import elemental2.dom.File;
 import elemental2.dom.FileList;
+import elemental2.dom.FileReader;
+import elemental2.dom.HTMLCanvasElement;
+import elemental2.dom.HTMLCanvasElement.ToBlobCallbackFn;
 import elemental2.dom.HTMLImageElement;
 import elemental2.dom.HTMLImageElement.OnerrorCallbackFn;
 import elemental2.dom.HTMLImageElement.OnloadCallbackFn;
@@ -49,6 +54,12 @@ import muksihs.ipfs.photogallery.shared.IpfsGateway;
 import muksihs.ipfs.photogallery.shared.IpfsGatewayEntry;
 
 public class MainView extends Composite {
+	
+	private static final int KB = 1024;
+
+	private static final double maxSize=1024;
+	
+	private static final double jpgQuality = 0.7;
 
 	private static final String PLACEHOLDER_HASH = "QmQ4keX7r9YnoARDgq4YJBqRwABcfXsnnE8EkD5EnjtLVH";
 
@@ -150,6 +161,108 @@ public class MainView extends Composite {
 	private IpfsGatewayEntry last = new IpfsGateway().getAny();
 
 	private void putImage(String hash, FileList files, int ix) {
+		if (ix >= files.length) {
+			filename.setText("Upload complete.");
+			progress.setType(ProgressType.DETERMINATE);
+			progress.setPercent(0);
+			GWT.log("DONE PUTTING IMAGES.");
+			String finalUrl = last.getBaseUrl().replace(":hash", hash) + "/";
+			link.setEnabled(true);
+			link.setHref(finalUrl);
+			link.getElement().setAttribute("target", "_blank");
+			Scheduler.get().scheduleDeferred(() -> showSteemitHtml());
+			add.setEnabled(true);
+			return;
+		}
+		_putThumb(hash, files, ix);
+	}
+
+	private void _putThumb(String hash, FileList files, int ix) {
+		String prefix = zeroPadded((int) files.length, ix);
+		IpfsGatewayEntry putGw = new IpfsGateway().getWritable();
+
+		File f = files.getAt(ix);
+		filename.setText(f.name + " (Thumbnail) [" + (ix + 1) + " of " + files.length + "]");
+
+		HTMLImageElement thumbImg = (HTMLImageElement) DomGlobal.document.createElement("img");
+		FileReader r = new FileReader();
+		r.onabort = (e2) ->retryPutImage(hash, files, ix);
+		r.onerror = (e2) ->retryPutImage(hash, files, ix);
+		r.onloadend = (e) -> {
+			// load the image
+			thumbImg.onabort = (e2) ->retryPutImage(hash, files, ix);
+			thumbImg.onerror = (e2) ->retryPutImage(hash, files, ix);
+			thumbImg.onload = (e2) -> {
+				double scale;
+				double w = thumbImg.width;
+				double h = thumbImg.height;
+				// reduce
+				if (w > h) {
+					scale = maxSize / w;
+				} else {
+					scale = maxSize / h;
+				}
+				// create thumbnail image
+				HTMLCanvasElement thumb = (HTMLCanvasElement) DomGlobal.document.createElement("canvas");
+				thumb.width = thumbImg.width * scale;
+				thumb.height = thumbImg.height * scale;
+				CanvasRenderingContext2D ctx = (CanvasRenderingContext2D) (Object) thumb.getContext("2d");
+				ctx.drawImage(thumbImg, 0, 0, thumbImg.width * scale, thumbImg.height * scale);
+				String mime = thumbImg.src.startsWith("data:image/png")?"image/png":"image/jpeg";
+				thumb.toBlob(new ToBlobCallbackFn() {
+					@Override
+					public Object onInvoke(Blob p0) {
+						GWT.log("thumb type: "+p0.type);
+						// post thumbnail image
+						String baseUrl = putGw.getBaseUrl();
+						String xhrUrl = baseUrl.replace(":hash", hash) + "/thumb/" + URL.encode(prefix + "-" + f.name);
+						XMLHttpRequest xhr = new XMLHttpRequest();
+						xhr.open("PUT", xhrUrl, true);
+						GWT.log("PUT: " + xhrUrl);
+						xhr.onloadend = new OnloadendCallbackFn() {
+							@Override
+							public void onInvoke(ProgressEvent onloadendEvent) {
+								progress.setType(ProgressType.INDETERMINATE);
+								if (xhr.status != 201) {
+									progress.setType(ProgressType.DETERMINATE);
+									progress.setPercent(0);
+									GWT.log("PUT failed.");
+									putGw.fail();
+									PhotoGallery.resetGatewaysPingStatus();
+									retryPutImage(hash, files, ix);
+									return;
+								}
+								String newHash = xhr.getResponseHeader(Ipfs.HEADER_IPFS_HASH);
+								_putImage(newHash, files, ix);
+							}
+						};
+						xhr.onabort = (e3) -> retryPutImage(hash, files, ix);
+						xhr.send(p0);
+						return p0;
+					}
+				}, mime, jpgQuality);
+				return e2;
+			};
+			thumbImg.src = r.result.asString();
+			return e;
+		};
+		r.readAsDataURL(f.slice());
+	}
+	
+	public Object retryPutImage(String hash, FileList files, int ix) {
+		GWT.log("retryImage: "+files.getAt(ix).name);
+		new Timer() {
+			@Override
+			public void run() {
+				Scheduler.get().scheduleDeferred(() -> putImage(hash, files, ix));
+			}
+		}.schedule(3000);
+		return null;
+	}
+
+	private void _putImage(String hash, FileList files, int ix) {
+		String prefix = zeroPadded((int) files.length, ix);
+
 		IpfsGatewayEntry putGw = new IpfsGateway().getWritable();
 		if (ix >= files.length) {
 			filename.setText("");
@@ -166,14 +279,14 @@ public class MainView extends Composite {
 		}
 
 		File f = files.getAt(ix);
-		String size = NumberFormat.getDecimalFormat().format(Math.ceil(f.size / 1024)) + " KB";
+		String size = NumberFormat.getDecimalFormat().format(Math.ceil(f.size / KB)) + " KB";
 		filename.setText(f.name + " (" + size + ") [" + (ix + 1) + " of " + files.length + "]");
 		filename.setTitle(f.name + ": " + (new java.sql.Date((long) f.lastModified)).toString() + ", "
 				+ Math.ceil(f.size / 1024) + " KB");
+		String xhrUrl = putGw.getBaseUrl().replace(":hash", hash) + "/" + URL.encode(prefix + "-" + f.name);
+		GWT.log("PUT: " + xhrUrl);
 		XMLHttpRequest xhr = new XMLHttpRequest();
-		String url = putGw.getBaseUrl().replace(":hash", hash) + "/" + URL.encode(f.name);
-		GWT.log("PUT: " + url);
-
+		xhr.open("PUT", xhrUrl, true);
 		xhr.onloadend = new OnloadendCallbackFn() {
 			@Override
 			public void onInvoke(ProgressEvent onloadendEvent) {
@@ -183,13 +296,13 @@ public class MainView extends Composite {
 					progress.setPercent(0);
 					GWT.log("PUT failed.");
 					putGw.fail();
-					Scheduler.get().scheduleDeferred(() -> putImage(hash, files, ix));
-					if (xhr.status == 413) {
-						GWT.log("BLACKLISTING: " + putGw.getBaseUrl());
-						putGw.setAlive(false);
-						putGw.setExpires(System.currentTimeMillis() + 24 * 60l * PhotoGallery.MINUTE);
-						PhotoGallery.cacheIpfsGatewayStatus(putGw);
-					}
+					retryPutImage(hash, files, ix);
+//					if (xhr.status == 413) {
+//						GWT.log("BLACKLISTING: " + putGw.getBaseUrl());
+//						putGw.setAlive(false);
+//						putGw.setExpires(System.currentTimeMillis() + 24 * 60l * PhotoGallery.MINUTE);
+//						PhotoGallery.cacheIpfsGatewayStatus(putGw);
+//					}
 					return;
 				}
 				String newHash = xhr.getResponseHeader(Ipfs.HEADER_IPFS_HASH);
@@ -200,7 +313,8 @@ public class MainView extends Composite {
 				Set<String> already = new HashSet<>();
 				for (int iy = 0; iy < imgs.length; iy++) {
 					IpfsGatewayEntry fetchGw = new IpfsGateway().getAnyReadonly();
-					String picUrl = fetchGw.getBaseUrl().replace(":hash", newHash) + "/" + URL.encode(f.name);
+					String picUrl = fetchGw.getBaseUrl().replace(":hash", newHash) + "/" + URL.encode(prefix + "-"+f.name);
+					String thumbUrl = fetchGw.getBaseUrl().replace(":hash", newHash) + "/thumb/" + URL.encode(prefix + "-"+f.name);
 					if (already.contains(picUrl)) {
 						continue;
 					}
@@ -221,7 +335,7 @@ public class MainView extends Composite {
 							failCount[0]++;
 							if (failCount[0] >= imgs.length) {
 								Scheduler.get().scheduleDeferred(() -> PhotoGallery.resetGatewaysPingStatus());
-								Scheduler.get().scheduleDeferred(() -> putImage(hash, files, ix));
+								retryPutImage(hash, files, ix);
 							}
 							return null;
 						}
@@ -240,7 +354,7 @@ public class MainView extends Composite {
 							failCount[0]++;
 							if (failCount[0] >= imgs.length) {
 								Scheduler.get().scheduleDeferred(() -> PhotoGallery.resetGatewaysPingStatus());
-								Scheduler.get().scheduleDeferred(() -> putImage(hash, files, ix));
+								retryPutImage(hash, files, ix);
 							}
 							return null;
 						}
@@ -279,7 +393,8 @@ public class MainView extends Composite {
 							return null;
 						}
 					};
-					img.setAttribute("src", picUrl);
+					img.crossOrigin = "anonymous";
+					img.setAttribute("src", thumbUrl);
 				}
 			}
 		};
@@ -295,8 +410,11 @@ public class MainView extends Composite {
 				}
 			}
 		};
-		xhr.open("PUT", url, true);
 		xhr.send(f.slice());
+	}
+
+	public String zeroPadded(int length, int ix) {
+		return StringUtils.repeat("0", (int) length - String.valueOf((int) ix).length()) + String.valueOf((int) ix);
 	}
 
 	@Override
@@ -349,7 +467,7 @@ public class MainView extends Composite {
 				cell = 1;
 			}
 			String pic = iPics.next();
-			// set img src and a href values. 
+			// set img src and a href values.
 			tmp = tmp.replace("_IMG" + cell + "_", pic);
 			// set alt text values.
 			String name = StringUtils.substringAfterLast(pic, "/");
