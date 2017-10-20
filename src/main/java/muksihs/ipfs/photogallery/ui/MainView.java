@@ -477,8 +477,9 @@ public class MainView extends Composite {
 		if (cell <= perRow) {
 			while (cell <= perRow) {
 				cell++;
-				tmp = tmp.replace("_" + cell + "_",
+				tmp = tmp.replace("_IMG" + cell + "_",
 						new IpfsGateway().getAny().getBaseUrl().replace(":hash", placeholder));
+				tmp = tmp.replace("_ALT" + cell + "_", "EMPTY");
 			}
 			previewHtml.append(tmp);
 		}
