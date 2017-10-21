@@ -1,6 +1,4 @@
 [
-	"https://ipfs.jes.xxx/ipfs/:hash",
-	"https://hardbin.com/ipfs/:hash",
 	"https://ipfs.macholibre.org/ipfs/:hash",
 	"https://ipfs.works/ipfs/:hash",
 	"https://ipfs.work/ipfs/:hash"
