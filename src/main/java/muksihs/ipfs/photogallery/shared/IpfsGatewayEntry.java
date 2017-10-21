@@ -1,7 +1,9 @@
 package muksihs.ipfs.photogallery.shared;
 
+import java.util.Date;
+
 public class IpfsGatewayEntry {
-	private long expires;
+	private Date expires;
 	private long latency=-1;
 	public long getLatency() {
 		return latency;
@@ -88,11 +90,14 @@ public class IpfsGatewayEntry {
 		this.baseUrl = baseUrl;
 	}
 
-	public long getExpires() {
+	public Date getExpires() {
+		if (expires==null) {
+			return new Date(0);
+		}
 		return expires;
 	}
 
-	public void setExpires(long expires) {
+	public void setExpires(Date expires) {
 		this.expires = expires;
 	}
 }

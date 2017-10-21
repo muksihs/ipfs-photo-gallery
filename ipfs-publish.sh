@@ -1,11 +1,11 @@
 #!/bin/bash
 
-WAR="ipfs-photo-gallery"
-
 set -e
 set -o pipefail
-
 trap 'echo ERROR' ERR
+
+IPFS="https://ipfs.macholibre.org/ipfs"
+WAR="ipfs-photo-gallery"
 
 cd "$(dirname "$0")"
 gradle clean build
@@ -42,7 +42,7 @@ find "$WAR" | while read x; do
 	
 	echo "Uploading $x"
 	y=$(rawurlencode "$x")
-	curl -# -D "$TMP" -X PUT --data-binary @"$x" https://ipfs.work/ipfs/"$DIRKEY"/"$y" | tee /dev/null
+	curl -# -D "$TMP" -X PUT --data-binary @"$x" $IPFS/"$DIRKEY"/"$y" | tee /dev/null
 	DIRKEY="$(grep 'Ipfs-Hash:' "$TMP" | cut -f 2 -d ':' | sed 's/[[:space:]]*//g')"
 	DIRKEY=$(rawurlencode "$DIRKEY")
 	if [ "$DIRKEY"x = x ]; then
@@ -52,9 +52,9 @@ find "$WAR" | while read x; do
 done
 
 DIRKEY="$(grep 'Ipfs-Hash:' "$TMP" | cut -f 2 -d ':' | sed 's/[[:space:]]*//g')"
-echo "FINAL DIR URL: https://ipfs.works/ipfs/$DIRKEY"
+echo "FINAL DIR URL: $IPFS/$DIRKEY"
 
-xdg-open "https://ipfs.works/ipfs/$DIRKEY"
+xdg-open "$IPFS/$DIRKEY"
 
 echo "DONE."
 

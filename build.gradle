@@ -73,9 +73,9 @@ gwt {
 		disableClassMetadata = false;
 		//
 		strict = true;
-		//style = "OBF";
+		style = "OBF";
 		//style = "PRETTY";
-		style = "DETAILED";
+		//style = "DETAILED";
 		localWorkers = 4;
 	}
 	
