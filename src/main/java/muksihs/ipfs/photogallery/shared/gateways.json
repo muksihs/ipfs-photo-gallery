@@ -1,6 +1,5 @@
 [
 	"https://ipfs.io/ipfs/:hash",
-	"https://gateway.ipfs.io/ipfs/:hash",
 	"https://ipfs.infura.io/ipfs/:hash",
 	"https://xmine128.tk/ipfs/:hash",
 	"https://upload.global/ipfs/:hash",
