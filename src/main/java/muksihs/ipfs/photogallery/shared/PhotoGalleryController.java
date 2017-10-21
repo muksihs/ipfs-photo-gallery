@@ -10,4 +10,6 @@ public interface PhotoGalleryController {
 	void wantsColumns(int count);
 
 	void setView(View view);
+
+	void wantsNsfw(Boolean value);
 }

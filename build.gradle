@@ -6,7 +6,7 @@ apply plugin: 'eclipse-wtp'
 apply plugin: 'org.akhikhl.gretty'
 //apply plugin: 'maven'
 
-version = '20171018'
+version = '20171021'
 group = "muksihs"
 
 sourceCompatibility = 1.8
@@ -64,7 +64,7 @@ gwt {
 
 	maxHeapSize = "2048M";
 
-	gwtVersion='2.8.1'
+	gwtVersion='2.8.2'
 
 	modules 'muksihs.ipfs.photogallery.PhotoGallery'
 	

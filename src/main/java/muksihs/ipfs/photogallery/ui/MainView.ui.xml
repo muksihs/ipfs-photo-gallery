@@ -25,6 +25,9 @@
 				<m:MaterialRadioButton ui:field="rb4" name="sidebyside"
 					text="4 UP" title="Generate a gallery that displays 4 images side by side."></m:MaterialRadioButton>
 			</div>
+			<div style="clear: left; width: auto;">
+			<m:MaterialCheckBox ui:field="nsfw" name="nsfw" text="Include NSFW logo"></m:MaterialCheckBox>
+			</div>
 			<!-- <div style='clear: left;width: auto'> -->
 			<!-- <m:MaterialRadioButton ui:field="rb8" name="sidebyside" -->
 			<!-- text="8 UP" title="Generate a gallery that displays 8 images side 

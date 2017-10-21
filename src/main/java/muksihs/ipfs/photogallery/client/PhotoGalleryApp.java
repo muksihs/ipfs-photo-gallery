@@ -10,9 +10,12 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.dom.client.Document;
 import com.google.gwt.http.client.URL;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.user.client.Timer;
+import com.google.gwt.user.client.ui.Image;
+import com.google.gwt.user.client.ui.RootPanel;
 
 import elemental2.dom.Blob;
 import elemental2.dom.CanvasRenderingContext2D;
@@ -64,7 +67,7 @@ public class PhotoGalleryApp implements PhotoGalleryController {
 	private List<ImageUrl> pics = new ArrayList<>();
 
 	private String steemitHtml() {
-		final String placeholder = Consts.PLACEHOLDER_HASH + "/placeholder.png";
+		final String placeholder = Consts.PLACEHOLDER;
 		int perRow;
 		String template = PostingTemplates.getInstance().templates().getText();
 		perRow = columns;
@@ -120,11 +123,15 @@ public class PhotoGalleryApp implements PhotoGalleryController {
 	@Override
 	public void wantsHtmlDisplayed() {
 		String aHref = "<a href='" + GWT.getHostPageBaseURL() + "'>";
-		String text = "<html>\n" + steemitHtml() //
+		String text = "<html>\n";
+		if (nsfw) {
+			text += "<div class='pull-left'><img src='"+Consts.NSFW+"'/></div>\n";
+		}
+		text += steemitHtml() //
 				+ "\n" //
-				+ "<div class='pull-right'>" //
-				+ aHref + "Muksihs' IPFS Photo Gallery Maker</a>" //
-				+ "<br/>@muksihs" //
+				+ "<div class='pull-right'>\n" //
+				+ aHref + "\nMuksihs' IPFS Photo Gallery Maker\n</a>\n" //
+				+ "<br/>@muksihs\n" //
 				+ "</div>" //
 				+ "\n</html>";
 		text = text.replace("\t", "  ");
@@ -139,6 +146,8 @@ public class PhotoGalleryApp implements PhotoGalleryController {
 	}
 
 	private IpfsGatewayEntry last = new IpfsGateway().getAny();
+
+	private Boolean nsfw;
 
 	private void uploadImage(String hash, FileList files, int ix) {
 		if (ix >= files.length) {
@@ -191,7 +200,10 @@ public class PhotoGalleryApp implements PhotoGalleryController {
 		thumb.height = thumbImg.height * scale;
 		CanvasRenderingContext2D ctx = (CanvasRenderingContext2D) (Object) thumb.getContext("2d");
 		ctx.drawImage(thumbImg, 0, 0, thumbImg.width * scale, thumbImg.height * scale);
-		String mime = thumbImg.src.startsWith("data:image/png") ? "image/png" : "image/jpeg";
+		String mime = thumbImg.src.contains(";base64,iVBOR") ? "image/png" : "image/jpeg";
+		Image w2 = new Image();
+		RootPanel.get().add(w2);
+		w2.setUrl(thumbImg.src);
 		thumb.toBlob((p0) -> uploadThumbnail(hash, files, ix, p0), mime, Consts.jpgQuality);
 		return null;
 	}
@@ -368,5 +380,10 @@ public class PhotoGalleryApp implements PhotoGalleryController {
 	@Override
 	public void setView(View view) {
 		this.view = view;
+	}
+
+	@Override
+	public void wantsNsfw(Boolean value) {
+		this.nsfw=value;
 	}
 }

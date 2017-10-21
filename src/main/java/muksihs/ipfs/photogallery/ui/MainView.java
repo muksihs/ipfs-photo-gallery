@@ -16,6 +16,7 @@ import elemental2.dom.FileList;
 import elemental2.dom.HTMLInputElement;
 import gwt.material.design.client.constants.ProgressType;
 import gwt.material.design.client.ui.MaterialButton;
+import gwt.material.design.client.ui.MaterialCheckBox;
 import gwt.material.design.client.ui.MaterialLabel;
 import gwt.material.design.client.ui.MaterialLink;
 import gwt.material.design.client.ui.MaterialProgress;
@@ -87,6 +88,8 @@ public class MainView extends Composite implements muksihs.ipfs.photogallery.sha
 		add.setEnabled(false);
 	}
 	
+	@UiField
+	protected MaterialCheckBox nsfw;
 	public MainView() {
 		initWidget(uiBinder.createAndBindUi(this));
 		rb4.setValue(true, true);
@@ -104,6 +107,8 @@ public class MainView extends Composite implements muksihs.ipfs.photogallery.sha
 		edit.setVisible(false);
 		edit.setEnabled(false);
 		add.setEnabled(false);
+		
+		nsfw.addClickHandler((e)->app.wantsNsfw(nsfw.getValue()));
 	}
 	
 	@Override

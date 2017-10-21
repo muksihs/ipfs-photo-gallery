@@ -24,6 +24,7 @@ import com.google.gwt.storage.client.StorageMap;
 import com.google.gwt.user.client.Cookies;
 import com.google.gwt.user.client.Window;
 
+import muksihs.ipfs.photogallery.client.IpfsGatewayCache.IgCodec;
 import muksihs.ipfs.photogallery.shared.Consts;
 import muksihs.ipfs.photogallery.shared.IpfsGateway;
 import muksihs.ipfs.photogallery.shared.IpfsGatewayEntry;
@@ -164,7 +165,13 @@ public class IpfsGatewayCache {
 			Scheduler.get().scheduleDeferred(() -> pingNextGateway(ig));
 			return;
 		}
-		String pingUrl = g.getBaseUrl().replace(":hash", Consts.PLACEHOLDER_HASH + "/placeholder.png");
+		String testImg;
+		if (new Random().nextBoolean()) {
+			testImg=Consts.NSFW;
+		} else {
+			testImg=Consts.PLACEHOLDER;
+		}
+		String pingUrl = g.getBaseUrl().replace(":hash", testImg);
 		RequestBuilder rb = new RequestBuilder(RequestBuilder.HEAD, pingUrl);
 		rb.setTimeoutMillis(1000);
 		g.setAlive(false);
