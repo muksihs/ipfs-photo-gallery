@@ -3,15 +3,17 @@
 	xmlns:g="urn:import:com.google.gwt.user.client.ui" xmlns:m="urn:import:gwt.material.design.client.ui"
 	xmlns:x="urn:import:muksihs.ipfs.photogallery.ui">
 	<ui:style>
-	button {
+		button {
 		margin: 3px;
-	}
+		}
 	</ui:style>
 	<g:HTMLPanel>
 		<div style='text-align: center'>
 			<h5>Muksihs' Photo Gallery Maker</h5>
 			<h6>
-				for steemit (v20171019) - steemit:
+				for steemit
+				<m:MaterialLabel ui:field="version"></m:MaterialLabel>
+				- steemit:
 				<a href='https://www.steemit.com/@muksihs' target="_blank">@muksihs</a>
 			</h6>
 		</div>
@@ -26,13 +28,15 @@
 					text="4 UP" title="Generate a gallery that displays 4 images side by side."></m:MaterialRadioButton>
 			</div>
 			<div style="clear: left; width: auto;">
-			<m:MaterialCheckBox ui:field="nsfw" name="nsfw" text="Include NSFW logo"></m:MaterialCheckBox>
+				<m:MaterialCheckBox ui:field="nsfw" name="nsfw"
+					text="Include NSFW logo"></m:MaterialCheckBox>
+				<m:MaterialTextBox label="steem username"
+					placeholder="Put Steemit Username Here" ui:field="username"></m:MaterialTextBox>
+				<m:MaterialTextBox label="steem private posting key"
+					placeholder="Put Private Posting Key Here" ui:field="wif"></m:MaterialTextBox>
+				<m:MaterialLabel textColor="RED"
+					text="This app does save or post your Private Posting Key anywhere."></m:MaterialLabel>
 			</div>
-			<!-- <div style='clear: left;width: auto'> -->
-			<!-- <m:MaterialRadioButton ui:field="rb8" name="sidebyside" -->
-			<!-- text="8 UP" title="Generate a gallery that displays 8 images side 
-				by side."></m:MaterialRadioButton> -->
-			<!-- </div> -->
 			<hr style='clear: left;' />
 			<div style='clear: left;width: auto'>
 				<span>Add Images: </span>
@@ -44,7 +48,8 @@
 			<div style='clear: left;width: auto'>
 				<m:MaterialButton ui:field="edit" text="Edit Text"></m:MaterialButton>
 			</div>
-			<div style='clear: left;width: auto'>
+			<m:MaterialButton text="POST TO STEEMIT BLOG" ui:field="post"></m:MaterialButton>
+			<div style='clear: left;width: auto; display: none;'>
 				<m:MaterialButton ui:field="showSteemitText" text="Show Steemit Text"></m:MaterialButton>
 			</div>
 			<hr style='clear: left;' />
@@ -83,7 +88,7 @@
 		<hr style='clear: both;' />
 		<div
 			style='margin: 0.5em; padding: 0.25em; clear: both; border-width: 2px; border-style: solid; border-color: blue;'>
-			<g:TextArea height="50em" ui:field="steemitText"></g:TextArea>
+			<g:TextArea height="auto" ui:field="steemitText"></g:TextArea>
 		</div>
 	</g:HTMLPanel>
 </ui:UiBinder> 

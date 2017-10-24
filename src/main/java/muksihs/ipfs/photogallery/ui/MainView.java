@@ -21,6 +21,9 @@ import gwt.material.design.client.ui.MaterialLabel;
 import gwt.material.design.client.ui.MaterialLink;
 import gwt.material.design.client.ui.MaterialProgress;
 import gwt.material.design.client.ui.MaterialRadioButton;
+import gwt.material.design.client.ui.MaterialTextBox;
+import gwt.material.design.client.ui.MaterialToast;
+import muksihs.ipfs.photogallery.shared.Consts;
 import muksihs.ipfs.photogallery.shared.PhotoGalleryController;
 
 public class MainView extends Composite implements muksihs.ipfs.photogallery.shared.View {
@@ -30,6 +33,9 @@ public class MainView extends Composite implements muksihs.ipfs.photogallery.sha
 
 	private static MainViewUiBinder uiBinder = GWT.create(MainViewUiBinder.class);
 
+	@UiField
+	MaterialLabel version;
+	
 	@UiField
 	MaterialLabel filename;
 
@@ -87,11 +93,20 @@ public class MainView extends Composite implements muksihs.ipfs.photogallery.sha
 		link.setEnabled(false);
 		add.setEnabled(false);
 	}
+	@UiField
+	protected MaterialTextBox username;
+	@UiField
+	protected MaterialTextBox wif;
+	@UiField
+	protected MaterialButton post;
 	
 	@UiField
 	protected MaterialCheckBox nsfw;
 	public MainView() {
 		initWidget(uiBinder.createAndBindUi(this));
+		
+		version.setText(Consts.VERSION);
+		
 		rb4.setValue(true, true);
 		
 		add.getElement().setId("upload");
@@ -109,6 +124,9 @@ public class MainView extends Composite implements muksihs.ipfs.photogallery.sha
 		add.setEnabled(false);
 		
 		nsfw.addClickHandler((e)->app.wantsNsfw(nsfw.getValue()));
+		wif.addChangeHandler((e)->app.updateWif(wif.getValue()));
+		username.addChangeHandler((e)->app.updateUsername(username.getValue()));
+		post.addClickHandler((e)->app.postGallery());
 	}
 	
 	@Override
@@ -157,5 +175,10 @@ public class MainView extends Composite implements muksihs.ipfs.photogallery.sha
 	@Override
 	public void setController(PhotoGalleryController app) {
 		this.app=app;
+	}
+
+	@Override
+	public void alert(String message) {
+		MaterialToast.fireToast(message, 10000);
 	}
 }

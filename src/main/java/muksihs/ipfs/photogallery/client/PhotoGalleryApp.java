@@ -148,6 +148,10 @@ public class PhotoGalleryApp implements PhotoGalleryController {
 
 	private Boolean nsfw;
 
+	private String wif;
+
+	private String username;
+
 	private void uploadImage(String hash, FileList files, int ix) {
 		if (ix >= files.length) {
 			view.setFileText("Upload complete.");
@@ -384,5 +388,31 @@ public class PhotoGalleryApp implements PhotoGalleryController {
 	@Override
 	public void wantsNsfw(Boolean value) {
 		this.nsfw=value;
+	}
+
+	@Override
+	public void postGallery() {
+		if (StringUtils.isBlank(wif)){
+			view.alert("Your steemit private posting key is required to post.");
+			return;
+		}
+		if (StringUtils.isBlank(username)){
+			view.alert("Your steemit username is required to post.");
+			return;
+		}
+		if (pics.isEmpty()) {
+			view.alert("You haven't uploaded any photos yet!");
+			return;
+		}
+	}
+
+	@Override
+	public void updateWif(String wif) {
+		this.wif=wif;
+	}
+
+	@Override
+	public void updateUsername(String username) {
+		this.username=username;
 	}
 }

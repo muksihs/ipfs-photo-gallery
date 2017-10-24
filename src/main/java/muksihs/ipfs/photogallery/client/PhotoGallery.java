@@ -7,7 +7,6 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.user.client.ui.RootPanel;
 
-import jsinterop.annotations.JsOverlay;
 import muksihs.ipfs.photogallery.ui.MainView;
 import steemjs.SteemApi;
 import steemjs.TrendingTagsResult;
@@ -21,7 +20,6 @@ public class PhotoGallery implements EntryPoint {
 		MainView mainView = new MainView();
 		new PhotoGalleryApp(mainView);
 		RootPanel.get().add(mainView);
-		Scheduler.get().scheduleDeferred(this::getTrendingTags);
 	}
 
 	public void getTrendingTags() {

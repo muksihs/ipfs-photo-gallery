@@ -16,4 +16,6 @@ public interface View {
 	void setPreviewHtml(String steemitHtml);
 
 	void setController(PhotoGalleryController photoGalleryApp);
+
+	void alert(String string);
 }

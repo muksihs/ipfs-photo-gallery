@@ -12,4 +12,10 @@ public interface PhotoGalleryController {
 	void setView(View view);
 
 	void wantsNsfw(Boolean value);
+
+	void postGallery();
+
+	void updateWif(String wif);
+
+	void updateUsername(String value);
 }
