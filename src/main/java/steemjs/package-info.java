@@ -1,8 +1,0 @@
-/**
- * 
- */
-/**
- * @author muksihs
- *
- */
-package steemjs;

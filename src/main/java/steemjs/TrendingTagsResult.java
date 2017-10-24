@@ -10,11 +10,11 @@ public abstract class TrendingTagsResult {
 	@JsProperty
 	public abstract String getTotal_payouts();
 	@JsProperty
-	public abstract long getNet_votes();
+	public abstract int getNet_votes();
 	@JsProperty
-	public abstract long getTop_posts();
+	public abstract int getTop_posts();
 	@JsProperty
-	public abstract long getComments();
+	public abstract int getComments();
 	@JsProperty
 	public abstract String getTrending();
 }
