@@ -24,7 +24,6 @@ import com.google.gwt.storage.client.StorageMap;
 import com.google.gwt.user.client.Cookies;
 import com.google.gwt.user.client.Window;
 
-import muksihs.ipfs.photogallery.client.IpfsGatewayCache.IgCodec;
 import muksihs.ipfs.photogallery.shared.Consts;
 import muksihs.ipfs.photogallery.shared.IpfsGateway;
 import muksihs.ipfs.photogallery.shared.IpfsGatewayEntry;

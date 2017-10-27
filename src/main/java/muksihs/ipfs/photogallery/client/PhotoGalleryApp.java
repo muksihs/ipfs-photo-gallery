@@ -15,6 +15,8 @@ import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.RootPanel;
+import com.google.web.bindery.event.shared.binder.EventBinder;
+import com.google.web.bindery.event.shared.binder.EventHandler;
 
 import elemental2.dom.Blob;
 import elemental2.dom.CanvasRenderingContext2D;
@@ -31,36 +33,47 @@ import muksihs.ipfs.photogallery.shared.ImageUrl;
 import muksihs.ipfs.photogallery.shared.Ipfs;
 import muksihs.ipfs.photogallery.shared.IpfsGateway;
 import muksihs.ipfs.photogallery.shared.IpfsGatewayEntry;
-import muksihs.ipfs.photogallery.shared.PhotoGalleryController;
-import muksihs.ipfs.photogallery.shared.View;
 
-public class PhotoGalleryApp implements PhotoGalleryController {
-	private View view;
-
+public class PhotoGalleryApp {
+	interface MyEventBinder extends EventBinder<PhotoGalleryApp> {}
+	private final MyEventBinder eventBinder = GWT.create(MyEventBinder.class);
+	
 	private int columns = 4;
 	private IpfsGatewayCache ipfsGwCache;
+
+	private final DeferredEventBus eventBus;
 
 	public void wantsColumns(int count) {
 		columns = count;
 	}
+	@EventHandler
+	protected void onMainViewLoaded(Event.ViewLoaded event) {
+		GWT.log("Main View Loaded");
+	}
+	
+	@EventHandler
+	protected void onIpfsGatewayReady(Event.IpfsGatewayReady event) {
+		GWT.log("IPFS gateway list loaded and ready for use.");
+	}
 
-	public PhotoGalleryApp(View view) {
+	public PhotoGalleryApp(DeferredEventBus eventBus) {
+		eventBinder.bindEventHandlers(this, eventBus);
+		this.eventBus=eventBus;
 		ipfsGwCache = IpfsGatewayCache.get();
-		this.view=view;
-		this.view.setController(this);
-		this.view.setReady(false);
+		eventBus.fireEvent(new Event.SetViewReady(false));
 		Scheduler.get().scheduleFixedDelay(() -> {
 			boolean ready = IpfsGateway.isReady();
-			this.view.setReady(ready);
 			if (ready) {
 				Scheduler.get().scheduleDeferred(() -> updatePreview());
+				eventBus.fireEvent(new Event.IpfsGatewayReady());
+				eventBus.fireEvent(new Event.SetViewReady(true));
 			}
 			return !ready;
 		}, 500);
 	}
 
 	private void updatePreview() {
-		view.setPreviewHtml(steemitHtml());
+		eventBus.fireEvent(new Event.SetPreviewHtml(steemitHtml()));
 	}
 
 	private List<ImageUrl> pics = new ArrayList<>();
@@ -119,8 +132,8 @@ public class PhotoGalleryApp implements PhotoGalleryController {
 		return "<div>" + previewHtml.toString() + "</div>";
 	}
 
-	@Override
-	public void wantsHtmlDisplayed() {
+	@EventHandler
+	public void wantsHtmlDisplayed(Event.WantsHtmlDisplayed event) {
 		String aHref = "<a href='" + GWT.getHostPageBaseURL() + "'>";
 		String text = "<html>\n";
 		if (nsfw) {
@@ -135,11 +148,12 @@ public class PhotoGalleryApp implements PhotoGalleryController {
 				+ "\n</html>";
 		text = text.replace("\t", "  ");
 		text = text.replaceAll("\n+", "\n");
-		view.setSteemitHtml(text);
+		eventBus.fireEvent(new Event.SetSteemitText(text));
 	}
 
-	@Override
-	public void uploadImages(FileList files) {
+	@EventHandler
+	public void uploadImages(Event.UploadImages event) {
+		FileList files = event.getFiles();
 		GWT.log("uploadImages: " + files.length);
 		Scheduler.get().scheduleDeferred(() -> uploadImage(Ipfs.EMPTY_DIR, files, 0));
 	}
@@ -154,11 +168,11 @@ public class PhotoGalleryApp implements PhotoGalleryController {
 
 	private void uploadImage(String hash, FileList files, int ix) {
 		if (ix >= files.length) {
-			view.setFileText("Upload complete.");
-			view.setProgress(0);
+			eventBus.fireEvent(new Event.SetFilenameMsg("Upload complete."));
+			eventBus.fireEvent(new Event.SetProgress(0));
 			GWT.log("DONE PUTTING IMAGES.");
 			String finalUrl = last.getBaseUrl().replace(":hash", hash) + "/";
-			view.setIpfsFolderLink(finalUrl);
+			eventBus.fireEvent(new Event.SetIpfsFolderLink(finalUrl));
 			return;
 		}
 		_putThumb(hash, files, ix);
@@ -169,7 +183,7 @@ public class PhotoGalleryApp implements PhotoGalleryController {
 		FileReader reader = new FileReader();
 		File file = files.getAt(ix);
 
-		view.setFileText(file.name + " (Thumbnail) [" + (ix + 1) + " of " + files.length + "]");
+		eventBus.fireEvent(new Event.SetFilenameMsg(file.name + " (Thumbnail) [" + (ix + 1) + " of " + files.length + "]"));
 		reader.onabort = (e) -> retryPutImage(hash, files, ix);
 		reader.onerror = (e) -> retryPutImage(hash, files, ix);
 		reader.onloadend = (e) -> onFileLoaded(hash, files, ix, reader);
@@ -228,14 +242,14 @@ public class PhotoGalleryApp implements PhotoGalleryController {
 	}
 
 	public void onThumbPutDone(String hash, FileList files, int ix, double xhrStatus, String newHash) {
-		view.setProgressIndeterminate();
+		eventBus.fireEvent(new Event.SetProgressIndeterminate());
 		if (newHash == null || newHash.trim().isEmpty()) {
 			retryPutImage(hash, files, ix);
 			return;
 		}
 		if (xhrStatus != 201) {
 			GWT.log("PUT thumb failed.");
-			view.setProgress(0);
+			eventBus.fireEvent(new Event.SetProgress(0));
 			ipfsGwCache.forceExpireGateways();
 			retryPutImage(hash, files, ix);
 			return;
@@ -269,7 +283,7 @@ public class PhotoGalleryApp implements PhotoGalleryController {
 		String xhrUrl = putGw.getBaseUrl().replace(":hash", hash) + "/" + encodedName;
 		String size = NumberFormat.getDecimalFormat().format(Math.ceil(file.size / Consts.KB)) + " KB";
 
-		view.setFileText(file.name + " (" + size + ") [" + (ix + 1) + " of " + files.length + "]");
+		eventBus.fireEvent(new Event.SetFilenameMsg(file.name + " (" + size + ") [" + (ix + 1) + " of " + files.length + "]"));
 		GWT.log("PUT: " + xhrUrl);
 		XMLHttpRequest xhr = new XMLHttpRequest();
 		xhr.open("PUT", xhrUrl, true);
@@ -282,9 +296,9 @@ public class PhotoGalleryApp implements PhotoGalleryController {
 	public void onImagePutDone(String hash, FileList files, int ix, String zeroPaddedName, String newHash,
 			double xhrStatus) {
 		String encodedName = URL.encode(zeroPaddedName);
-		view.setProgressIndeterminate();
+		eventBus.fireEvent(new Event.SetProgressIndeterminate());
 		if (xhrStatus != 201) {
-			view.setProgress(0);
+			eventBus.fireEvent(new Event.SetProgress(0));
 			GWT.log("PUT failed.");
 			retryPutImage(hash, files, ix);
 			return;
@@ -315,9 +329,9 @@ public class PhotoGalleryApp implements PhotoGalleryController {
 
 	public void updateProgressView(ProgressEvent p0) {
 		if (p0.lengthComputable) {
-			view.setProgress(Math.floor(p0.loaded * 100 / p0.total));
+			eventBus.fireEvent(new Event.SetProgress(Math.floor(p0.loaded * 100 / p0.total)));
 		} else {
-			view.setProgressIndeterminate();
+			eventBus.fireEvent(new Event.SetProgressIndeterminate());
 		}
 	}
 
@@ -380,39 +394,34 @@ public class PhotoGalleryApp implements PhotoGalleryController {
 		return null;
 	}
 
-	@Override
-	public void setView(View view) {
-		this.view = view;
+	@EventHandler
+	public void wantsNsfw(Event.WantsNsfw event) {
+		this.nsfw=event.isValue();
 	}
 
-	@Override
-	public void wantsNsfw(Boolean value) {
-		this.nsfw=value;
-	}
-
-	@Override
-	public void postGallery() {
+	@EventHandler
+	public void postGallery(Event.PostGallery event) {
 		if (StringUtils.isBlank(wif)){
-			view.alert("Your steemit private posting key is required to post.");
+			eventBus.fireEvent(new Event.AlertMessage("Your steemit private posting key is required to post."));
 			return;
 		}
 		if (StringUtils.isBlank(username)){
-			view.alert("Your steemit username is required to post.");
+			eventBus.fireEvent(new Event.AlertMessage("Your steemit username is required to post."));
 			return;
 		}
 		if (pics.isEmpty()) {
-			view.alert("You haven't uploaded any photos yet!");
+			eventBus.fireEvent(new Event.AlertMessage("You haven't uploaded any photos yet!"));
 			return;
 		}
 	}
 
-	@Override
-	public void updateWif(String wif) {
-		this.wif=wif;
+	@EventHandler
+	public void updateWif(Event.UpdateWif event) {
+		this.wif=event.getWif();
 	}
 
-	@Override
-	public void updateUsername(String username) {
-		this.username=username;
+	@EventHandler
+	public void updateUsername(Event.UpdateUsername event) {
+		this.username=event.getUsername();
 	}
 }

@@ -70,13 +70,11 @@ gwt {
 	
 	compiler {
 		ea = false //enable assert statements for testing result conditions
-		disableClassMetadata = false;
-		//
 		strict = true;
 		style = "OBF";
 		//style = "PRETTY";
 		//style = "DETAILED";
-		localWorkers = 4;
+		localWorkers = 1;
 	}
 	
 	superDev {
@@ -86,7 +84,7 @@ gwt {
 	}
 	
 	eclipse {
-		addGwtContainer = false;
+		addGwtContainer = true;
 	}
 }
 
@@ -117,6 +115,10 @@ dependencies {
 	gwt 'com.google.elemental2:elemental2-webgl:1.0.0-beta-1'
 	gwt 'com.google.elemental2:elemental2-media:1.0.0-beta-1'
 	gwt 'com.google.elemental2:elemental2-webstorage:1.0.0-beta-1'
+	
+	gwt ('com.google.gwt.eventbinder:eventbinder:1.1.0') {
+		exclude module: 'gwt-user'
+	}
 	
 	compile 'org.mitre.dsmiley.httpproxy:smiley-http-proxy-servlet:1.9'
 	

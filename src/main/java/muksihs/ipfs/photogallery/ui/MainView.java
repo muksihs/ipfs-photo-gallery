@@ -10,6 +10,9 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FileUpload;
 import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.web.bindery.event.shared.EventBus;
+import com.google.web.bindery.event.shared.binder.EventBinder;
+import com.google.web.bindery.event.shared.binder.EventHandler;
 
 import elemental2.dom.DomGlobal;
 import elemental2.dom.FileList;
@@ -23,10 +26,10 @@ import gwt.material.design.client.ui.MaterialProgress;
 import gwt.material.design.client.ui.MaterialRadioButton;
 import gwt.material.design.client.ui.MaterialTextBox;
 import gwt.material.design.client.ui.MaterialToast;
+import muksihs.ipfs.photogallery.client.Event;
 import muksihs.ipfs.photogallery.shared.Consts;
-import muksihs.ipfs.photogallery.shared.PhotoGalleryController;
 
-public class MainView extends Composite implements muksihs.ipfs.photogallery.shared.View {
+public class MainView extends Composite {
 
 	interface MainViewUiBinder extends UiBinder<Widget, MainView> {
 	}
@@ -35,7 +38,7 @@ public class MainView extends Composite implements muksihs.ipfs.photogallery.sha
 
 	@UiField
 	MaterialLabel version;
-	
+
 	@UiField
 	MaterialLabel filename;
 
@@ -66,13 +69,13 @@ public class MainView extends Composite implements muksihs.ipfs.photogallery.sha
 
 	@UiField
 	DivElement picPreview;
-	
-	public void setProgress(double percent){
+
+	public void setProgress(double percent) {
 		progress.setType(ProgressType.DETERMINATE);
 		progress.setPercent(Math.ceil(percent));
 	}
-	
-	public void setProgressIndeterminate(){
+
+	public void setProgressIndeterminate() {
 		progress.setPercent(0);
 		progress.setType(ProgressType.INDETERMINATE);
 	}
@@ -86,63 +89,76 @@ public class MainView extends Composite implements muksihs.ipfs.photogallery.sha
 		FileList files = x.files;
 		GWT.log("Have " + files.length + " files to upload.");
 		try {
-			app.uploadImages(files);
+			eventBus.fireEvent(new Event.UploadImages(files));
 		} catch (Exception e) {
 			GWT.log(e.getMessage(), e);
 		}
 		link.setEnabled(false);
 		add.setEnabled(false);
 	}
+
 	@UiField
 	protected MaterialTextBox username;
 	@UiField
 	protected MaterialTextBox wif;
 	@UiField
 	protected MaterialButton post;
-	
+
 	@UiField
 	protected MaterialCheckBox nsfw;
-	public MainView() {
+
+	private EventBus eventBus;
+
+	public MainView(EventBus eventBus) {
 		initWidget(uiBinder.createAndBindUi(this));
-		
+		this.eventBus = eventBus;
+
 		version.setText(Consts.VERSION);
-		
+
 		rb4.setValue(true, true);
-		
+
 		add.getElement().setId("upload");
 		add.getElement().setAttribute("multiple", "multiple");
 		add.getElement().setAttribute("accept", "image/*");
-		add.addChangeHandler((e)->uploadImages());
-		
-		rb1.addClickHandler((e) -> app.wantsColumns(1));
-		rb2.addClickHandler((e) -> app.wantsColumns(2));
-		rb4.addClickHandler((e) -> app.wantsColumns(4));
-		showSteemitText.addClickHandler((e) -> app.wantsHtmlDisplayed());
+		add.addChangeHandler((e) -> uploadImages());
+
+		rb1.addClickHandler((e) -> eventBus.fireEvent(new Event.WantsColumns(1)));
+		rb2.addClickHandler((e) -> eventBus.fireEvent(new Event.WantsColumns(2)));
+		rb4.addClickHandler((e) -> eventBus.fireEvent(new Event.WantsColumns(4)));
+		showSteemitText.addClickHandler((e) -> eventBus.fireEvent(new Event.WantsHtmlDisplayed()));
 		clear.addClickHandler((e) -> Location.reload());
 		edit.setVisible(false);
 		edit.setEnabled(false);
 		add.setEnabled(false);
-		
-		nsfw.addClickHandler((e)->app.wantsNsfw(nsfw.getValue()));
-		wif.addChangeHandler((e)->app.updateWif(wif.getValue()));
-		username.addChangeHandler((e)->app.updateUsername(username.getValue()));
-		post.addClickHandler((e)->app.postGallery());
+
+		nsfw.addClickHandler((e) -> eventBus.fireEvent(new Event.WantsNsfw(nsfw.getValue())));
+		wif.addChangeHandler((e) -> eventBus.fireEvent(new Event.UpdateWif(wif.getValue())));
+		username.addChangeHandler((e) -> eventBus.fireEvent(new Event.UpdateUsername(username.getValue())));
+		post.addClickHandler((e) -> eventBus.fireEvent(new Event.PostGallery()));
+	}
+
+	@Override
+	protected void onLoad() {
+		super.onLoad();
+		eventBinder.bindEventHandlers(this, eventBus);
+		eventBus.fireEvent(new Event.ViewLoaded());
 	}
 	
-	@Override
-	public void setReady(boolean ready) {
-		add.setEnabled(ready);
+	interface MyEventBinder extends EventBinder<MainView> {}
+	private final MyEventBinder eventBinder = GWT.create(MyEventBinder.class);
+
+	@EventHandler
+	public void setReady(Event.IpfsGatewayReady ready) {
+		add.setEnabled(true);
 	}
 
 	@UiField
 	TextArea steemitText;
 
-	@Override
-	public void setSteemitHtml(String text){
-		steemitText.setText(text);
+	@EventHandler
+	public void setSteemitHtml(Event.SetSteemitText event) {
+		steemitText.setText(event.getText());
 	}
-
-	private PhotoGalleryController app;
 
 	@Override
 	protected void onAttach() {
@@ -154,31 +170,26 @@ public class MainView extends Composite implements muksihs.ipfs.photogallery.sha
 		super.onDetach();
 	}
 
-	@Override
-	public void setFileText(String msg) {
-		filename.setText(msg);
+	@EventHandler
+	public void setFileText(Event.SetFilenameMsg event) {
+		filename.setText(event.getMessage());
 	}
 
-	@Override
-	public void setIpfsFolderLink(String finalUrl) {
+	@EventHandler
+	public void setIpfsFolderLink(Event.SetIpfsFolderLink event) {
 		link.setEnabled(true);
-		link.setHref(finalUrl);
+		link.setHref(event.getIpfsFolderLink());
 		link.getElement().setAttribute("target", "_blank");
 		add.setEnabled(true);
 	}
 
-	@Override
-	public void setPreviewHtml(String steemitHtml) {
-		this.picPreview.setInnerHTML(steemitHtml);
+	@EventHandler
+	public void setPreviewHtml(Event.SetPreviewHtml event) {
+		this.picPreview.setInnerHTML(event.getPreviewHtml());
 	}
 
-	@Override
-	public void setController(PhotoGalleryController app) {
-		this.app=app;
-	}
-
-	@Override
-	public void alert(String message) {
-		MaterialToast.fireToast(message, 10000);
+	@EventHandler
+	public void alert(Event.AlertMessage event) {
+		MaterialToast.fireToast(event.getMessage(), 10000);
 	}
 }

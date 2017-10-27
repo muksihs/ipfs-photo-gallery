@@ -12,6 +12,9 @@
 	<source path='shared' />
 	<source path='ui' />
 	
+	<!-- eventbinder -->
+	<inherits name='com.google.web.bindery.event.EventBinder'/>
+	
 	<!-- steemjs -->
 	<inherits name="steemjs.SteemJs" />
 	<!-- HTML5 -->

@@ -6,20 +6,32 @@ import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.user.client.ui.RootPanel;
+import com.google.web.bindery.event.shared.binder.EventBinder;
+import com.google.web.bindery.event.shared.binder.EventHandler;
 
 import muksihs.ipfs.photogallery.ui.MainView;
 import steemjs.SteemApi;
 import steemjs.TrendingTagsResult;
 
 public class PhotoGallery implements EntryPoint {
+	interface MyEventBinder extends EventBinder<PhotoGallery> {}
+	private final MyEventBinder eventBinder = GWT.create(MyEventBinder.class);
+	
 	@Override
 	public void onModuleLoad() {
 		Defaults.setRequestTimeout(0);
 		Defaults.setAddXHttpMethodOverrideHeader(false);
 		Defaults.ignoreJsonNulls();
-		MainView mainView = new MainView();
-		new PhotoGalleryApp(mainView);
+		DeferredEventBus eventBus = new DeferredEventBus();
+		eventBinder.bindEventHandlers(this, eventBus);
+		MainView mainView = new MainView(eventBus);
+		new PhotoGalleryApp(eventBus);
 		RootPanel.get().add(mainView);
+	}
+	
+	@EventHandler
+	protected void onAppLoaded(Event.AppLoaded event) {
+		GWT.log("App loaded.");
 	}
 
 	public void getTrendingTags() {
