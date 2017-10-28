@@ -1,0 +1,27 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+	xmlns:g="urn:import:com.google.gwt.user.client.ui" xmlns:m="urn:import:gwt.material.design.client.ui"
+	xmlns:x="urn:import:muksihs.ipfs.photogallery.ui">
+	<ui:style>
+	
+	</ui:style>
+	<m:MaterialPanel style="min-width: 840px;">
+		<m:MaterialHeader>
+			<m:MaterialTitle style="margin: 0em;"
+				title="Muksihs' Photo Gallery Maker"></m:MaterialTitle>
+			<m:MaterialPanel>
+				<m:MaterialLabel style="display: inline; margin: 0.2em;"
+					text="for steemit - version: "></m:MaterialLabel>
+				<m:MaterialLabel style="display: inline; margin: 0.2em;"
+					text="0000000" ui:field="version"></m:MaterialLabel>
+				<m:MaterialLabel style="display: inline; margin: 0.2em;"
+					text=" - created by "></m:MaterialLabel>
+				<m:MaterialLink target="_blank" style="margin: 0.2em;"
+					href="https://www.steemit.com/@muksihs" text="@muksihs"></m:MaterialLink>
+					<m:MaterialLabel style="display: inline; margin: 0.2em;"
+					text="(nsfw!)"></m:MaterialLabel>
+			</m:MaterialPanel>
+		</m:MaterialHeader>
+		<m:MaterialDivider></m:MaterialDivider>
+	</m:MaterialPanel>
+</ui:UiBinder> 

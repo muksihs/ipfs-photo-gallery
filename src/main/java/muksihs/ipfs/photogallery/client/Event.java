@@ -5,6 +5,27 @@ import com.google.web.bindery.event.shared.binder.GenericEvent;
 import elemental2.dom.FileList;
 
 public interface Event {
+	public class AddImages extends GenericEvent {
+		private final FileList files;
+		public AddImages(FileList files) {
+			this.files = files;
+		}
+		public FileList getFiles() {
+			return files;
+		}
+	}
+	public class DisplayAppVersion extends GenericEvent {
+		private final String version;
+		public DisplayAppVersion(String version) {
+			this.version=version;
+		}
+		public String getVersion() {
+			return version;
+		}
+	}
+	public class GetAppVersion extends GenericEvent {
+
+	}
 	public class ShowLoading extends GenericEvent {
 		private final boolean loading;
 

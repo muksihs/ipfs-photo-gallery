@@ -1,7 +1,10 @@
 package muksihs.ipfs.photogallery.client;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
+import com.google.web.bindery.event.shared.binder.EventBinder;
+import com.google.web.bindery.event.shared.binder.EventHandler;
 
 import muksihs.ipfs.photogallery.shared.IpfsGateway;
 import muksihs.ipfs.photogallery.ui.GlobalEventBus;
@@ -10,11 +13,15 @@ import muksihs.ipfs.photogallery.ui.Presenter.ShowView;
 import muksihs.ipfs.photogallery.ui.Presenter.View;
 
 public class PhotoGalleryWizard implements ScheduledCommand, GlobalEventBus {
-	private final Presenter presenter;
+	
+	interface MyEventBinder extends EventBinder<PhotoGalleryWizard> {}
+	
+	private static final MyEventBinder eventBinder = GWT.create(MyEventBinder.class);
 
 	public PhotoGalleryWizard() {
+		eventBinder.bindEventHandlers(this, eventBus);
 		IpfsGatewayCache.get();
-		presenter = new Presenter();
+		new Presenter();
 	}
 
 	@Override
@@ -28,10 +35,11 @@ public class PhotoGalleryWizard implements ScheduledCommand, GlobalEventBus {
 				fireEvent(new ShowView(View.SelectImages));
 			}
 			return !ready;
-		}, 500);
+		}, 250);
 	}
-
-	public Presenter getPresenter() {
-		return presenter;
+	
+	@EventHandler
+	protected void getAppVersion(Event.GetAppVersion event) {
+		fireEvent(new Event.DisplayAppVersion("20171027"));
 	}
 }

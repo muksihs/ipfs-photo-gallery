@@ -77,6 +77,7 @@ public class Presenter implements GlobalEventBus {
 		case PostGallery:
 			break;
 		case SelectImages:
+			replaceView(new SelectImages());
 			break;
 		case UploadImages:
 			break;
