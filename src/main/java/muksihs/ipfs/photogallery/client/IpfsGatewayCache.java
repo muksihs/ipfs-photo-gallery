@@ -28,8 +28,9 @@ import muksihs.ipfs.photogallery.shared.Consts;
 import muksihs.ipfs.photogallery.shared.IpfsGateway;
 import muksihs.ipfs.photogallery.shared.IpfsGatewayEntry;
 import muksihs.ipfs.photogallery.shared.StringList;
+import muksihs.ipfs.photogallery.ui.GlobalEventBus;
 
-public class IpfsGatewayCache {
+public class IpfsGatewayCache implements GlobalEventBus {
 	private static final int SECOND = 1000;
 	public static final int MINUTE = SECOND * 60;
 

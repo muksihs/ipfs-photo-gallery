@@ -5,6 +5,18 @@ import com.google.web.bindery.event.shared.binder.GenericEvent;
 import elemental2.dom.FileList;
 
 public interface Event {
+	public class ShowLoading extends GenericEvent {
+		private final boolean loading;
+
+		public boolean isLoading() {
+			return loading;
+		}
+		
+		public ShowLoading(boolean loading) {
+			this.loading=loading;
+		}
+		
+	}
 	public class SetProgressIndeterminate extends GenericEvent {
 
 	}

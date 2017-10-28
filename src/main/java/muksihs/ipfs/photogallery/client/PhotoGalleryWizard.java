@@ -1,22 +1,37 @@
 package muksihs.ipfs.photogallery.client;
 
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
-import com.google.gwt.user.client.ui.RootPanel;
 
-public class PhotoGalleryWizard implements ScheduledCommand {
-	
-	private final DeferredEventBus eventbus;
+import muksihs.ipfs.photogallery.shared.IpfsGateway;
+import muksihs.ipfs.photogallery.ui.GlobalEventBus;
+import muksihs.ipfs.photogallery.ui.Presenter;
+import muksihs.ipfs.photogallery.ui.Presenter.ShowView;
+import muksihs.ipfs.photogallery.ui.Presenter.View;
 
-	private final IpfsGatewayCache gw;
-	private final RootPanel rp;
+public class PhotoGalleryWizard implements ScheduledCommand, GlobalEventBus {
+	private final Presenter presenter;
 
 	public PhotoGalleryWizard() {
-		this.eventbus = new DeferredEventBus();
-		this.gw = IpfsGatewayCache.get();
-		this.rp = RootPanel.get();
+		IpfsGatewayCache.get();
+		presenter = new Presenter();
 	}
 
 	@Override
 	public void execute() {
+		fireEvent(new Event.AppLoaded());
+		fireEvent(new ShowView(View.Loading));
+		Scheduler.get().scheduleFixedDelay(() -> {
+			boolean ready = IpfsGateway.isReady();
+			if (ready) {
+				fireEvent(new Event.IpfsGatewayReady());
+				fireEvent(new ShowView(View.SelectImages));
+			}
+			return !ready;
+		}, 500);
+	}
+
+	public Presenter getPresenter() {
+		return presenter;
 	}
 }

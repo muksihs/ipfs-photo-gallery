@@ -15,7 +15,6 @@ import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.RootPanel;
-import com.google.web.bindery.event.shared.binder.EventBinder;
 import com.google.web.bindery.event.shared.binder.EventHandler;
 
 import elemental2.dom.Blob;
@@ -33,15 +32,12 @@ import muksihs.ipfs.photogallery.shared.ImageUrl;
 import muksihs.ipfs.photogallery.shared.Ipfs;
 import muksihs.ipfs.photogallery.shared.IpfsGateway;
 import muksihs.ipfs.photogallery.shared.IpfsGatewayEntry;
+import muksihs.ipfs.photogallery.ui.GlobalEventBus;
 
-public class PhotoGalleryApp {
-	interface MyEventBinder extends EventBinder<PhotoGalleryApp> {}
-	private final MyEventBinder eventBinder = GWT.create(MyEventBinder.class);
+public class PhotoGalleryApp implements GlobalEventBus {
 	
 	private int columns = 4;
 	private IpfsGatewayCache ipfsGwCache;
-
-	private final DeferredEventBus eventBus;
 
 	public void wantsColumns(int count) {
 		columns = count;
@@ -56,24 +52,22 @@ public class PhotoGalleryApp {
 		GWT.log("IPFS gateway list loaded and ready for use.");
 	}
 
-	public PhotoGalleryApp(DeferredEventBus eventBus) {
-		eventBinder.bindEventHandlers(this, eventBus);
-		this.eventBus=eventBus;
+	public PhotoGalleryApp() {
 		ipfsGwCache = IpfsGatewayCache.get();
-		eventBus.fireEvent(new Event.SetViewReady(false));
+		fireEvent(new Event.SetViewReady(false));
 		Scheduler.get().scheduleFixedDelay(() -> {
 			boolean ready = IpfsGateway.isReady();
 			if (ready) {
 				Scheduler.get().scheduleDeferred(() -> updatePreview());
-				eventBus.fireEvent(new Event.IpfsGatewayReady());
-				eventBus.fireEvent(new Event.SetViewReady(true));
+				fireEvent(new Event.IpfsGatewayReady());
+				fireEvent(new Event.SetViewReady(true));
 			}
 			return !ready;
 		}, 500);
 	}
 
 	private void updatePreview() {
-		eventBus.fireEvent(new Event.SetPreviewHtml(steemitHtml()));
+		fireEvent(new Event.SetPreviewHtml(steemitHtml()));
 	}
 
 	private List<ImageUrl> pics = new ArrayList<>();
@@ -148,7 +142,7 @@ public class PhotoGalleryApp {
 				+ "\n</html>";
 		text = text.replace("\t", "  ");
 		text = text.replaceAll("\n+", "\n");
-		eventBus.fireEvent(new Event.SetSteemitText(text));
+		fireEvent(new Event.SetSteemitText(text));
 	}
 
 	@EventHandler
@@ -168,11 +162,11 @@ public class PhotoGalleryApp {
 
 	private void uploadImage(String hash, FileList files, int ix) {
 		if (ix >= files.length) {
-			eventBus.fireEvent(new Event.SetFilenameMsg("Upload complete."));
-			eventBus.fireEvent(new Event.SetProgress(0));
+			fireEvent(new Event.SetFilenameMsg("Upload complete."));
+			fireEvent(new Event.SetProgress(0));
 			GWT.log("DONE PUTTING IMAGES.");
 			String finalUrl = last.getBaseUrl().replace(":hash", hash) + "/";
-			eventBus.fireEvent(new Event.SetIpfsFolderLink(finalUrl));
+			fireEvent(new Event.SetIpfsFolderLink(finalUrl));
 			return;
 		}
 		_putThumb(hash, files, ix);
@@ -183,7 +177,7 @@ public class PhotoGalleryApp {
 		FileReader reader = new FileReader();
 		File file = files.getAt(ix);
 
-		eventBus.fireEvent(new Event.SetFilenameMsg(file.name + " (Thumbnail) [" + (ix + 1) + " of " + files.length + "]"));
+		fireEvent(new Event.SetFilenameMsg(file.name + " (Thumbnail) [" + (ix + 1) + " of " + files.length + "]"));
 		reader.onabort = (e) -> retryPutImage(hash, files, ix);
 		reader.onerror = (e) -> retryPutImage(hash, files, ix);
 		reader.onloadend = (e) -> onFileLoaded(hash, files, ix, reader);
@@ -242,14 +236,14 @@ public class PhotoGalleryApp {
 	}
 
 	public void onThumbPutDone(String hash, FileList files, int ix, double xhrStatus, String newHash) {
-		eventBus.fireEvent(new Event.SetProgressIndeterminate());
+		fireEvent(new Event.SetProgressIndeterminate());
 		if (newHash == null || newHash.trim().isEmpty()) {
 			retryPutImage(hash, files, ix);
 			return;
 		}
 		if (xhrStatus != 201) {
 			GWT.log("PUT thumb failed.");
-			eventBus.fireEvent(new Event.SetProgress(0));
+			fireEvent(new Event.SetProgress(0));
 			ipfsGwCache.forceExpireGateways();
 			retryPutImage(hash, files, ix);
 			return;
@@ -283,7 +277,7 @@ public class PhotoGalleryApp {
 		String xhrUrl = putGw.getBaseUrl().replace(":hash", hash) + "/" + encodedName;
 		String size = NumberFormat.getDecimalFormat().format(Math.ceil(file.size / Consts.KB)) + " KB";
 
-		eventBus.fireEvent(new Event.SetFilenameMsg(file.name + " (" + size + ") [" + (ix + 1) + " of " + files.length + "]"));
+		fireEvent(new Event.SetFilenameMsg(file.name + " (" + size + ") [" + (ix + 1) + " of " + files.length + "]"));
 		GWT.log("PUT: " + xhrUrl);
 		XMLHttpRequest xhr = new XMLHttpRequest();
 		xhr.open("PUT", xhrUrl, true);
@@ -296,9 +290,9 @@ public class PhotoGalleryApp {
 	public void onImagePutDone(String hash, FileList files, int ix, String zeroPaddedName, String newHash,
 			double xhrStatus) {
 		String encodedName = URL.encode(zeroPaddedName);
-		eventBus.fireEvent(new Event.SetProgressIndeterminate());
+		fireEvent(new Event.SetProgressIndeterminate());
 		if (xhrStatus != 201) {
-			eventBus.fireEvent(new Event.SetProgress(0));
+			fireEvent(new Event.SetProgress(0));
 			GWT.log("PUT failed.");
 			retryPutImage(hash, files, ix);
 			return;
@@ -329,9 +323,9 @@ public class PhotoGalleryApp {
 
 	public void updateProgressView(ProgressEvent p0) {
 		if (p0.lengthComputable) {
-			eventBus.fireEvent(new Event.SetProgress(Math.floor(p0.loaded * 100 / p0.total)));
+			fireEvent(new Event.SetProgress(Math.floor(p0.loaded * 100 / p0.total)));
 		} else {
-			eventBus.fireEvent(new Event.SetProgressIndeterminate());
+			fireEvent(new Event.SetProgressIndeterminate());
 		}
 	}
 
@@ -402,15 +396,15 @@ public class PhotoGalleryApp {
 	@EventHandler
 	public void postGallery(Event.PostGallery event) {
 		if (StringUtils.isBlank(wif)){
-			eventBus.fireEvent(new Event.AlertMessage("Your steemit private posting key is required to post."));
+			fireEvent(new Event.AlertMessage("Your steemit private posting key is required to post."));
 			return;
 		}
 		if (StringUtils.isBlank(username)){
-			eventBus.fireEvent(new Event.AlertMessage("Your steemit username is required to post."));
+			fireEvent(new Event.AlertMessage("Your steemit username is required to post."));
 			return;
 		}
 		if (pics.isEmpty()) {
-			eventBus.fireEvent(new Event.AlertMessage("You haven't uploaded any photos yet!"));
+			fireEvent(new Event.AlertMessage("You haven't uploaded any photos yet!"));
 			return;
 		}
 	}
