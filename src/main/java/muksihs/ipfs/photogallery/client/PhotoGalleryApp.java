@@ -193,10 +193,10 @@ public class PhotoGalleryApp implements GlobalEventBus {
 		return null;
 	}
 
-	public Void createThumbnail(String hash, FileList files, int ix, HTMLImageElement thumbImg) {
+	public Void createThumbnail(String hash, FileList files, int ix, HTMLImageElement image) {
 		double scale;
-		double w = thumbImg.width;
-		double h = thumbImg.height;
+		double w = image.width;
+		double h = image.height;
 		/*
 		 * size to fit
 		 */
@@ -207,14 +207,14 @@ public class PhotoGalleryApp implements GlobalEventBus {
 		}
 		// draw thumbnail image
 		HTMLCanvasElement thumb = (HTMLCanvasElement) DomGlobal.document.createElement("canvas");
-		thumb.width = thumbImg.width * scale;
-		thumb.height = thumbImg.height * scale;
+		thumb.width = image.width * scale;
+		thumb.height = image.height * scale;
 		CanvasRenderingContext2D ctx = (CanvasRenderingContext2D) (Object) thumb.getContext("2d");
-		ctx.drawImage(thumbImg, 0, 0, thumbImg.width * scale, thumbImg.height * scale);
-		String mime = thumbImg.src.contains(";base64,iVBOR") ? "image/png" : "image/jpeg";
+		ctx.drawImage(image, 0, 0, image.width * scale, image.height * scale);
+		String mime = image.src.contains(";base64,iVBOR") ? "image/png" : "image/jpeg";
 		Image w2 = new Image();
 		RootPanel.get().add(w2);
-		w2.setUrl(thumbImg.src);
+		w2.setUrl(image.src);
 		thumb.toBlob((p0) -> uploadThumbnail(hash, files, ix, p0), mime, Consts.jpgQuality);
 		return null;
 	}

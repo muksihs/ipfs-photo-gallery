@@ -3,8 +3,65 @@ package muksihs.ipfs.photogallery.client;
 import com.google.web.bindery.event.shared.binder.GenericEvent;
 
 import elemental2.dom.FileList;
+import muksihs.ipfs.photogallery.shared.ImageData;
 
 public interface Event {
+	public class UpdateImageCount extends GenericEvent {
+		private final int count;
+		public UpdateImageCount(int count) {
+			this.count=count;
+		}
+		public int getCount() {
+			return count;
+		}
+
+	}
+	public class RemoveImage extends GenericEvent {
+		public RemoveImage(int index) {
+			this.index=index;
+		}
+		private final int index;
+
+		public int getIndex() {
+			return index;
+		}
+
+	}
+	public class AddToPreviewPanel extends GenericEvent {
+		private final String imageDataUrl;
+		private final String caption;
+		public AddToPreviewPanel(String imageDataUrl, String caption) {
+			this.imageDataUrl=imageDataUrl;
+			this.caption=caption;
+		}
+		public String getImageDataUrl() {
+			return imageDataUrl;
+		}
+		public String getCaption() {
+			return this.caption;
+		}
+	}
+	public class EnableSelectImages extends GenericEvent {
+		private final boolean enable;
+		public EnableSelectImages(boolean enable) {
+			this.enable=enable;
+		}
+		public boolean isEnable() {
+			return enable;
+		}
+	}
+	public class AddImagesDone extends GenericEvent {
+
+	}
+	public class ImageDataAdded extends GenericEvent {
+		private final ImageData imageData;
+		public ImageDataAdded(ImageData dataUrls) {
+			this.imageData=dataUrls;
+		}
+		public ImageData getDataUrls() {
+			return imageData;
+		}
+	}
 	public class AddImages extends GenericEvent {
 		private final FileList files;
 		public AddImages(FileList files) {
