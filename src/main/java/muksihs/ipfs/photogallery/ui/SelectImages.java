@@ -46,6 +46,9 @@ public class SelectImages extends EventBusComposite {
 	@EventHandler
 	protected void updateImageCount(Event.UpdateImageCount event) {
 		GWT.log("Have "+event.getCount()+" images in the gallery.");
+		if (event.getCount()==0) {
+			next.setEnabled(false);
+		}
 	}
 
 	private Void showListEditOptions(MaterialImage image) {
@@ -86,6 +89,9 @@ public class SelectImages extends EventBusComposite {
 		});
 		modal.add(btnRemove);
 		modal.add(btnCancel);
+		MaterialPanel child = new MaterialPanel();
+		modal.add(child);
+		child.add(new MaterialImage(image.getUrl()));
 		previewPanel.add(modal);
 		Scheduler.get().scheduleDeferred(()->modal.open());
 		return null;
@@ -126,6 +132,8 @@ public class SelectImages extends EventBusComposite {
 		fileUpload.getElement().setAttribute("multiple", "multiple");
 		fileUpload.getElement().setAttribute("accept", "image/*");
 		fileUpload.addChangeHandler(this::addFilesToUploadQueue);
+		next.setEnabled(false);
+		next.addClickHandler((e)->fireEvent(new Event.SelectImagesNext()));
 	}
 
 	private void addFilesToUploadQueue(ChangeEvent event) {
@@ -138,6 +146,7 @@ public class SelectImages extends EventBusComposite {
 		GWT.log("Have " + files.length + " files to upload.");
 		eventBus.fireEvent(new Event.AddImages(files));
 		fileUpload.setEnabled(false);
+		next.setEnabled(false);
 	}
 
 }

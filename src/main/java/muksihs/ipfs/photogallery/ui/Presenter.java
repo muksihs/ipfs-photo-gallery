@@ -80,6 +80,7 @@ public class Presenter implements GlobalEventBus {
 			replaceView(new SelectImages());
 			break;
 		case UploadImages:
+			replaceView(new UploadImages());
 			break;
 		}
 	}

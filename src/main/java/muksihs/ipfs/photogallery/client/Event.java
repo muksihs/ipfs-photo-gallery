@@ -6,6 +6,12 @@ import elemental2.dom.FileList;
 import muksihs.ipfs.photogallery.shared.ImageData;
 
 public interface Event {
+	public class StoreImagesStarted extends GenericEvent {
+
+	}
+	public class SelectImagesNext extends GenericEvent {
+
+	}
 	public class UpdateImageCount extends GenericEvent {
 		private final int count;
 		public UpdateImageCount(int count) {

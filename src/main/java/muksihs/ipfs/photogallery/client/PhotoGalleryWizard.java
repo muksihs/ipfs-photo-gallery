@@ -43,6 +43,12 @@ public class PhotoGalleryWizard implements ScheduledCommand, GlobalEventBus {
 	}
 	
 	@EventHandler
+	protected void selectImagesNext(Event.SelectImagesNext event) {
+		fireEvent(new ShowView(View.UploadImages));
+		Scheduler.get().scheduleDeferred(new StoreImagesInIpfs(imageDataUrls));
+	}
+	
+	@EventHandler
 	protected void addImages(Event.AddImages event) {
 		if (event.getFiles()==null||event.getFiles().length==0) {
 			return;
@@ -76,5 +82,6 @@ public class PhotoGalleryWizard implements ScheduledCommand, GlobalEventBus {
 	@EventHandler
 	protected void addImagesDone(Event.AddImagesDone event) {
 		fireEvent(new Event.EnableSelectImages(true));
+		fireEvent(new Event.UpdateImageCount(imageDataUrls.size()));
 	}
 }

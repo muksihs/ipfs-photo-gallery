@@ -8,11 +8,11 @@
 			margin: 4px;
 		}
 	</ui:style>
-	<m:MaterialPanel style='text-align: center;'>
+	<m:MaterialPanel style='margin: auto; text-align: center; max-width:840px;'>
 		<x:HeaderBlock ui:field="hblock"></x:HeaderBlock>
 		<m:MaterialLabel style="margin: 0.2em; margin-right: 0.4em; display: inline;" text="Select images for upload:"></m:MaterialLabel>
 		<g:FileUpload ui:field="fileUpload"></g:FileUpload>
 		<m:MaterialButton ui:field="next" enabled="false" text="Next" title="The next step is to upload the selected images and thumbnails into the IPFS cloud."></m:MaterialButton>
-	<m:MaterialPanel style='margin: auto; max-width:840px; border-width: 4px; border-color: black; border-style: solid;' ui:field="previewPanel"></m:MaterialPanel>
+	<m:MaterialPanel style='margin: auto; border-width: 4px; border-color: black; border-style: solid;' ui:field="previewPanel"></m:MaterialPanel>
 	</m:MaterialPanel>
 </ui:UiBinder> 
