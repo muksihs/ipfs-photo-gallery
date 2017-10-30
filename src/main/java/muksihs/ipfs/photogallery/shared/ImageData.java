@@ -3,6 +3,8 @@ package muksihs.ipfs.photogallery.shared;
 public class ImageData {
 	private String imageDataUrl;
 	private String thumbDataUrl;
+	private String imageUrl;
+	private String thumbUrl;
 	private String caption;
 	public ImageData() {
 	}
@@ -28,5 +30,17 @@ public class ImageData {
 	}
 	public void setCaption(String caption) {
 		this.caption = caption;
+	}
+	public String getImageUrl() {
+		return imageUrl;
+	}
+	public void setImageUrl(String imageUrl) {
+		this.imageUrl = imageUrl;
+	}
+	public String getThumbUrl() {
+		return thumbUrl;
+	}
+	public void setThumbUrl(String thumbUrl) {
+		this.thumbUrl = thumbUrl;
 	}
 }

@@ -6,6 +6,9 @@ import elemental2.dom.FileList;
 import muksihs.ipfs.photogallery.shared.ImageData;
 
 public interface Event {
+	public class IpfsLoadDone extends GenericEvent {
+
+	}
 	public class StoreImagesStarted extends GenericEvent {
 
 	}
