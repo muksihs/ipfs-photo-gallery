@@ -37,17 +37,12 @@ public interface Event {
 
 	}
 	public class AddToPreviewPanel extends GenericEvent {
-		private final String imageDataUrl;
-		private final String caption;
-		public AddToPreviewPanel(String imageDataUrl, String caption) {
-			this.imageDataUrl=imageDataUrl;
-			this.caption=caption;
+		private final ImageData imageData;
+		public AddToPreviewPanel(ImageData imageData) {
+			this.imageData=imageData;
 		}
-		public String getImageDataUrl() {
-			return imageDataUrl;
-		}
-		public String getCaption() {
-			return this.caption;
+		public ImageData getImageData() {
+			return imageData;
 		}
 	}
 	public class EnableSelectImages extends GenericEvent {
@@ -67,7 +62,7 @@ public interface Event {
 		public ImageDataAdded(ImageData dataUrls) {
 			this.imageData=dataUrls;
 		}
-		public ImageData getDataUrls() {
+		public ImageData getData() {
 			return imageData;
 		}
 	}

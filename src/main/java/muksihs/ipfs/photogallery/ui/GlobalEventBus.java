@@ -10,7 +10,7 @@ public interface GlobalEventBus {
 	EventBus eventBus = new DeferredEventBus() {
 		public void fireEvent(com.google.web.bindery.event.shared.Event<?> event) {
 			if (event != null) {
-				GWT.log("event: " + event.getClass().getSimpleName());
+//				GWT.log("event: " + event.getClass().getSimpleName());
 			} else {
 				GWT.log("null event!");
 			}

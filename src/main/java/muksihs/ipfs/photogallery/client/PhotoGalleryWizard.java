@@ -69,8 +69,8 @@ public class PhotoGalleryWizard implements ScheduledCommand, GlobalEventBus {
 	private List<ImageData> imageDataUrls=new ArrayList<>();
 	@EventHandler
 	protected void imageDataAdded(Event.ImageDataAdded event) {
-		imageDataUrls.add(event.getDataUrls());
-		fireEvent(new Event.AddToPreviewPanel(event.getDataUrls().getThumbDataUrl(), event.getDataUrls().getCaption()));
+		imageDataUrls.add(event.getData());
+		fireEvent(new Event.AddToPreviewPanel(event.getData()));
 		fireEvent(new Event.UpdateImageCount(imageDataUrls.size()));
 	}
 	

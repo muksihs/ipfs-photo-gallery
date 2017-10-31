@@ -1,46 +1,65 @@
 package muksihs.ipfs.photogallery.shared;
 
+import elemental2.dom.Blob;
+
 public class ImageData {
-	private String imageDataUrl;
-	private String thumbDataUrl;
+	private Blob imageData;
+	private Blob thumbData;
 	private String imageUrl;
 	private String thumbUrl;
-	private String caption;
+	private String name;
+
 	public ImageData() {
 	}
-	public ImageData(String imageDataurl, String thumbDataUrl, String caption) {
-		this.imageDataUrl=imageDataurl;
-		this.thumbDataUrl=thumbDataUrl;
-		this.caption=caption;
+
+	public ImageData(Blob imageData, Blob thumbData, String name) {
+		this.imageData = imageData;
+		this.thumbData = thumbData;
+		this.name = name;
 	}
-	public String getImageDataUrl() {
-		return imageDataUrl;
+
+	public Blob getImageData() {
+		return imageData;
 	}
-	public void setImageDataUrl(String imageDataUrl) {
-		this.imageDataUrl = imageDataUrl;
-	}
-	public String getThumbDataUrl() {
-		return thumbDataUrl;
-	}
-	public void setThumbDataUrl(String thumbDataUrl) {
-		this.thumbDataUrl = thumbDataUrl;
-	}
-	public String getCaption() {
-		return caption;
-	}
-	public void setCaption(String caption) {
-		this.caption = caption;
-	}
+
 	public String getImageUrl() {
 		return imageUrl;
 	}
-	public void setImageUrl(String imageUrl) {
-		this.imageUrl = imageUrl;
+
+	public String getName() {
+		return name;
 	}
+
+	public Blob getThumbData() {
+		return thumbData;
+	}
+
 	public String getThumbUrl() {
 		return thumbUrl;
 	}
-	public void setThumbUrl(String thumbUrl) {
+
+	public ImageData setImageData(Blob imageData) {
+		this.imageData = imageData;
+		return this;
+	}
+
+	public ImageData setImageUrl(String imageUrl) {
+		this.imageUrl = imageUrl;
+		return this;
+	}
+
+	public ImageData setName(String name) {
+		this.name = name;
+		return this;
+	}
+
+	public ImageData setThumbData(Blob thumbData) {
+		this.thumbData = thumbData;
+		return this;
+	}
+
+	public ImageData setThumbUrl(String thumbUrl) {
 		this.thumbUrl = thumbUrl;
+		return this;
 	}
 }

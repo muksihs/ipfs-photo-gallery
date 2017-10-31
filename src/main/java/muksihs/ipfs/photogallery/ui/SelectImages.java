@@ -14,6 +14,7 @@ import com.google.web.bindery.event.shared.binder.EventHandler;
 
 import elemental2.dom.DomGlobal;
 import elemental2.dom.FileList;
+import elemental2.dom.FileReader;
 import elemental2.dom.HTMLInputElement;
 import gwt.material.design.client.ui.MaterialButton;
 import gwt.material.design.client.ui.MaterialImage;
@@ -36,11 +37,16 @@ public class SelectImages extends EventBusComposite {
 
 	@EventHandler
 	protected void updatePreviewPanel(Event.AddToPreviewPanel event) {
-		MaterialImage image = new MaterialImage(event.getImageDataUrl());
-		image.setCaption(event.getCaption());
-		image.setTitle(event.getCaption());
-		image.addClickHandler((e)->showListEditOptions(image));
-		previewPanel.add(image);
+		FileReader reader = new FileReader();
+		reader.onloadend=(e)->{
+			MaterialImage image = new MaterialImage(reader.result.asString());
+			image.setCaption(event.getImageData().getName());
+			image.setTitle(event.getImageData().getName());
+			image.addClickHandler((e2)->showListEditOptions(image));
+			previewPanel.add(image);
+			return null;
+		};
+		reader.readAsDataURL(event.getImageData().getThumbData());
 	}
 	
 	@EventHandler

@@ -18,33 +18,36 @@ public class LoadFileImages implements GlobalEventBus {
 	public void load(FileList files) {
 		loadNextDataUrl(files, 0);
 	}
-	
-//	private List<ImageData> dataUrls=new ArrayList<>();
+
+	// private List<ImageData> dataUrls=new ArrayList<>();
 	protected Void loadNextDataUrl(FileList files, int ix) {
-		if (ix>=files.length) {
+		if (ix >= files.length) {
 			fireEvent(new Event.AddImagesDone());
 			return null;
 		}
 		GWT.log("loadDataUrl: " + files.getAt(ix).name);
 		FileReader reader = new FileReader();
 		File file = files.getAt(ix);
-		reader.onabort = (e) -> loadNextDataUrl(files, ix+1);//skip un-readable file
-		reader.onerror = (e) -> loadNextDataUrl(files, ix+1);//skip un-readable file
+		reader.onabort = (e) -> loadNextDataUrl(files, ix + 1);// skip un-readable file
+		reader.onerror = (e) -> loadNextDataUrl(files, ix + 1);// skip un-readable file
 		reader.onloadend = (e) -> onFileLoaded(files, ix, reader.result);
 		reader.readAsDataURL(file.slice());
 		return null;
 	}
-	
+
 	public Void onFileLoaded(FileList files, int ix, ResultUnionType result) {
+		File file = files.getAt(ix);
 		HTMLImageElement image = (HTMLImageElement) DomGlobal.document.createElement("img");
-		image.onabort = (e) -> loadNextDataUrl(files, ix+1);//skip non-image file
-		image.onerror = (e) -> loadNextDataUrl(files, ix+1);//skip non-image file
-		image.onload = (e) -> createThumbnail(files, ix, image);
+		image.onabort = (e) -> loadNextDataUrl(files, ix + 1);// skip non-image file
+		image.onerror = (e) -> loadNextDataUrl(files, ix + 1);// skip non-image file
+		image.onload = (e) -> {
+			return createThumbnail(files, ix, new ImageData(file.slice(), null, file.name), image);
+		};
 		image.src = result.asString();
 		return null;
 	}
-	
-	public Void createThumbnail(FileList files, int ix, HTMLImageElement image) {
+
+	public Void createThumbnail(FileList files, int ix, ImageData imageData, HTMLImageElement image) {
 		double scale;
 		double w = image.width;
 		double h = image.height;
@@ -63,9 +66,15 @@ public class LoadFileImages implements GlobalEventBus {
 		CanvasRenderingContext2D ctx = (CanvasRenderingContext2D) (Object) canvas.getContext("2d");
 		ctx.drawImage(image, 0, 0, image.width * scale, image.height * scale);
 		String mime = image.src.contains(";base64,iVBOR") ? "image/png" : "image/jpeg";
-		String thumbDataUrl = canvas.toDataURL(mime, Consts.jpgQuality);
-		fireEvent(new Event.ImageDataAdded(new ImageData(image.src, thumbDataUrl, files.getAt(ix).name)));
-		loadNextDataUrl(files, ix+1);
+		canvas.toBlob((blob) -> {
+			fireEvent(new Event.ImageDataAdded(imageData.setThumbData(blob)));
+			loadNextDataUrl(files, ix + 1);
+			return null;
+		}, mime, Consts.jpgQuality);
 		return null;
 	}
+
+	public native String createObjectURL(elemental2.dom.Blob bb) /*-{
+		return $wnd.URL.createObjectURL(bb);
+	}-*/;
 }

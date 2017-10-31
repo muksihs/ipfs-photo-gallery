@@ -7,6 +7,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.web.bindery.event.shared.binder.EventBinder;
 import com.google.web.bindery.event.shared.binder.EventHandler;
 
+import elemental2.dom.FileReader;
 import gwt.material.design.client.constants.ProgressType;
 import gwt.material.design.client.ui.MaterialImage;
 import gwt.material.design.client.ui.MaterialPanel;
@@ -35,10 +36,15 @@ public class UploadImages extends EventBusComposite {
 	
 	@EventHandler
 	protected void updatePreviewPanel(Event.AddToPreviewPanel event) {
-		MaterialImage image = new MaterialImage(event.getImageDataUrl());
-		image.setCaption(event.getCaption());
-		image.setTitle(event.getCaption());
-		previewPanel.add(image);
+		FileReader reader = new FileReader();
+		reader.onloadend=(e)->{
+			MaterialImage image = new MaterialImage(reader.result.asString());
+			image.setCaption(event.getImageData().getName());
+			image.setTitle(event.getImageData().getName());
+			previewPanel.add(image);
+			return null;
+		};
+		reader.readAsDataURL(event.getImageData().getThumbData());
 	}
 	
 	interface MyEventBinder extends EventBinder<UploadImages>{}
