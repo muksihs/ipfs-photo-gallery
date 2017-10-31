@@ -135,6 +135,9 @@ public class StoreImagesInIpfs implements GlobalEventBus, ScheduledCommand {
 		state.img().setThumbUrl(img.src);
 		state.img().setImageUrl(fetchGwUrl.replace(":hash", newHash)+"/"+getEncodedName(state));
 		for (HTMLImageElement i : imgs) {
+			if (i==null) {
+				continue;
+			}
 			if (i.hasAttribute("src")) {
 				i.removeAttribute("src");
 			}
