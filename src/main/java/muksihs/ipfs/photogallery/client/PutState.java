@@ -5,44 +5,61 @@ import java.util.List;
 import muksihs.ipfs.photogallery.shared.ImageData;
 
 public class PutState {
-	public int getI() {
-		return i;
-	}
-
+	private int putFails;
 	private String hash;
+	private List<ImageData> images;
+	private int index;
+
 	public String getHash() {
 		return hash;
 	}
-	
-	public int size() {
-		return this.imgs!=null?this.imgs.size():0;
+
+	public ImageData getImageData() {
+		return images.get(index);
+	}
+
+	public int getImagesSize() {
+		return this.images != null ? this.images.size() : 0;
+	}
+
+	public int getIndex() {
+		return index;
+	}
+
+	public int getPutFails() {
+		return putFails;
+	}
+
+	public boolean hasNext() {
+		return (index + 1) < images.size();
+	}
+
+	public void incFails() {
+		setPutFails(getPutFails() + 1);
+	}
+
+	public PutState next() {
+		index++;
+		return this;
+	}
+
+	public void resetFails() {
+		setPutFails(0);
 	}
 
 	public void setHash(String hash) {
 		this.hash = hash;
 	}
 
-	public void setImgs(List<ImageData> imgs) {
-		this.imgs = imgs;
+	public void setImages(List<ImageData> imgs) {
+		this.images = imgs;
 	}
 
-	public void setI(int i) {
-		this.i = i;
+	public void setIndex(int index) {
+		this.index = index;
 	}
 
-	private List<ImageData> imgs;
-	private int i;
-
-	public boolean hasNext() {
-		return (i+1)<imgs.size();
-	}
-	
-	public ImageData img() {
-		return imgs.get(i);
-	}
-
-	public PutState next() {
-		i++;
-		return this;
+	public void setPutFails(int putFails) {
+		this.putFails = putFails;
 	}
 }

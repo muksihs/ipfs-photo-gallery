@@ -43,6 +43,11 @@ public class PhotoGalleryWizard implements ScheduledCommand, GlobalEventBus {
 	}
 	
 	@EventHandler
+	protected void ipfsLoadDone(Event.IpfsLoadDone event) {
+		fireEvent(new ShowView(View.AddDescription));
+	}
+	
+	@EventHandler
 	protected void selectImagesNext(Event.SelectImagesNext event) {
 		fireEvent(new ShowView(View.UploadImages));
 		Scheduler.get().scheduleDeferred(new StoreImagesInIpfs(imageDataUrls));

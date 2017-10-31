@@ -7,7 +7,11 @@ import com.google.web.bindery.event.shared.binder.EventBinder;
 import com.google.web.bindery.event.shared.binder.EventHandler;
 import com.google.web.bindery.event.shared.binder.GenericEvent;
 
+import gwt.material.design.client.ui.MaterialButton;
 import gwt.material.design.client.ui.MaterialLoader;
+import gwt.material.design.client.ui.MaterialModal;
+import gwt.material.design.client.ui.MaterialTitle;
+import muksihs.ipfs.photogallery.client.Event;
 import muksihs.ipfs.photogallery.client.Event.ShowLoading;
 
 public class Presenter implements GlobalEventBus {
@@ -51,6 +55,19 @@ public class Presenter implements GlobalEventBus {
 
 	private Composite activeView;
 
+	@EventHandler
+	protected void showAlert(Event.AlertMessage event) {
+		MaterialModal alert = new MaterialModal();
+		alert.setTitle("ALERT!");
+		alert.add(new MaterialTitle(event.getMessage(), event.getMessage()));
+		alert.addCloseHandler((e)->alert.removeFromParent());
+		MaterialButton btn = new MaterialButton("OK");
+		btn.addClickHandler((e)->alert.close());
+		alert.add(btn);
+		RootPanel.get().add(alert);
+		alert.open();
+	}
+	
 	@EventHandler
 	protected void showLoading(ShowLoading event) {
 		MaterialLoader.loading(event.isLoading());

@@ -6,6 +6,18 @@ import elemental2.dom.FileList;
 import muksihs.ipfs.photogallery.shared.ImageData;
 
 public interface Event {
+	public class SetXhrProgressIndeterminate extends GenericEvent {
+
+	}
+	public class SetXhrProgress extends GenericEvent {
+		private final double percent;
+		public SetXhrProgress(double percent) {
+			this.percent=percent;
+		}
+		public double getPercent() {
+			return percent;
+		}
+	}
 	public class IpfsLoadDone extends GenericEvent {
 
 	}

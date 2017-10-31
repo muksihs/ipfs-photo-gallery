@@ -26,12 +26,29 @@ public class UploadImages extends EventBusComposite {
 	
 	@UiField
 	protected MaterialProgress progress;
+	
+	@UiField
+	protected MaterialProgress xhrProgress;
 
 	public UploadImages() {
 		initWidget(uiBinder.createAndBindUi(this));
+	}
+	
+	@EventHandler
+	protected void setProgress(Event.SetXhrProgressIndeterminate event) {
+		xhrProgress.setType(ProgressType.INDETERMINATE);
+	}
+	
+	@EventHandler
+	protected void setProgress(Event.SetXhrProgress event) {
+		xhrProgress.setType(ProgressType.DETERMINATE);
+		xhrProgress.setPercent(Math.floor(event.getPercent()));
+	}
+	
+	@EventHandler
+	protected void setProgress(Event.SetProgress event) {
 		progress.setType(ProgressType.DETERMINATE);
-		progress.setPercent(0);
-		progress.setTitle("0%");
+		progress.setPercent(Math.floor(event.getPercent()));
 	}
 	
 	@EventHandler
