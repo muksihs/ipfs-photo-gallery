@@ -26,8 +26,8 @@ public class IpfsGatewayEntry {
 
 	public IpfsGatewayEntry(String baseUrl, boolean writeable) {
 		this();
-		this.baseUrl = baseUrl;
-		this.writeable = writeable;
+		setBaseUrl(baseUrl);
+		setWriteable(writeable);
 	}
 	
 	@Override

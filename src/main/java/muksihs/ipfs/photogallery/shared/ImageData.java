@@ -5,8 +5,9 @@ import elemental2.dom.Blob;
 public class ImageData {
 	private Blob imageData;
 	private Blob thumbData;
-	private String imageUrl;
-	private String thumbUrl;
+	private String encodedName;
+	private String ipfsHash;
+	private String baseUrl;
 	private String name;
 
 	public ImageData() {
@@ -18,12 +19,16 @@ public class ImageData {
 		this.name = name;
 	}
 
+	public String getEncodedName() {
+		return encodedName;
+	}
+
 	public Blob getImageData() {
 		return imageData;
 	}
 
-	public String getImageUrl() {
-		return imageUrl;
+	public String getIpfsHash() {
+		return ipfsHash;
 	}
 
 	public String getName() {
@@ -34,8 +39,9 @@ public class ImageData {
 		return thumbData;
 	}
 
-	public String getThumbUrl() {
-		return thumbUrl;
+	public ImageData setEncodedName(String encodedName) {
+		this.encodedName = encodedName;
+		return this;
 	}
 
 	public ImageData setImageData(Blob imageData) {
@@ -43,8 +49,8 @@ public class ImageData {
 		return this;
 	}
 
-	public ImageData setImageUrl(String imageUrl) {
-		this.imageUrl = imageUrl;
+	public ImageData setIpfsHash(String ipfsHash) {
+		this.ipfsHash = ipfsHash;
 		return this;
 	}
 
@@ -58,8 +64,11 @@ public class ImageData {
 		return this;
 	}
 
-	public ImageData setThumbUrl(String thumbUrl) {
-		this.thumbUrl = thumbUrl;
-		return this;
+	public String getBaseUrl() {
+		return baseUrl;
+	}
+
+	public void setBaseUrl(String baseUrl) {
+		this.baseUrl = baseUrl;
 	}
 }

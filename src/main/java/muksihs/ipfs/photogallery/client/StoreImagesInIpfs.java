@@ -2,7 +2,9 @@ package muksihs.ipfs.photogallery.client;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
@@ -15,7 +17,9 @@ import com.google.gwt.user.client.Timer;
 
 import elemental2.dom.DomGlobal;
 import elemental2.dom.HTMLImageElement;
+import elemental2.dom.ProgressEvent;
 import elemental2.dom.XMLHttpRequest;
+import elemental2.dom.XMLHttpRequest.OnloadendCallbackFn;
 import muksihs.ipfs.photogallery.shared.ImageData;
 import muksihs.ipfs.photogallery.shared.Ipfs;
 import muksihs.ipfs.photogallery.shared.IpfsGateway;
@@ -57,6 +61,15 @@ public class StoreImagesInIpfs implements GlobalEventBus, ScheduledCommand {
 		if (!state.hasNext()) {
 			fireEvent(new Event.IpfsLoadDone());
 			fireEvent(new Event.SetXhrProgress(0));
+			/*
+			 * update all images to use most recent hash, leave gateways as-is though
+			 */
+			state.setAllIpfsHashes(state.getImageData().getIpfsHash());
+			/*
+			 * Perform "HEAD" requests against all images and thumbs using the latest
+			 * ipfs-hash in the background (sequentially)
+			 */
+			doImageHeadRequest(state.getImages().listIterator());
 			return null;
 		}
 		state.resetFails();
@@ -64,10 +77,31 @@ public class StoreImagesInIpfs implements GlobalEventBus, ScheduledCommand {
 		return null;
 	}
 
+	private void doImageHeadRequest(ListIterator<ImageData> iImages) {
+		if (!iImages.hasNext()) {
+			return;
+		}
+		ImageData image = iImages.next();
+		XMLHttpRequest xhr = new XMLHttpRequest();
+		xhr.open("HEAD", image.getBaseUrl() + image.getIpfsHash() + "/" + image.getEncodedName());
+		xhr.onloadend = (e) -> doThumbHeadRequest(iImages);
+		xhr.send();
+	}
+
+	private void doThumbHeadRequest(ListIterator<ImageData> iImages) {
+		iImages.previous();
+		ImageData image = iImages.next();
+		XMLHttpRequest xhr = new XMLHttpRequest();
+		xhr.open("HEAD", image.getBaseUrl() + image.getIpfsHash() + "/thumb/" + image.getEncodedName());
+		xhr.onloadend = (e) -> doImageHeadRequest(iImages);
+		xhr.send();
+	}
+
 	private Void putImage(PutState state) {
-		GWT.log("putImage: " + state.getImageData().getName());
-		String baseUrl = putGw.getBaseUrl();
-		String xhrUrl = baseUrl.replace(":hash", state.getHash()) + "/" + getEncodedName(state);
+		ImageData imageData = state.getImageData();
+		GWT.log("putImage: " + imageData.getName());
+		imageData.setEncodedName(getEncodedName(state));
+		String xhrUrl = putGw.getBaseUrl() + state.getHash() + "/" + imageData.getEncodedName();
 		XMLHttpRequest xhr = new XMLHttpRequest();
 		xhr.upload.onprogress = (e) -> {
 			if (e.lengthComputable) {
@@ -76,24 +110,24 @@ public class StoreImagesInIpfs implements GlobalEventBus, ScheduledCommand {
 		};
 		xhr.onloadend = (e) -> putThumb(state, xhr.getResponseHeader(Ipfs.HEADER_IPFS_HASH), xhr.status);
 		xhr.open("PUT", xhrUrl, true);
-		xhr.send(state.getImageData().getImageData());
+		xhr.send(imageData.getImageData());
 		return null;
 	}
 
 	private Void putThumb(PutState state, String newHash, double status) {
-		if ((int)status == 405) {
+		if ((int) status == 405) {
 			GWT.log("put not supported on this gateway!");
-			fireEvent(new Event.AlertMessage("This IPFS gateway does not support uploads via PUT! Please select a different gateway!"));
+			fireEvent(new Event.AlertMessage(
+					"This IPFS gateway does not support uploads via PUT!\nPlease select a different gateway!"));
 			return null;
 		}
-		if ((int)status != 201) {
+		if ((int) status != 201) {
 			GWT.log("putImage failed: " + state.getImageData().getName() + " [" + status + "]");
 			retryPutImage(state);
 			return null;
 		}
 		GWT.log("putThumb: " + state.getImageData().getName());
-		String baseUrl = putGw.getBaseUrl();
-		String xhrUrl = baseUrl.replace(":hash", newHash) + "/thumb/" + getEncodedName(state);
+		String xhrUrl = putGw.getBaseUrl() + newHash + "/thumb/" + state.getImageData().getEncodedName();
 		XMLHttpRequest xhr = new XMLHttpRequest();
 		xhr.upload.onprogress = (e) -> {
 			if (e.lengthComputable) {
@@ -129,20 +163,22 @@ public class StoreImagesInIpfs implements GlobalEventBus, ScheduledCommand {
 
 	private Void verifyThumbImage(PutState state, String newHash, double status) {
 		fireEvent(new Event.SetXhrProgressIndeterminate());
-		if ((int)status != 201) {
-			GWT.log("putThumb failed: " + state.getImageData().getName() + " [" + status + "]");
+		ImageData imageData = state.getImageData();
+		if ((int) status != 201) {
+			GWT.log("putThumb failed: " + imageData.getName() + " [" + status + "]");
 			retryPutImage(state);
 			return null;
 		}
 		if (newHash == null || newHash.trim().isEmpty()) {
-			DomGlobal.console
-					.log("putThumb failed, no ipfs hash: " + state.getImageData().getName() + " [" + status + "]");
+			DomGlobal.console.log("putThumb failed, no ipfs hash: " + imageData.getName() + " [" + status + "]");
 			retryPutImage(state);
 			return null;
 		}
-		GWT.log("verifyThumbImage: " + state.getImageData().getName());
-		// the first successful IMG GET becomes the assigned URL for both image and
-		// thumb
+		GWT.log("verifyThumbImage: " + imageData.getName());
+		/*
+		 * the first successful IMG GET becomes the assigned IPFS HASH for both image
+		 * and thumb
+		 */
 		final HTMLImageElement[] imgs = new HTMLImageElement[4];
 		Set<String> already = new HashSet<>();
 		ImgLoadState loadState = new ImgLoadState();
@@ -152,7 +188,7 @@ public class StoreImagesInIpfs implements GlobalEventBus, ScheduledCommand {
 		IpfsGateway ipfsGateway = new IpfsGateway();
 		for (int iy = 0; iy < imgs.length; iy++) {
 			IpfsGatewayEntry fetchGw = ipfsGateway.getAnyReadonly();
-			String url = fetchGw.getBaseUrl().replace(":hash", newHash) + "/thumb/" + getEncodedName(state);
+			String url = fetchGw.getBaseUrl() + newHash + "/thumb/" + imageData.getEncodedName();
 			if (already.contains(url)) {
 				loadState.maxFails--;
 				continue;
@@ -177,9 +213,8 @@ public class StoreImagesInIpfs implements GlobalEventBus, ScheduledCommand {
 			return null;
 		}
 		loadState.loaded = true;
-		GWT.log("thumbImageVerified: " + state.getImageData().getName());
-		state.getImageData().setThumbUrl(img.src);
-		state.getImageData().setImageUrl(fetchGwUrl.replace(":hash", newHash) + "/" + getEncodedName(state));
+		ImageData imageData = state.getImageData();
+		GWT.log("thumbImageVerified: " + imageData.getName());
 		for (HTMLImageElement i : imgs) {
 			if (i == null) {
 				continue;
@@ -188,8 +223,10 @@ public class StoreImagesInIpfs implements GlobalEventBus, ScheduledCommand {
 				i.removeAttribute("src");
 			}
 		}
+		imageData.setBaseUrl(fetchGwUrl);
+		imageData.setIpfsHash(newHash);
 		state.setHash(newHash);
-		fireEvent(new Event.AddToPreviewPanel(state.getImageData()));
+		fireEvent(new Event.AddToPreviewPanel(imageData));
 		fireEvent(new Event.SetProgress((1 + state.getIndex()) * 100 / state.getImagesSize()));
 		defer(() -> putNextImage(state));
 		return null;
@@ -212,9 +249,10 @@ public class StoreImagesInIpfs implements GlobalEventBus, ScheduledCommand {
 	}
 
 	private Timer timer;
+
 	private void retryPutImage(PutState state) {
 		state.incFails();
-		if (state.getPutFails()>5) {
+		if (state.getPutFails() > 5) {
 			fireEvent(new Event.AlertMessage("Too Many Upload Failures!"));
 			fireEvent(new Event.AlertMessage("Aborting!"));
 			return;
@@ -227,7 +265,7 @@ public class StoreImagesInIpfs implements GlobalEventBus, ScheduledCommand {
 		timer = new Timer() {
 			@Override
 			public void run() {
-				defer(()->putImage(state));
+				defer(() -> putImage(state));
 				timer = null;
 			}
 		};

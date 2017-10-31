@@ -1,5 +1,5 @@
 [
-	"https://ipfs.macholibre.org/ipfs/:hash",
-	"https://ipfs.works/ipfs/:hash",
-	"https://ipfs.work/ipfs/:hash"
+	"https://ipfs.macholibre.org/ipfs/",
+	"https://ipfs.works/ipfs/",
+	"https://ipfs.work/ipfs/"
 ]

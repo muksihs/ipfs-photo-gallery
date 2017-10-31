@@ -10,12 +10,23 @@ public class PutState {
 	private List<ImageData> images;
 	private int index;
 
+	public PutState setAllIpfsHashes(String ipfsHash) {
+		for (ImageData image: images) {
+			image.setIpfsHash(ipfsHash);
+		}
+		return this;
+	}
+	
 	public String getHash() {
 		return hash;
 	}
 
 	public ImageData getImageData() {
 		return images.get(index);
+	}
+
+	public List<ImageData> getImages() {
+		return images;
 	}
 
 	public int getImagesSize() {

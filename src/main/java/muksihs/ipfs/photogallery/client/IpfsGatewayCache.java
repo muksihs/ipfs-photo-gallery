@@ -171,7 +171,7 @@ public class IpfsGatewayCache implements GlobalEventBus {
 		} else {
 			testImg=Consts.PLACEHOLDER;
 		}
-		String pingUrl = g.getBaseUrl().replace(":hash", testImg);
+		String pingUrl = g.getBaseUrl()+ testImg;
 		RequestBuilder rb = new RequestBuilder(RequestBuilder.HEAD, pingUrl);
 		rb.setTimeoutMillis(1000);
 		g.setAlive(false);
@@ -249,7 +249,7 @@ public class IpfsGatewayCache implements GlobalEventBus {
 			 * representing the IPFS host we are being hosted from.
 			 */
 			tmp = StringUtils.substringBefore(GWT.getHostPageBaseURL(), "/ipfs/");
-			tmp = "{ \"list\": [\"" + tmp + "/ipfs/:hash\"]}";
+			tmp = "{ \"list\": [\"" + tmp + "/ipfs/\"]}";
 			// tmp = "{ \"list\":" + g.writableGateways().getText() + "}";
 		}
 		list = StringListCodec.instance().decode(JSONParser.parseStrict(tmp));

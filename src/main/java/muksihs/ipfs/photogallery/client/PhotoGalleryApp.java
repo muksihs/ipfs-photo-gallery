@@ -118,7 +118,7 @@ public class PhotoGalleryApp implements GlobalEventBus {
 			while (cell <= perRow) {
 				cell++;
 				tmp = tmp.replace("_IMG" + cell + "_",
-						new IpfsGateway().getAny().getBaseUrl().replace(":hash", placeholder));
+						new IpfsGateway().getAny().getBaseUrl()+placeholder);
 				tmp = tmp.replace("_ALT" + cell + "_", "EMPTY");
 			}
 			previewHtml.append(tmp);
@@ -165,7 +165,7 @@ public class PhotoGalleryApp implements GlobalEventBus {
 			fireEvent(new Event.SetFilenameMsg("Upload complete."));
 			fireEvent(new Event.SetProgress(0));
 			GWT.log("DONE PUTTING IMAGES.");
-			String finalUrl = last.getBaseUrl().replace(":hash", hash) + "/";
+			String finalUrl = last.getBaseUrl()+ hash + "/";
 			fireEvent(new Event.SetIpfsFolderLink(finalUrl));
 			return;
 		}
@@ -225,7 +225,7 @@ public class PhotoGalleryApp implements GlobalEventBus {
 		String prefix = zeroPadded((int) files.length, ix);
 		String baseUrl = putGw.getBaseUrl();
 		String encodedName = URL.encode(prefix + "-" + file.name);
-		String xhrUrl = baseUrl.replace(":hash", hash) + "/thumb/" + encodedName;
+		String xhrUrl = baseUrl+ hash + "/thumb/" + encodedName;
 		GWT.log("uploadThumbnail: " + xhrUrl);
 		XMLHttpRequest xhr = new XMLHttpRequest();
 		xhr.open("PUT", xhrUrl, true);
@@ -274,7 +274,7 @@ public class PhotoGalleryApp implements GlobalEventBus {
 		String prefix = zeroPadded((int) files.length, ix);
 		String zeroPaddedName = prefix + "-" + file.name;
 		String encodedName = URL.encode(zeroPaddedName);
-		String xhrUrl = putGw.getBaseUrl().replace(":hash", hash) + "/" + encodedName;
+		String xhrUrl = putGw.getBaseUrl()+ hash + "/" + encodedName;
 		String size = NumberFormat.getDecimalFormat().format(Math.ceil(file.size / Consts.KB)) + " KB";
 
 		fireEvent(new Event.SetFilenameMsg(file.name + " (" + size + ") [" + (ix + 1) + " of " + files.length + "]"));
@@ -306,8 +306,8 @@ public class PhotoGalleryApp implements GlobalEventBus {
 		int imgsLength = imgs.length;
 		for (int iy = 0; iy < imgsLength; iy++) {
 			IpfsGatewayEntry fetchGw = new IpfsGateway().getAnyReadonly();
-			String picUrl = fetchGw.getBaseUrl().replace(":hash", newHash) + "/" + encodedName;
-			String thumbUrl = fetchGw.getBaseUrl().replace(":hash", newHash) + "/thumb/" + encodedName;
+			String picUrl = fetchGw.getBaseUrl()+newHash + "/" + encodedName;
+			String thumbUrl = fetchGw.getBaseUrl()+ newHash + "/thumb/" + encodedName;
 			if (already.contains(thumbUrl)) {
 				continue;
 			}
