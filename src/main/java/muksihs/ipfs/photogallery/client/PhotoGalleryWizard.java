@@ -12,9 +12,9 @@ import com.google.web.bindery.event.shared.binder.EventHandler;
 import muksihs.ipfs.photogallery.shared.ImageData;
 import muksihs.ipfs.photogallery.shared.IpfsGateway;
 import muksihs.ipfs.photogallery.ui.GlobalEventBus;
-import muksihs.ipfs.photogallery.ui.Presenter;
-import muksihs.ipfs.photogallery.ui.Presenter.ShowView;
-import muksihs.ipfs.photogallery.ui.Presenter.View;
+import muksihs.ipfs.photogallery.ui.ViewHandler;
+import muksihs.ipfs.photogallery.ui.ViewHandler.ShowView;
+import muksihs.ipfs.photogallery.ui.ViewHandler.View;
 
 public class PhotoGalleryWizard implements ScheduledCommand, GlobalEventBus {
 	
@@ -25,7 +25,7 @@ public class PhotoGalleryWizard implements ScheduledCommand, GlobalEventBus {
 	public PhotoGalleryWizard() {
 		eventBinder.bindEventHandlers(this, eventBus);
 		IpfsGatewayCache.get();
-		new Presenter();
+		new ViewHandler();
 	}
 
 	@Override

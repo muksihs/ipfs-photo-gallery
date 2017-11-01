@@ -14,12 +14,12 @@ import gwt.material.design.client.ui.MaterialTitle;
 import muksihs.ipfs.photogallery.client.Event;
 import muksihs.ipfs.photogallery.client.Event.ShowLoading;
 
-public class Presenter implements GlobalEventBus {
+public class ViewHandler implements GlobalEventBus {
 	public static enum View {
 		Loading, SelectImages, UploadImages, SetGalleryInfo, PostGallery;
 	}
 	
-	interface MyEventBinder extends EventBinder<Presenter>{}
+	interface MyEventBinder extends EventBinder<ViewHandler>{}
 	private static final MyEventBinder eventBinder = GWT.create(MyEventBinder.class);
 
 	public static class ShowView extends GenericEvent {
@@ -48,7 +48,7 @@ public class Presenter implements GlobalEventBus {
 
 	private final RootPanel root;
 
-	public Presenter() {
+	public ViewHandler() {
 		eventBinder.bindEventHandlers(this, eventBus);
 		root = RootPanel.get();
 	}
