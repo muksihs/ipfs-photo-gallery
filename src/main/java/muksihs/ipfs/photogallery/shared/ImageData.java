@@ -1,5 +1,7 @@
 package muksihs.ipfs.photogallery.shared;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import elemental2.dom.Blob;
 
 public class ImageData {
@@ -31,6 +33,11 @@ public class ImageData {
 		return imageData;
 	}
 
+	@JsonIgnore
+	public String getImageUrl() {
+		return getBaseUrl() + getIpfsHash() + "/" + getEncodedName();
+	}
+
 	public String getIpfsHash() {
 		return ipfsHash;
 	}
@@ -41,6 +48,11 @@ public class ImageData {
 
 	public Blob getThumbData() {
 		return thumbData;
+	}
+
+	@JsonIgnore
+	public String getThumbUrl() {
+		return getBaseUrl() + getIpfsHash() + "/thumb/" + getEncodedName();
 	}
 
 	public void setBaseUrl(String baseUrl) {

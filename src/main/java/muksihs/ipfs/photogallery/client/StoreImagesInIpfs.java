@@ -59,7 +59,7 @@ public class StoreImagesInIpfs implements GlobalEventBus, ScheduledCommand {
 		}
 		ImageData image = iImages.next();
 		XMLHttpRequest xhr = new XMLHttpRequest();
-		xhr.open("HEAD", image.getBaseUrl() + image.getIpfsHash() + "/" + image.getEncodedName());
+		xhr.open("HEAD", image.getImageUrl());
 		xhr.onloadend = (e) -> doThumbHeadRequest(iImages);
 		xhr.send();
 	}
@@ -68,7 +68,7 @@ public class StoreImagesInIpfs implements GlobalEventBus, ScheduledCommand {
 		iImages.previous();
 		ImageData image = iImages.next();
 		XMLHttpRequest xhr = new XMLHttpRequest();
-		xhr.open("HEAD", image.getBaseUrl() + image.getIpfsHash() + "/thumb/" + image.getEncodedName());
+		xhr.open("HEAD", image.getThumbUrl());
 		xhr.onloadend = (e) -> doImageHeadRequest(iImages);
 		xhr.send();
 	}
@@ -242,8 +242,8 @@ public class StoreImagesInIpfs implements GlobalEventBus, ScheduledCommand {
 		loadState.maxFails = imgs.length;
 		IpfsGateway ipfsGateway = new IpfsGateway();
 		for (int iy = 0; iy < imgs.length; iy++) {
-			IpfsGatewayEntry fetchGw = ipfsGateway.getAnyReadonly();
-			String url = fetchGw.getBaseUrl() + newHash + "/thumb/" + imageData.getEncodedName();
+			String baseUrl = ipfsGateway.getAnyReadonly().getBaseUrl();
+			String url = baseUrl + newHash + "/thumb/" + imageData.getEncodedName();
 			if (already.contains(url)) {
 				loadState.maxFails--;
 				continue;
@@ -253,7 +253,7 @@ public class StoreImagesInIpfs implements GlobalEventBus, ScheduledCommand {
 			imgs[iy] = img;
 			img.onabort = (e2) -> onImageLoadFail(state, loadState, img);
 			img.onerror = (e2) -> onImageLoadFail(state, loadState, img);
-			img.onload = (e2) -> thumbImageVerified(fetchGw.getBaseUrl(), newHash, state, loadState, imgs, img);
+			img.onload = (e2) -> thumbImageVerified(baseUrl, newHash, state, loadState, imgs, img);
 			/*
 			 * Don't start loading imgs until event hooks and max fail count are set!
 			 */
