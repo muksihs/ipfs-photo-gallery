@@ -60,13 +60,11 @@ public class StoreImagesInIpfs implements GlobalEventBus, ScheduledCommand {
 		ImageData image = iImages.next();
 		XMLHttpRequest xhr = new XMLHttpRequest();
 		xhr.open("HEAD", image.getImageUrl());
-		xhr.onloadend = (e) -> doThumbHeadRequest(iImages);
+		xhr.onloadend = (e) -> doThumbHeadRequest(image, iImages);
 		xhr.send();
 	}
 
-	private void doThumbHeadRequest(ListIterator<ImageData> iImages) {
-		iImages.previous();
-		ImageData image = iImages.next();
+	private void doThumbHeadRequest(ImageData image, ListIterator<ImageData> iImages) {
 		XMLHttpRequest xhr = new XMLHttpRequest();
 		xhr.open("HEAD", image.getThumbUrl());
 		xhr.onloadend = (e) -> doImageHeadRequest(iImages);
