@@ -18,11 +18,12 @@ import muksihs.ipfs.photogallery.shared.GalleryInfo;
 
 public class SetGalleryInfo extends EventBusComposite {
 
-	private static SetGalleryInfoUiBinder uiBinder = GWT.create(SetGalleryInfoUiBinder.class);
+	interface MyEventBinder extends EventBinder<SetGalleryInfo>{}
 
 	interface SetGalleryInfoUiBinder extends UiBinder<Widget, SetGalleryInfo> {
 	}
 	
+	private static SetGalleryInfoUiBinder uiBinder = GWT.create(SetGalleryInfoUiBinder.class);
 	@UiField
 	protected MaterialTextBox title;
 	@UiField
@@ -31,17 +32,9 @@ public class SetGalleryInfo extends EventBusComposite {
 	protected MaterialRichEditor description;
 	@UiField
 	protected MaterialButton cancel;
+	
 	@UiField
 	protected MaterialButton next;
-	
-	@EventHandler
-	protected void getGalleryInfoPageValues(Event.GetGalleryInfoPageValues event) {
-		GalleryInfo galleryInfo = new GalleryInfo();
-		galleryInfo.setTitle(title.getValue());
-		galleryInfo.setDescription(description.getValue());
-		galleryInfo.setTags(Arrays.asList(tags.getValue().split("\\s")));
-		fireEvent(new Event.GalleryInfo(galleryInfo));
-	}
 	
 	public SetGalleryInfo() {
 		initWidget(uiBinder.createAndBindUi(this));
@@ -84,10 +77,17 @@ public class SetGalleryInfo extends EventBusComposite {
 		description.setDisableDragAndDrop(true);
 	}
 
-	interface MyEventBinder extends EventBinder<SetGalleryInfo>{};
 	@Override
 	protected <T extends EventBinder<EventBusComposite>> T getEventBinder() {
 		return GWT.create(MyEventBinder.class);
+	};
+	@EventHandler
+	protected void getGalleryInfoPageValues(Event.GetGalleryInfoPageValues event) {
+		GalleryInfo galleryInfo = new GalleryInfo();
+		galleryInfo.setTitle(title.getValue());
+		galleryInfo.setDescription(description.getValue());
+		galleryInfo.setTags(Arrays.asList(tags.getValue().split("\\s")));
+		fireEvent(new Event.GalleryInfo(galleryInfo));
 	}
 
 }

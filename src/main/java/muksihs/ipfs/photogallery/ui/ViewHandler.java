@@ -15,25 +15,6 @@ import muksihs.ipfs.photogallery.client.Event;
 import muksihs.ipfs.photogallery.client.Event.ShowLoading;
 
 public class ViewHandler implements GlobalEventBus {
-	public static enum View {
-		Loading, SelectImages, UploadImages, SetGalleryInfo, PostGallery;
-	}
-	
-	interface MyEventBinder extends EventBinder<ViewHandler>{}
-	private static final MyEventBinder eventBinder = GWT.create(MyEventBinder.class);
-
-	public static class ShowView extends GenericEvent {
-		private final View view;
-
-		public View getView() {
-			return view;
-		}
-
-		public ShowView(View view) {
-			this.view = view;
-		}
-	}
-
 	public static class DisplayMessage extends GenericEvent {
 		private final String message;
 
@@ -45,16 +26,45 @@ public class ViewHandler implements GlobalEventBus {
 			return message;
 		}
 	}
+	
+	interface MyEventBinder extends EventBinder<ViewHandler>{}
+	public static class ShowView extends GenericEvent {
+		private final View view;
+
+		public ShowView(View view) {
+			this.view = view;
+		}
+
+		public View getView() {
+			return view;
+		}
+	}
+
+	public static enum View {
+		Loading, SelectImages, UploadImages, SetGalleryInfo, PostGallery;
+	}
+
+	private static final MyEventBinder eventBinder = GWT.create(MyEventBinder.class);
 
 	private final RootPanel root;
+
+	private Composite activeView;
 
 	public ViewHandler() {
 		eventBinder.bindEventHandlers(this, eventBus);
 		root = RootPanel.get();
 	}
 
-	private Composite activeView;
-
+	private void replaceView(Composite view) {
+		if (activeView != null) {
+			root.remove(activeView);
+		}
+		activeView=view;
+		if (activeView!=null) {
+			root.add(activeView);
+		}
+	}
+	
 	@EventHandler
 	protected void showAlert(Event.AlertMessage event) {
 		MaterialModal alert = new MaterialModal();
@@ -71,16 +81,6 @@ public class ViewHandler implements GlobalEventBus {
 	@EventHandler
 	protected void showLoading(ShowLoading event) {
 		MaterialLoader.loading(event.isLoading());
-	}
-	
-	private void replaceView(Composite view) {
-		if (activeView != null) {
-			root.remove(activeView);
-		}
-		activeView=view;
-		if (activeView!=null) {
-			root.add(activeView);
-		}
 	}
 	@EventHandler
 	protected void showView(ShowView event) {

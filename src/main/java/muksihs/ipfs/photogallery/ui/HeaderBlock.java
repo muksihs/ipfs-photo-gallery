@@ -12,34 +12,27 @@ import muksihs.ipfs.photogallery.client.Event;
 
 public class HeaderBlock extends EventBusComposite {
 	
-	interface MyEventBinder extends EventBinder<HeaderBlock> {
+	interface HeaderBlockUiBinder extends UiBinder<Widget, HeaderBlock> {
 	}
-	@Override
-	protected <T extends EventBinder<EventBusComposite>> T getEventBinder() {
-		return GWT.create(MyEventBinder.class);
+	interface MyEventBinder extends EventBinder<HeaderBlock> {
 	}
 	
 	private static String versionTxt="19000101";
 	
-	@UiField
-	protected MaterialLabel version;
-
 	private static HeaderBlockUiBinder uiBinder = GWT.create(HeaderBlockUiBinder.class);
 
-	interface HeaderBlockUiBinder extends UiBinder<Widget, HeaderBlock> {
-	}
+	@UiField
+	protected MaterialLabel version;
 
 	public HeaderBlock() {
 		super();
 		initWidget(uiBinder.createAndBindUi(this));
 		version.setText(versionTxt);
 	}
-	
-	@EventHandler
-	public void setAppVersion(Event.DisplayAppVersion event) {
-		GWT.log("APP VERSION: "+event.getVersion());
-		version.setText(event.getVersion());
-		versionTxt=event.getVersion();
+
+	@Override
+	protected <T extends EventBinder<EventBusComposite>> T getEventBinder() {
+		return GWT.create(MyEventBinder.class);
 	}
 	
 	@Override
@@ -51,5 +44,12 @@ public class HeaderBlock extends EventBusComposite {
 	@Override
 	protected void onUnload() {
 		super.onUnload();
+	}
+	
+	@EventHandler
+	public void setAppVersion(Event.DisplayAppVersion event) {
+		GWT.log("APP VERSION: "+event.getVersion());
+		version.setText(event.getVersion());
+		versionTxt=event.getVersion();
 	}
 }

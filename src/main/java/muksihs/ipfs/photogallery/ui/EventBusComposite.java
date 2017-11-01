@@ -10,11 +10,11 @@ public abstract class EventBusComposite extends Composite implements GlobalEvent
 	interface MyEventBinder extends EventBinder<EventBusComposite> {
 	}
 
-	protected abstract <T extends EventBinder<EventBusComposite>> T getEventBinder();
 	protected HandlerRegistration registration;
-
 	public EventBusComposite() {
 	}
+
+	protected abstract <T extends EventBinder<EventBusComposite>> T getEventBinder();
 
 	@Override
 	protected void onLoad() {

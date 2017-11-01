@@ -24,7 +24,25 @@ import muksihs.ipfs.photogallery.shared.IpfsGatewayEntry;
 import muksihs.ipfs.photogallery.ui.GlobalEventBus;
 
 public class StoreImagesInIpfs implements GlobalEventBus, ScheduledCommand {
+	private static class ImgLoadState {
+		public int maxFails;
+		public boolean loaded;
+		public int failCount;
+
+		@Override
+		public String toString() {
+			StringBuilder builder = new StringBuilder();
+			builder.append("ImgLoadState [maxFails=").append(maxFails).append(", loaded=").append(loaded)
+					.append(", failCount=").append(failCount).append("]");
+			return builder.toString();
+		}
+	}
+
 	private final List<ImageData> imageDataUrls;
+
+	private IpfsGatewayEntry putGw = new IpfsGateway().getWritable();
+
+	private Timer timer;
 
 	public StoreImagesInIpfs(List<ImageData> imageDataUrls) {
 		this.imageDataUrls = imageDataUrls;
@@ -32,45 +50,6 @@ public class StoreImagesInIpfs implements GlobalEventBus, ScheduledCommand {
 
 	private Void defer(ScheduledCommand cmd) {
 		Scheduler.get().scheduleDeferred(cmd);
-		return null;
-	}
-
-	@Override
-	public void execute() {
-		fireEvent(new Event.StoreImagesStarted());
-		PutState state = new PutState();
-		state.setHash(Ipfs.EMPTY_DIR);
-		state.setIndex(0);
-		state.setImages(new ArrayList<>(this.imageDataUrls));
-		state.setIndex(0);
-		defer(() -> putImage(state));
-	}
-
-	private IpfsGatewayEntry putGw = new IpfsGateway().getWritable();
-
-	private String getEncodedName(PutState state) {
-		String prefix = zeroPadded(state.getImagesSize(), state.getIndex());
-		String encodedName = URL.encode(prefix + "/" + state.getImageData().getName());
-		return encodedName;
-	}
-
-	private Void putNextImage(PutState state) {
-		if (!state.hasNext()) {
-			fireEvent(new Event.IpfsLoadDone());
-			fireEvent(new Event.SetXhrProgress(0));
-			/*
-			 * update all images to use most recent hash, leave gateways as-is though
-			 */
-			state.setAllIpfsHashes(state.getImageData().getIpfsHash());
-			/*
-			 * Perform "HEAD" requests against all images and thumbs using the latest
-			 * ipfs-hash in the background (sequentially)
-			 */
-			doImageHeadRequest(state.getImages().listIterator());
-			return null;
-		}
-		state.resetFails();
-		defer(() -> putImage(state.next()));
 		return null;
 	}
 
@@ -94,6 +73,39 @@ public class StoreImagesInIpfs implements GlobalEventBus, ScheduledCommand {
 		xhr.send();
 	}
 
+	@Override
+	public void execute() {
+		fireEvent(new Event.StoreImagesStarted());
+		PutState state = new PutState();
+		state.setHash(Ipfs.EMPTY_DIR);
+		state.setIndex(0);
+		state.setImages(new ArrayList<>(this.imageDataUrls));
+		state.setIndex(0);
+		defer(() -> putImage(state));
+	}
+
+	private String getEncodedName(PutState state) {
+		String prefix = zeroPadded(state.getImagesSize(), state.getIndex());
+		String encodedName = URL.encode(prefix + "/" + state.getImageData().getName());
+		return encodedName;
+	}
+
+	private Void onImageLoadFail(PutState state, ImgLoadState loadState, HTMLImageElement img) {
+		GWT.log("onImageLoadFail: " + loadState.toString());
+		if (loadState.loaded) {
+			return null;
+		}
+		if (img.hasAttribute("src")) {
+			img.removeAttribute("src");
+		}
+		loadState.failCount++;
+		if (loadState.failCount >= loadState.maxFails) {
+			retryPutImage(state); // try again
+			return null;
+		}
+		return null;
+	}
+
 	private Void putImage(PutState state) {
 		ImageData imageData = state.getImageData();
 		GWT.log("putImage: " + imageData.getName());
@@ -108,6 +120,26 @@ public class StoreImagesInIpfs implements GlobalEventBus, ScheduledCommand {
 		xhr.onloadend = (e) -> putThumb(state, xhr.getResponseHeader(Ipfs.HEADER_IPFS_HASH), xhr.status);
 		xhr.open("PUT", xhrUrl, true);
 		xhr.send(imageData.getImageData());
+		return null;
+	}
+
+	private Void putNextImage(PutState state) {
+		if (!state.hasNext()) {
+			fireEvent(new Event.IpfsLoadDone());
+			fireEvent(new Event.SetXhrProgress(0));
+			/*
+			 * update all images to use most recent hash, leave gateways as-is though
+			 */
+			state.setAllIpfsHashes(state.getImageData().getIpfsHash());
+			/*
+			 * Perform "HEAD" requests against all images and thumbs using the latest
+			 * ipfs-hash in the background (sequentially)
+			 */
+			doImageHeadRequest(state.getImages().listIterator());
+			return null;
+		}
+		state.resetFails();
+		defer(() -> putImage(state.next()));
 		return null;
 	}
 
@@ -137,25 +169,51 @@ public class StoreImagesInIpfs implements GlobalEventBus, ScheduledCommand {
 		return null;
 	}
 
-	private String zeroPadded(int length, int ix) {
-		ix++;
-		int zeroCount = String.valueOf((int) length).length();
-		int digitCount = String.valueOf((int) ix).length();
-		return StringUtils.repeat("0", zeroCount - digitCount) + String.valueOf((int) ix);
+	private void retryPutImage(PutState state) {
+		state.incFails();
+		if (state.getPutFails() > 5) {
+			fireEvent(new Event.AlertMessage("Too Many Upload Failures!"));
+			fireEvent(new Event.AlertMessage("Aborting!"));
+			return;
+		}
+		GWT.log("retryPutImage: " + state.getImageData().getName());
+		if (timer != null) {
+			GWT.log("timer was running already: " + timer.isRunning());
+			timer.cancel();
+		}
+		timer = new Timer() {
+			@Override
+			public void run() {
+				defer(() -> putImage(state));
+				timer = null;
+			}
+		};
+		timer.schedule(1000);
 	}
 
-	private static class ImgLoadState {
-		public int maxFails;
-		public boolean loaded;
-		public int failCount;
-
-		@Override
-		public String toString() {
-			StringBuilder builder = new StringBuilder();
-			builder.append("ImgLoadState [maxFails=").append(maxFails).append(", loaded=").append(loaded)
-					.append(", failCount=").append(failCount).append("]");
-			return builder.toString();
+	private Void thumbImageVerified(String fetchGwUrl, String newHash, PutState state, ImgLoadState loadState,
+			HTMLImageElement[] imgs, HTMLImageElement img) {
+		if (loadState.loaded) {
+			return null;
 		}
+		loadState.loaded = true;
+		ImageData imageData = state.getImageData();
+		GWT.log("thumbImageVerified: " + imageData.getName());
+		for (HTMLImageElement i : imgs) {
+			if (i == null) {
+				continue;
+			}
+			if (i.hasAttribute("src")) {
+				i.removeAttribute("src");
+			}
+		}
+		imageData.setBaseUrl(fetchGwUrl);
+		imageData.setIpfsHash(newHash);
+		state.setHash(newHash);
+		fireEvent(new Event.AddToPreviewPanel(imageData));
+		fireEvent(new Event.SetProgress((1 + state.getIndex()) * 100 / state.getImagesSize()));
+		defer(() -> putNextImage(state));
+		return null;
 	}
 
 	private Void verifyThumbImage(PutState state, String newHash, double status) {
@@ -204,68 +262,10 @@ public class StoreImagesInIpfs implements GlobalEventBus, ScheduledCommand {
 		return null;
 	}
 
-	private Void thumbImageVerified(String fetchGwUrl, String newHash, PutState state, ImgLoadState loadState,
-			HTMLImageElement[] imgs, HTMLImageElement img) {
-		if (loadState.loaded) {
-			return null;
-		}
-		loadState.loaded = true;
-		ImageData imageData = state.getImageData();
-		GWT.log("thumbImageVerified: " + imageData.getName());
-		for (HTMLImageElement i : imgs) {
-			if (i == null) {
-				continue;
-			}
-			if (i.hasAttribute("src")) {
-				i.removeAttribute("src");
-			}
-		}
-		imageData.setBaseUrl(fetchGwUrl);
-		imageData.setIpfsHash(newHash);
-		state.setHash(newHash);
-		fireEvent(new Event.AddToPreviewPanel(imageData));
-		fireEvent(new Event.SetProgress((1 + state.getIndex()) * 100 / state.getImagesSize()));
-		defer(() -> putNextImage(state));
-		return null;
-	}
-
-	private Void onImageLoadFail(PutState state, ImgLoadState loadState, HTMLImageElement img) {
-		GWT.log("onImageLoadFail: " + loadState.toString());
-		if (loadState.loaded) {
-			return null;
-		}
-		if (img.hasAttribute("src")) {
-			img.removeAttribute("src");
-		}
-		loadState.failCount++;
-		if (loadState.failCount >= loadState.maxFails) {
-			retryPutImage(state); // try again
-			return null;
-		}
-		return null;
-	}
-
-	private Timer timer;
-
-	private void retryPutImage(PutState state) {
-		state.incFails();
-		if (state.getPutFails() > 5) {
-			fireEvent(new Event.AlertMessage("Too Many Upload Failures!"));
-			fireEvent(new Event.AlertMessage("Aborting!"));
-			return;
-		}
-		GWT.log("retryPutImage: " + state.getImageData().getName());
-		if (timer != null) {
-			GWT.log("timer was running already: " + timer.isRunning());
-			timer.cancel();
-		}
-		timer = new Timer() {
-			@Override
-			public void run() {
-				defer(() -> putImage(state));
-				timer = null;
-			}
-		};
-		timer.schedule(1000);
+	private String zeroPadded(int length, int ix) {
+		ix++;
+		int zeroCount = String.valueOf((int) length).length();
+		int digitCount = String.valueOf((int) ix).length();
+		return StringUtils.repeat("0", zeroCount - digitCount) + String.valueOf((int) ix);
 	}
 }

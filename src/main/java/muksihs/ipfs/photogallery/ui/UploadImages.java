@@ -16,27 +16,35 @@ import muksihs.ipfs.photogallery.client.Event;
 
 public class UploadImages extends EventBusComposite {
 
-	private static UploadImagesUiBinder uiBinder = GWT.create(UploadImagesUiBinder.class);
+	interface MyEventBinder extends EventBinder<UploadImages>{}
 
 	interface UploadImagesUiBinder extends UiBinder<Widget, UploadImages> {
 	}
+	
+	private static UploadImagesUiBinder uiBinder = GWT.create(UploadImagesUiBinder.class);
 	
 	@UiField
 	protected MaterialPanel previewPanel;
 	
 	@UiField
 	protected MaterialProgress progress;
-	
+
 	@UiField
 	protected MaterialProgress xhrProgress;
-
+	
 	public UploadImages() {
 		initWidget(uiBinder.createAndBindUi(this));
 	}
 	
+	@Override
+	protected <T extends EventBinder<EventBusComposite>> T getEventBinder() {
+		return GWT.create(MyEventBinder.class);
+	}
+	
 	@EventHandler
-	protected void setProgress(Event.SetXhrProgressIndeterminate event) {
-		xhrProgress.setType(ProgressType.INDETERMINATE);
+	protected void setProgress(Event.SetProgress event) {
+		progress.setType(ProgressType.DETERMINATE);
+		progress.setPercent(Math.floor(event.getPercent()));
 	}
 	
 	@EventHandler
@@ -46,11 +54,10 @@ public class UploadImages extends EventBusComposite {
 	}
 	
 	@EventHandler
-	protected void setProgress(Event.SetProgress event) {
-		progress.setType(ProgressType.DETERMINATE);
-		progress.setPercent(Math.floor(event.getPercent()));
+	protected void setProgress(Event.SetXhrProgressIndeterminate event) {
+		xhrProgress.setType(ProgressType.INDETERMINATE);
 	}
-	
+
 	@EventHandler
 	protected void updatePreviewPanel(Event.AddToPreviewPanel event) {
 		FileReader reader = new FileReader();
@@ -62,13 +69,6 @@ public class UploadImages extends EventBusComposite {
 			return null;
 		};
 		reader.readAsDataURL(event.getImageData().getThumbData());
-	}
-	
-	interface MyEventBinder extends EventBinder<UploadImages>{}
-
-	@Override
-	protected <T extends EventBinder<EventBusComposite>> T getEventBinder() {
-		return GWT.create(MyEventBinder.class);
 	}
 
 }

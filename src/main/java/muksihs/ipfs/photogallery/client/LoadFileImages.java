@@ -15,6 +15,37 @@ import muksihs.ipfs.photogallery.shared.ImageData;
 import muksihs.ipfs.photogallery.ui.GlobalEventBus;
 
 public class LoadFileImages implements GlobalEventBus {
+	public native String createObjectURL(elemental2.dom.Blob bb) /*-{
+		return $wnd.URL.createObjectURL(bb);
+	}-*/;
+
+	public Void createThumbnail(FileList files, int ix, ImageData imageData, HTMLImageElement image) {
+		double scale;
+		double w = image.width;
+		double h = image.height;
+		/*
+		 * size to fit
+		 */
+		if (w > h) {
+			scale = Consts.maxSize / w;
+		} else {
+			scale = Consts.maxSize / h;
+		}
+		// draw thumbnail image
+		HTMLCanvasElement canvas = (HTMLCanvasElement) DomGlobal.document.createElement("canvas");
+		canvas.width = image.width * scale;
+		canvas.height = image.height * scale;
+		CanvasRenderingContext2D ctx = (CanvasRenderingContext2D) (Object) canvas.getContext("2d");
+		ctx.drawImage(image, 0, 0, image.width * scale, image.height * scale);
+		String mime = image.src.contains(";base64,iVBOR") ? "image/png" : "image/jpeg";
+		canvas.toBlob((blob) -> {
+			fireEvent(new Event.ImageDataAdded(imageData.setThumbData(blob)));
+			loadNextDataUrl(files, ix + 1);
+			return null;
+		}, mime, Consts.jpgQuality);
+		return null;
+	}
+
 	public void load(FileList files) {
 		loadNextDataUrl(files, 0);
 	}
@@ -46,35 +77,4 @@ public class LoadFileImages implements GlobalEventBus {
 		image.src = result.asString();
 		return null;
 	}
-
-	public Void createThumbnail(FileList files, int ix, ImageData imageData, HTMLImageElement image) {
-		double scale;
-		double w = image.width;
-		double h = image.height;
-		/*
-		 * size to fit
-		 */
-		if (w > h) {
-			scale = Consts.maxSize / w;
-		} else {
-			scale = Consts.maxSize / h;
-		}
-		// draw thumbnail image
-		HTMLCanvasElement canvas = (HTMLCanvasElement) DomGlobal.document.createElement("canvas");
-		canvas.width = image.width * scale;
-		canvas.height = image.height * scale;
-		CanvasRenderingContext2D ctx = (CanvasRenderingContext2D) (Object) canvas.getContext("2d");
-		ctx.drawImage(image, 0, 0, image.width * scale, image.height * scale);
-		String mime = image.src.contains(";base64,iVBOR") ? "image/png" : "image/jpeg";
-		canvas.toBlob((blob) -> {
-			fireEvent(new Event.ImageDataAdded(imageData.setThumbData(blob)));
-			loadNextDataUrl(files, ix + 1);
-			return null;
-		}, mime, Consts.jpgQuality);
-		return null;
-	}
-
-	public native String createObjectURL(elemental2.dom.Blob bb) /*-{
-		return $wnd.URL.createObjectURL(bb);
-	}-*/;
 }

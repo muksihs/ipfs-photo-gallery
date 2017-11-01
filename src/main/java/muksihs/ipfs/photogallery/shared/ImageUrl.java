@@ -6,43 +6,10 @@ public class ImageUrl {
 	private String thumb;
 	private String image;
 
-	public String getThumbUrl(){
-		StringBuilder sb = new StringBuilder();
-		sb.append(ipfsGateway);
-		if (!ipfsGateway.endsWith("/")){
-			sb.append("/");
-		}
-		sb.append(ipfsHash);
-		if (!ipfsHash.endsWith("/")){
-			sb.append("/");
-		}
-		sb.append(thumb);
-		return sb.toString();
+	public ImageUrl(String thumb, String image) {
+		this.setThumb(thumb);
+		this.setImage(image);
 	}
-	public String getImgUrl(){
-		StringBuilder sb = new StringBuilder();
-		sb.append(ipfsGateway);
-		if (!ipfsGateway.endsWith("/")){
-			sb.append("/");
-		}
-		sb.append(ipfsHash);
-		if (!ipfsHash.endsWith("/")){
-			sb.append("/");
-		}
-		sb.append(image);
-		return sb.toString();
-	}
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((image == null) ? 0 : image.hashCode());
-		result = prime * result + ((ipfsGateway == null) ? 0 : ipfsGateway.hashCode());
-		result = prime * result + ((ipfsHash == null) ? 0 : ipfsHash.hashCode());
-		result = prime * result + ((thumb == null) ? 0 : thumb.hashCode());
-		return result;
-	}
-
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj) {
@@ -85,41 +52,74 @@ public class ImageUrl {
 		}
 		return true;
 	}
-
-	public String getIpfsHash() {
-		return ipfsHash;
+	public String getImage() {
+		return image;
 	}
 
-	public void setIpfsHash(String ipfsHash) {
-		this.ipfsHash = ipfsHash;
+	public String getImgUrl(){
+		StringBuilder sb = new StringBuilder();
+		sb.append(ipfsGateway);
+		if (!ipfsGateway.endsWith("/")){
+			sb.append("/");
+		}
+		sb.append(ipfsHash);
+		if (!ipfsHash.endsWith("/")){
+			sb.append("/");
+		}
+		sb.append(image);
+		return sb.toString();
 	}
 
 	public String getIpfsGateway() {
 		return ipfsGateway;
 	}
 
-	public void setIpfsGateway(String ipfsGateway) {
-		this.ipfsGateway = ipfsGateway;
-	}
-
-	public ImageUrl(String thumb, String image) {
-		this.setThumb(thumb);
-		this.setImage(image);
+	public String getIpfsHash() {
+		return ipfsHash;
 	}
 
 	public String getThumb() {
 		return thumb;
 	}
 
-	public void setThumb(String thumb) {
-		this.thumb = thumb;
+	public String getThumbUrl(){
+		StringBuilder sb = new StringBuilder();
+		sb.append(ipfsGateway);
+		if (!ipfsGateway.endsWith("/")){
+			sb.append("/");
+		}
+		sb.append(ipfsHash);
+		if (!ipfsHash.endsWith("/")){
+			sb.append("/");
+		}
+		sb.append(thumb);
+		return sb.toString();
 	}
 
-	public String getImage() {
-		return image;
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((image == null) ? 0 : image.hashCode());
+		result = prime * result + ((ipfsGateway == null) ? 0 : ipfsGateway.hashCode());
+		result = prime * result + ((ipfsHash == null) ? 0 : ipfsHash.hashCode());
+		result = prime * result + ((thumb == null) ? 0 : thumb.hashCode());
+		return result;
 	}
 
 	public void setImage(String image) {
 		this.image = image;
+	}
+
+	public void setIpfsGateway(String ipfsGateway) {
+		this.ipfsGateway = ipfsGateway;
+	}
+
+	public void setIpfsHash(String ipfsHash) {
+		this.ipfsHash = ipfsHash;
+	}
+
+	public void setThumb(String thumb) {
+		this.thumb = thumb;
 	}
 }

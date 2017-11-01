@@ -7,22 +7,22 @@ import jsinterop.annotations.JsType;
 
 @JsType(isNative=true)
 public interface SteemError {
-	@JsProperty
-	public int getCode();
-	@JsProperty
-	public String getMessage();
-	@JsProperty
-	public SteemErrorData getData();
-	
 	@JsType(isNative=true)
 	public static interface SteemErrorData {
 		@JsProperty
 		public int getCode();
 		@JsProperty
-		public String getName();
-		@JsProperty
 		public String getMessage();
+		@JsProperty
+		public String getName();
 		@JsProperty
 		public JSONValue getStack();
 	}
+	@JsProperty
+	public int getCode();
+	@JsProperty
+	public SteemErrorData getData();
+	
+	@JsProperty
+	public String getMessage();
 }

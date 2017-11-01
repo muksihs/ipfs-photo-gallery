@@ -9,18 +9,13 @@ import muksihs.ipfs.photogallery.client.Event;
 
 public class Loading extends EventBusComposite {
 
+	interface LoadingUiBinder extends UiBinder<Widget, Loading> {
+	}
+
 	interface MyEventBinder extends EventBinder<Loading> {
 	}
 
-	@Override
-	protected <T extends EventBinder<EventBusComposite>> T getEventBinder() {
-		return GWT.create(MyEventBinder.class);
-	}
-
 	private static final LoadingUiBinder uiBinder = GWT.create(LoadingUiBinder.class);
-
-	interface LoadingUiBinder extends UiBinder<Widget, Loading> {
-	}
 
 	public Loading() {
 		try {
@@ -28,6 +23,11 @@ public class Loading extends EventBusComposite {
 		} catch (Exception e) {
 			GWT.log("initWidget", e);
 		}
+	}
+
+	@Override
+	protected <T extends EventBinder<EventBusComposite>> T getEventBinder() {
+		return GWT.create(MyEventBinder.class);
 	}
 
 	@Override

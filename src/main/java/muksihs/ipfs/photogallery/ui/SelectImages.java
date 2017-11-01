@@ -26,35 +26,65 @@ import muksihs.ipfs.photogallery.client.Event;
 
 public class SelectImages extends EventBusComposite {
 
+	interface MyEventBinder extends EventBinder<SelectImages> {
+	}
+
+	interface SelectImagesUiBinder extends UiBinder<Widget, SelectImages> {
+	}
+
+	private static SelectImagesUiBinder uiBinder = GWT.create(SelectImagesUiBinder.class);
+
 	@UiField
 	protected FileUpload fileUpload;
-
+	
 	@UiField
 	protected MaterialPanel previewPanel;
 
 	@UiField
 	protected MaterialButton next;
 
-	@EventHandler
-	protected void updatePreviewPanel(Event.AddToPreviewPanel event) {
-		FileReader reader = new FileReader();
-		reader.onloadend=(e)->{
-			MaterialImage image = new MaterialImage(reader.result.asString());
-			image.setCaption(event.getImageData().getName());
-			image.setTitle(event.getImageData().getName());
-			image.addClickHandler((e2)->showListEditOptions(image));
-			previewPanel.add(image);
-			return null;
-		};
-		reader.readAsDataURL(event.getImageData().getThumbData());
+	@UiField
+	protected HeaderBlock hblock;
+
+	public SelectImages() {
+		initWidget(uiBinder.createAndBindUi(this));
+		fileUpload.getElement().setId("upload");
+		fileUpload.getElement().setAttribute("multiple", "multiple");
+		fileUpload.getElement().setAttribute("accept", "image/*");
+		fileUpload.addChangeHandler(this::addFilesToUploadQueue);
+		next.setEnabled(false);
+		next.addClickHandler((e)->fireEvent(new Event.SelectImagesNext()));
 	}
-	
-	@EventHandler
-	protected void updateImageCount(Event.UpdateImageCount event) {
-		GWT.log("Have "+event.getCount()+" images in the gallery.");
-		if (event.getCount()==0) {
-			next.setEnabled(false);
+
+	private void addFilesToUploadQueue(ChangeEvent event) {
+		HTMLInputElement x = (HTMLInputElement) DomGlobal.document.getElementById("upload");
+		if (x == null) {
+			Window.alert("Can't find input element!");
+			return;
 		}
+		FileList files = x.files;
+		GWT.log("Have " + files.length + " files to upload.");
+		eventBus.fireEvent(new Event.AddImages(files));
+		fileUpload.setEnabled(false);
+		next.setEnabled(false);
+	}
+
+	@EventHandler
+	protected void enable(Event.EnableSelectImages event) {
+		fileUpload.setEnabled(event.isEnable());
+		next.setEnabled(event.isEnable());
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	protected MyEventBinder getEventBinder() {
+		return GWT.create(MyEventBinder.class);
+	}
+
+	@EventHandler
+	public void setAppVersion(Event.DisplayAppVersion event) {
+		GWT.log("APP VERSION: " + event.getVersion());
+		hblock.setAppVersion(event);
 	}
 
 	private Void showListEditOptions(MaterialImage image) {
@@ -104,55 +134,25 @@ public class SelectImages extends EventBusComposite {
 	}
 
 	@EventHandler
-	protected void enable(Event.EnableSelectImages event) {
-		fileUpload.setEnabled(event.isEnable());
-		next.setEnabled(event.isEnable());
+	protected void updateImageCount(Event.UpdateImageCount event) {
+		GWT.log("Have "+event.getCount()+" images in the gallery.");
+		if (event.getCount()==0) {
+			next.setEnabled(false);
+		}
 	}
-
-	interface MyEventBinder extends EventBinder<SelectImages> {
-	}
-
-	@SuppressWarnings("unchecked")
-	@Override
-	protected MyEventBinder getEventBinder() {
-		return GWT.create(MyEventBinder.class);
-	}
-
-	@UiField
-	protected HeaderBlock hblock;
 
 	@EventHandler
-	public void setAppVersion(Event.DisplayAppVersion event) {
-		GWT.log("APP VERSION: " + event.getVersion());
-		hblock.setAppVersion(event);
-	}
-
-	private static SelectImagesUiBinder uiBinder = GWT.create(SelectImagesUiBinder.class);
-
-	interface SelectImagesUiBinder extends UiBinder<Widget, SelectImages> {
-	}
-
-	public SelectImages() {
-		initWidget(uiBinder.createAndBindUi(this));
-		fileUpload.getElement().setId("upload");
-		fileUpload.getElement().setAttribute("multiple", "multiple");
-		fileUpload.getElement().setAttribute("accept", "image/*");
-		fileUpload.addChangeHandler(this::addFilesToUploadQueue);
-		next.setEnabled(false);
-		next.addClickHandler((e)->fireEvent(new Event.SelectImagesNext()));
-	}
-
-	private void addFilesToUploadQueue(ChangeEvent event) {
-		HTMLInputElement x = (HTMLInputElement) DomGlobal.document.getElementById("upload");
-		if (x == null) {
-			Window.alert("Can't find input element!");
-			return;
-		}
-		FileList files = x.files;
-		GWT.log("Have " + files.length + " files to upload.");
-		eventBus.fireEvent(new Event.AddImages(files));
-		fileUpload.setEnabled(false);
-		next.setEnabled(false);
+	protected void updatePreviewPanel(Event.AddToPreviewPanel event) {
+		FileReader reader = new FileReader();
+		reader.onloadend=(e)->{
+			MaterialImage image = new MaterialImage(reader.result.asString());
+			image.setCaption(event.getImageData().getName());
+			image.setTitle(event.getImageData().getName());
+			image.addClickHandler((e2)->showListEditOptions(image));
+			previewPanel.add(image);
+			return null;
+		};
+		reader.readAsDataURL(event.getImageData().getThumbData());
 	}
 
 }

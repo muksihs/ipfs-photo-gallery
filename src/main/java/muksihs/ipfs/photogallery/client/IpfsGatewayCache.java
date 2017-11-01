@@ -31,13 +31,15 @@ import muksihs.ipfs.photogallery.shared.StringList;
 import muksihs.ipfs.photogallery.ui.GlobalEventBus;
 
 public class IpfsGatewayCache implements GlobalEventBus {
-	private static final int SECOND = 1000;
-	public static final int MINUTE = SECOND * 60;
+	protected interface IgCodec extends JsonEncoderDecoder<IpfsGatewayEntry> {
 
+	}
+	private static final int SECOND = 1000;
+
+	public static final int MINUTE = SECOND * 60;
 	private static final String IPFS_GATEWAY_EXPIRES = "-expires";
 	private static final String IPFS_GATEWAY_LATENCY = "-latency";
 	private static final String IPFS_GATEWAY_ALIVE = "-alive";
-	private final StorageMap cache;
 
 	private static IpfsGatewayCache instance;
 
@@ -61,173 +63,6 @@ public class IpfsGatewayCache implements GlobalEventBus {
 				g.setLatency(cached.getLatency());
 			}
 		});
-	}
-
-	protected IpfsGatewayCache() {
-		cache = new StorageMap(Storage.getLocalStorageIfSupported());
-		codec = GWT.create(IgCodec.class);
-		Scheduler.get().scheduleDeferred(this::globalExpiresCheck);
-		Scheduler.get().scheduleDeferred(this::legacyCookieCleanup);
-		Scheduler.get().scheduleDeferred(this::startWatchdogs);
-	}
-
-	private void legacyCookieCleanup() {
-		for (String c : Cookies.getCookieNames()) {
-			if (c.endsWith(IPFS_GATEWAY_EXPIRES)) {
-				Cookies.setCookie(c, "", new Date());
-			}
-			if (c.endsWith(IPFS_GATEWAY_LATENCY)) {
-				Cookies.setCookie(c, "", new Date());
-			}
-			if (c.endsWith(IPFS_GATEWAY_ALIVE)) {
-				Cookies.setCookie(c, "", new Date());
-			}
-		}
-	}
-
-	public void globalExpiresCheck() {
-		/*
-		 * check global expires timer to see if we need to reset all IpfsGateway
-		 * entries.
-		 */
-		Date expires;
-		try {
-			expires = new Date(Long.valueOf(cache.get(IpfsGatewayCache.class.getName())));
-		} catch (NumberFormatException e) {
-			expires = new Date(System.currentTimeMillis() - 1);
-		}
-		if (expires.before(new Date())) {
-			for (String key : cache.keySet()) {
-				if (!key.startsWith(IpfsGatewayEntry.class.getSimpleName())) {
-					continue;
-				}
-				cache.remove(key);
-			}
-		}
-		cache.put(IpfsGatewayCache.class.getName(),String.valueOf(System.currentTimeMillis()+24*60*MINUTE));
-	}
-
-	private IgCodec codec;
-
-	protected interface IgCodec extends JsonEncoderDecoder<IpfsGatewayEntry> {
-
-	}
-
-	public void cacheIpfsGatewayStatus(IpfsGatewayEntry g) {
-		cacheIpfsGatewayStatus(g, true);
-	}
-
-	public void cacheIpfsGatewayStatus(IpfsGatewayEntry g, boolean setNewExpires) {
-		// set a random cache time
-		if (setNewExpires) {
-			long expires = System.currentTimeMillis() + new Random().nextInt(15 * MINUTE);
-			g.setExpires(new Date(expires));
-		}
-		cache.put(IpfsGatewayEntry.class.getSimpleName() + ":" + g.getBaseUrl(), codec.encode(g).toString());
-	}
-
-	public boolean pingGateways() {
-		Iterator<IpfsGatewayEntry> ig = IpfsGateway.getGateways().iterator();
-		Scheduler.get().scheduleDeferred(() -> pingNextGateway(ig));
-		return true;
-	}
-
-	/**
-	 * Check to see if we have at least one alive writable gateway, if no
-	 * writable gateways exists, force expire all gateways
-	 * 
-	 * @return
-	 */
-	private boolean watchDog() {
-		for (IpfsGatewayEntry g : IpfsGateway.getGateways()) {
-			if (g.isAlive() && g.isWriteable()) {
-				return true;
-			}
-		}
-		forceExpireGateways();
-		pingGateways();
-		return true;
-	}
-
-	private void startWatchdogs() {
-		Scheduler.get().scheduleFixedDelay(this::watchDog, 1000);
-		Scheduler.get().scheduleFixedDelay(this::pingGateways, 30000);
-	}
-
-	private void pingNextGateway(Iterator<IpfsGatewayEntry> ig) {
-		if (!ig.hasNext()) {
-			Collections.sort(IpfsGateway.getGateways(), gatewaySorter());
-			return;
-		}
-		long start = System.currentTimeMillis();
-		IpfsGatewayEntry g = ig.next();
-		if (g.getExpires().after(new Date())) {
-			Scheduler.get().scheduleDeferred(() -> pingNextGateway(ig));
-			return;
-		}
-		String testImg;
-		if (new Random().nextBoolean()) {
-			testImg=Consts.NSFW;
-		} else {
-			testImg=Consts.PLACEHOLDER;
-		}
-		String pingUrl = g.getBaseUrl()+ testImg;
-		RequestBuilder rb = new RequestBuilder(RequestBuilder.HEAD, pingUrl);
-		rb.setTimeoutMillis(1000);
-		g.setAlive(false);
-		RequestCallback callback = checkCallback(ig, g, start);
-		rb.setCallback(callback);
-		try {
-			rb.send();
-		} catch (RequestException e) {
-			callback.onError(null, null);
-		}
-	}
-
-	public RequestCallback checkCallback(Iterator<IpfsGatewayEntry> ig, IpfsGatewayEntry g, long start) {
-		return new RequestCallback() {
-			@Override
-			public void onResponseReceived(Request request, Response response) {
-				if (response.getStatusCode() == 200) {
-					g.setAlive(true);
-					g.setLatency(System.currentTimeMillis() - start);
-					cacheIpfsGatewayStatus(g);
-				} else {
-					onError(request, new RuntimeException(response.getStatusText()));
-				}
-				pingNextGateway(ig);
-			}
-
-			@Override
-			public void onError(Request request, Throwable exception) {
-				g.setAlive(false);
-				g.setLatency(System.currentTimeMillis() - start);
-				cacheIpfsGatewayStatus(g);
-				pingNextGateway(ig);
-			}
-		};
-	}
-
-	public Comparator<? super IpfsGatewayEntry> gatewaySorter() {
-		return (a, b) -> {
-			if (a.isAlive() == b.isAlive()) {
-				if (a.getLatency() == b.getLatency()) {
-					return a.getBaseUrl().compareTo(b.getBaseUrl());
-				}
-				return Long.compare(a.getLatency(), b.getLatency());
-			}
-			if (a.isAlive() == false) {
-				return 1;
-			}
-			return -1;
-		};
-	}
-
-	public void forceExpireGateways() {
-		for (IpfsGatewayEntry g : IpfsGateway.getGateways()) {
-			g.setExpires(new Date(0));
-			cacheIpfsGatewayStatus(g, false);
-		}
 	}
 
 	private static void populateGateways() {
@@ -285,5 +120,170 @@ public class IpfsGatewayCache implements GlobalEventBus {
 		}
 		Collections.shuffle(gateways);
 		IpfsGateway.setGateways(gateways);
+	}
+
+	private final StorageMap cache;
+
+	private IgCodec codec;
+
+	protected IpfsGatewayCache() {
+		cache = new StorageMap(Storage.getLocalStorageIfSupported());
+		codec = GWT.create(IgCodec.class);
+		Scheduler.get().scheduleDeferred(this::globalExpiresCheck);
+		Scheduler.get().scheduleDeferred(this::legacyCookieCleanup);
+		Scheduler.get().scheduleDeferred(this::startWatchdogs);
+	}
+
+	public void cacheIpfsGatewayStatus(IpfsGatewayEntry g) {
+		cacheIpfsGatewayStatus(g, true);
+	}
+
+	public void cacheIpfsGatewayStatus(IpfsGatewayEntry g, boolean setNewExpires) {
+		// set a random cache time
+		if (setNewExpires) {
+			long expires = System.currentTimeMillis() + new Random().nextInt(15 * MINUTE);
+			g.setExpires(new Date(expires));
+		}
+		cache.put(IpfsGatewayEntry.class.getSimpleName() + ":" + g.getBaseUrl(), codec.encode(g).toString());
+	}
+
+	public RequestCallback checkCallback(Iterator<IpfsGatewayEntry> ig, IpfsGatewayEntry g, long start) {
+		return new RequestCallback() {
+			@Override
+			public void onError(Request request, Throwable exception) {
+				g.setAlive(false);
+				g.setLatency(System.currentTimeMillis() - start);
+				cacheIpfsGatewayStatus(g);
+				pingNextGateway(ig);
+			}
+
+			@Override
+			public void onResponseReceived(Request request, Response response) {
+				if (response.getStatusCode() == 200) {
+					g.setAlive(true);
+					g.setLatency(System.currentTimeMillis() - start);
+					cacheIpfsGatewayStatus(g);
+				} else {
+					onError(request, new RuntimeException(response.getStatusText()));
+				}
+				pingNextGateway(ig);
+			}
+		};
+	}
+
+	public void forceExpireGateways() {
+		for (IpfsGatewayEntry g : IpfsGateway.getGateways()) {
+			g.setExpires(new Date(0));
+			cacheIpfsGatewayStatus(g, false);
+		}
+	}
+
+	public Comparator<? super IpfsGatewayEntry> gatewaySorter() {
+		return (a, b) -> {
+			if (a.isAlive() == b.isAlive()) {
+				if (a.getLatency() == b.getLatency()) {
+					return a.getBaseUrl().compareTo(b.getBaseUrl());
+				}
+				return Long.compare(a.getLatency(), b.getLatency());
+			}
+			if (a.isAlive() == false) {
+				return 1;
+			}
+			return -1;
+		};
+	}
+
+	public void globalExpiresCheck() {
+		/*
+		 * check global expires timer to see if we need to reset all IpfsGateway
+		 * entries.
+		 */
+		Date expires;
+		try {
+			expires = new Date(Long.valueOf(cache.get(IpfsGatewayCache.class.getName())));
+		} catch (NumberFormatException e) {
+			expires = new Date(System.currentTimeMillis() - 1);
+		}
+		if (expires.before(new Date())) {
+			for (String key : cache.keySet()) {
+				if (!key.startsWith(IpfsGatewayEntry.class.getSimpleName())) {
+					continue;
+				}
+				cache.remove(key);
+			}
+		}
+		cache.put(IpfsGatewayCache.class.getName(),String.valueOf(System.currentTimeMillis()+24*60*MINUTE));
+	}
+
+	private void legacyCookieCleanup() {
+		for (String c : Cookies.getCookieNames()) {
+			if (c.endsWith(IPFS_GATEWAY_EXPIRES)) {
+				Cookies.setCookie(c, "", new Date());
+			}
+			if (c.endsWith(IPFS_GATEWAY_LATENCY)) {
+				Cookies.setCookie(c, "", new Date());
+			}
+			if (c.endsWith(IPFS_GATEWAY_ALIVE)) {
+				Cookies.setCookie(c, "", new Date());
+			}
+		}
+	}
+
+	public boolean pingGateways() {
+		Iterator<IpfsGatewayEntry> ig = IpfsGateway.getGateways().iterator();
+		Scheduler.get().scheduleDeferred(() -> pingNextGateway(ig));
+		return true;
+	}
+
+	private void pingNextGateway(Iterator<IpfsGatewayEntry> ig) {
+		if (!ig.hasNext()) {
+			Collections.sort(IpfsGateway.getGateways(), gatewaySorter());
+			return;
+		}
+		long start = System.currentTimeMillis();
+		IpfsGatewayEntry g = ig.next();
+		if (g.getExpires().after(new Date())) {
+			Scheduler.get().scheduleDeferred(() -> pingNextGateway(ig));
+			return;
+		}
+		String testImg;
+		if (new Random().nextBoolean()) {
+			testImg=Consts.NSFW;
+		} else {
+			testImg=Consts.PLACEHOLDER;
+		}
+		String pingUrl = g.getBaseUrl()+ testImg;
+		RequestBuilder rb = new RequestBuilder(RequestBuilder.HEAD, pingUrl);
+		rb.setTimeoutMillis(1000);
+		g.setAlive(false);
+		RequestCallback callback = checkCallback(ig, g, start);
+		rb.setCallback(callback);
+		try {
+			rb.send();
+		} catch (RequestException e) {
+			callback.onError(null, null);
+		}
+	}
+
+	private void startWatchdogs() {
+		Scheduler.get().scheduleFixedDelay(this::watchDog, 1000);
+		Scheduler.get().scheduleFixedDelay(this::pingGateways, 30000);
+	}
+
+	/**
+	 * Check to see if we have at least one alive writable gateway, if no
+	 * writable gateways exists, force expire all gateways
+	 * 
+	 * @return
+	 */
+	private boolean watchDog() {
+		for (IpfsGatewayEntry g : IpfsGateway.getGateways()) {
+			if (g.isAlive() && g.isWriteable()) {
+				return true;
+			}
+		}
+		forceExpireGateways();
+		pingGateways();
+		return true;
 	}
 }

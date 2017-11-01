@@ -22,12 +22,28 @@ public class PhotoGalleryWizard implements ScheduledCommand, GlobalEventBus {
 	
 	private static final MyEventBinder eventBinder = GWT.create(MyEventBinder.class);
 
+	private List<ImageData> imageDataList=new ArrayList<>();
+
 	public PhotoGalleryWizard() {
 		eventBinder.bindEventHandlers(this, eventBus);
 		IpfsGatewayCache.get();
 		new ViewHandler();
 	}
-
+	
+	@EventHandler
+	protected void addImages(Event.AddImages event) {
+		if (event.getFiles()==null||event.getFiles().length==0) {
+			return;
+		}
+		fireEvent(new Event.EnableSelectImages(false));
+		new LoadFileImages().load(event.getFiles());
+	}
+	
+	@EventHandler
+	protected void addImagesDone(Event.AddImagesDone event) {
+		fireEvent(new Event.EnableSelectImages(true));
+	}
+	
 	@Override
 	public void execute() {
 		fireEvent(new Event.AppLoaded());
@@ -43,50 +59,33 @@ public class PhotoGalleryWizard implements ScheduledCommand, GlobalEventBus {
 	}
 	
 	@EventHandler
+	protected void getAppVersion(Event.GetAppVersion event) {
+		fireEvent(new Event.DisplayAppVersion("20171101"));
+	}
+	
+	@EventHandler
+	protected void imageDataAdded(Event.ImageDataAdded event) {
+		imageDataList.add(event.getData());
+		fireEvent(new Event.AddToPreviewPanel(event.getData()));
+		fireEvent(new Event.UpdateImageCount(imageDataList.size()));
+	}
+	@EventHandler
 	protected void ipfsLoadDone(Event.IpfsLoadDone event) {
 		fireEvent(new ShowView(View.SetGalleryInfo));
 	}
 	
 	@EventHandler
+	protected void removeImageFromList(Event.RemoveImage event) {
+		if (event.getIndex()<0 || event.getIndex()>=imageDataList.size()) {
+			return;
+		}
+		imageDataList.remove(event.getIndex());
+		fireEvent(new Event.UpdateImageCount(imageDataList.size()));
+	}
+	
+	@EventHandler
 	protected void selectImagesNext(Event.SelectImagesNext event) {
 		fireEvent(new ShowView(View.UploadImages));
-		Scheduler.get().scheduleDeferred(new StoreImagesInIpfs(imageDataUrls));
-	}
-	
-	@EventHandler
-	protected void addImages(Event.AddImages event) {
-		if (event.getFiles()==null||event.getFiles().length==0) {
-			return;
-		}
-		fireEvent(new Event.EnableSelectImages(false));
-		new LoadFileImages().load(event.getFiles());
-	}
-	
-	@EventHandler
-	protected void removeImageFromList(Event.RemoveImage event) {
-		if (event.getIndex()<0 || event.getIndex()>=imageDataUrls.size()) {
-			return;
-		}
-		imageDataUrls.remove(event.getIndex());
-		fireEvent(new Event.UpdateImageCount(imageDataUrls.size()));
-	}
-	
-	private List<ImageData> imageDataUrls=new ArrayList<>();
-	@EventHandler
-	protected void imageDataAdded(Event.ImageDataAdded event) {
-		imageDataUrls.add(event.getData());
-		fireEvent(new Event.AddToPreviewPanel(event.getData()));
-		fireEvent(new Event.UpdateImageCount(imageDataUrls.size()));
-	}
-	
-	@EventHandler
-	protected void getAppVersion(Event.GetAppVersion event) {
-		fireEvent(new Event.DisplayAppVersion("20171029"));
-	}
-	
-	@EventHandler
-	protected void addImagesDone(Event.AddImagesDone event) {
-		fireEvent(new Event.EnableSelectImages(true));
-		fireEvent(new Event.UpdateImageCount(imageDataUrls.size()));
+		Scheduler.get().scheduleDeferred(new StoreImagesInIpfs(imageDataList));
 	}
 }

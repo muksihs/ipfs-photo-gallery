@@ -19,6 +19,10 @@ public class ImageData {
 		this.name = name;
 	}
 
+	public String getBaseUrl() {
+		return baseUrl;
+	}
+
 	public String getEncodedName() {
 		return encodedName;
 	}
@@ -37,6 +41,10 @@ public class ImageData {
 
 	public Blob getThumbData() {
 		return thumbData;
+	}
+
+	public void setBaseUrl(String baseUrl) {
+		this.baseUrl = baseUrl;
 	}
 
 	public ImageData setEncodedName(String encodedName) {
@@ -62,13 +70,5 @@ public class ImageData {
 	public ImageData setThumbData(Blob thumbData) {
 		this.thumbData = thumbData;
 		return this;
-	}
-
-	public String getBaseUrl() {
-		return baseUrl;
-	}
-
-	public void setBaseUrl(String baseUrl) {
-		this.baseUrl = baseUrl;
 	}
 }

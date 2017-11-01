@@ -15,18 +15,6 @@ public class PhotoGallery implements EntryPoint, GlobalEventBus {
 	private final MyEventBinder eventBinder = GWT.create(MyEventBinder.class);
 	private PhotoGalleryWizard app;
 	
-	@Override
-	public void onModuleLoad() {
-		eventBinder.bindEventHandlers(this, eventBus);
-		app = new PhotoGalleryWizard();
-		Scheduler.get().scheduleDeferred(app);
-	}
-	
-	@EventHandler
-	protected void onAppLoaded(Event.AppLoaded event) {
-		GWT.log("App loaded.");
-	}
-
 	public void getTrendingTags() {
 		GWT.log("getTrendingTags");
 		SteemApi.getTrendingTags("", 2, (error, result) -> {
@@ -53,5 +41,17 @@ public class PhotoGallery implements EntryPoint, GlobalEventBus {
 			}
 		});
 
+	}
+	
+	@EventHandler
+	protected void onAppLoaded(Event.AppLoaded event) {
+		GWT.log("App loaded.");
+	}
+
+	@Override
+	public void onModuleLoad() {
+		eventBinder.bindEventHandlers(this, eventBus);
+		app = new PhotoGalleryWizard();
+		Scheduler.get().scheduleDeferred(app);
 	}
 }
