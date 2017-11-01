@@ -53,7 +53,7 @@ public class StoreImagesInIpfs implements GlobalEventBus, ScheduledCommand {
 
 	private String getEncodedName(PutState state) {
 		String prefix = zeroPadded(state.getImagesSize(), state.getIndex());
-		String encodedName = URL.encode(prefix + "-" + state.getImageData().getName());
+		String encodedName = URL.encode(prefix + "/" + state.getImageData().getName());
 		return encodedName;
 	}
 
