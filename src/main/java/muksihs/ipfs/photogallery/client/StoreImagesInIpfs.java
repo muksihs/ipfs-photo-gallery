@@ -263,10 +263,11 @@ public class StoreImagesInIpfs implements GlobalEventBus, ScheduledCommand {
 						if (img.hasAttribute("src")) {
 							img.removeAttribute("src");
 							img.onerror.onInvoke(null);
+							GWT.log("image load abort - took too long!");
 						}
 					}
 				};
-				failsafe.schedule(1000);
+				failsafe.schedule(3000);
 			});
 		}
 		return null;
