@@ -68,9 +68,7 @@ public class LoadFileImages implements GlobalEventBus {
 		HTMLImageElement image = (HTMLImageElement) DomGlobal.document.createElement("img");
 		image.onabort = (e) -> loadNextDataUrl(files, ix + 1);// skip non-image file
 		image.onerror = (e) -> loadNextDataUrl(files, ix + 1);// skip non-image file
-		image.onload = (e) -> {
-			return createThumbnail(files, ix, new ImageData(file.slice(), null, file.name), image);
-		};
+		image.onload = (e) -> createThumbnail(files, ix, new ImageData(file.slice(), null, file.name), image);
 		image.src = result.asString();
 		return null;
 	}
