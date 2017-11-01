@@ -16,7 +16,7 @@ import muksihs.ipfs.photogallery.client.Event.ShowLoading;
 
 public class Presenter implements GlobalEventBus {
 	public static enum View {
-		Loading, SelectImages, UploadImages, AddDescription, PostGallery;
+		Loading, SelectImages, UploadImages, SetGalleryInfo, PostGallery;
 	}
 	
 	interface MyEventBinder extends EventBinder<Presenter>{}
@@ -86,7 +86,8 @@ public class Presenter implements GlobalEventBus {
 	protected void showView(ShowView event) {
 		GWT.log("view: "+String.valueOf(event.view));
 		switch (event.getView()) {
-		case AddDescription:
+		case SetGalleryInfo:
+			replaceView(new SetGalleryInfo());
 			break;
 		case Loading:
 			replaceView(new Loading());

@@ -3,9 +3,43 @@ package muksihs.ipfs.photogallery.client;
 import com.google.web.bindery.event.shared.binder.GenericEvent;
 
 import elemental2.dom.FileList;
+import muksihs.ipfs.photogallery.shared.GalleryInfo;
 import muksihs.ipfs.photogallery.shared.ImageData;
 
 public interface Event {
+	public class GalleryInfo extends GenericEvent {
+
+		private final muksihs.ipfs.photogallery.shared.GalleryInfo galleryInfo;
+
+		public GalleryInfo(muksihs.ipfs.photogallery.shared.GalleryInfo galleryInfo) {
+			this.galleryInfo = galleryInfo;
+		}
+
+		public muksihs.ipfs.photogallery.shared.GalleryInfo getGalleryInfo() {
+			return galleryInfo;
+		}
+
+	}
+	public class GetGalleryInfoPageValues extends GenericEvent {
+
+	}
+	public class GetPostingKey extends GenericEvent {
+
+	}
+	public class GetUserName extends GenericEvent {
+
+	}
+	public class GetDescription extends GenericEvent {
+
+	}
+	public class GetTitle extends GenericEvent {
+
+	}
+	public class Cancel extends GenericEvent {
+
+	}
+	public class SetGalleryInfoNext extends GenericEvent {
+	}
 	public class SetXhrProgressIndeterminate extends GenericEvent {
 
 	}

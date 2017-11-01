@@ -106,15 +106,16 @@ dependencies {
 	
 	gwt 'com.github.gwtmaterialdesign:gwt-material:2.0+'
 	gwt 'com.github.gwtmaterialdesign:gwt-material-themes:2.0+'
+	gwt 'com.github.gwtmaterialdesign:gwt-material-addins:2.0+'
 	
 	gwt 'com.google.elemental2:elemental2-core:1.0.0-beta-1'
 	gwt 'com.google.elemental2:elemental2-dom:1.0.0-beta-1'
-	gwt 'com.google.elemental2:elemental2-promise:1.0.0-beta-1'
+	/*gwt 'com.google.elemental2:elemental2-promise:1.0.0-beta-1'
 	gwt 'com.google.elemental2:elemental2-indexeddb:1.0.0-beta-1'
 	gwt 'com.google.elemental2:elemental2-svg:1.0.0-beta-1'
 	gwt 'com.google.elemental2:elemental2-webgl:1.0.0-beta-1'
 	gwt 'com.google.elemental2:elemental2-media:1.0.0-beta-1'
-	gwt 'com.google.elemental2:elemental2-webstorage:1.0.0-beta-1'
+	gwt 'com.google.elemental2:elemental2-webstorage:1.0.0-beta-1'*/
 	
 	gwt ('com.google.gwt.eventbinder:eventbinder:1.1.0') {
 		exclude module: 'gwt-user'
