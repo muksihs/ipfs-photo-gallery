@@ -1,4 +1,4 @@
-package muksihs.ipfs.photogallery.ui;
+package muksihs.ipfs.photogallery.client;
 
 import com.google.gwt.core.shared.GWT;
 import com.google.gwt.user.client.ui.Composite;
@@ -11,8 +11,13 @@ import gwt.material.design.client.ui.MaterialButton;
 import gwt.material.design.client.ui.MaterialLoader;
 import gwt.material.design.client.ui.MaterialModal;
 import gwt.material.design.client.ui.MaterialTitle;
-import muksihs.ipfs.photogallery.client.Event;
-import muksihs.ipfs.photogallery.client.Event.ShowLoading;
+import muksihs.ipfs.photogallery.ui.EventBusComposite;
+import muksihs.ipfs.photogallery.ui.GlobalEventBus;
+import muksihs.ipfs.photogallery.ui.Loading;
+import muksihs.ipfs.photogallery.ui.PostGallery;
+import muksihs.ipfs.photogallery.ui.SelectImages;
+import muksihs.ipfs.photogallery.ui.SetGalleryInfo;
+import muksihs.ipfs.photogallery.ui.UploadImages;
 
 public class ViewHandler implements GlobalEventBus {
 	public static class DisplayMessage extends GenericEvent {
@@ -57,7 +62,7 @@ public class ViewHandler implements GlobalEventBus {
 		root = RootPanel.get();
 	}
 
-	private void replaceView(Composite view) {
+	private void replaceView(EventBusComposite view) {
 		if (activeView != null) {
 			root.remove(activeView);
 		}
@@ -81,7 +86,7 @@ public class ViewHandler implements GlobalEventBus {
 	}
 
 	@EventHandler
-	protected void showLoading(ShowLoading event) {
+	protected void showLoading(Event.ShowLoading event) {
 		MaterialLoader.loading(event.isLoading());
 	}
 
@@ -96,6 +101,7 @@ public class ViewHandler implements GlobalEventBus {
 			replaceView(new Loading());
 			break;
 		case PostGallery:
+			replaceView(new PostGallery());
 			break;
 		case SelectImages:
 			replaceView(new SelectImages());

@@ -42,7 +42,6 @@ public class SetGalleryInfo extends EventBusComposite {
 		title.setAllowBlank(false);
 		description.setAllowBlank(false);
 
-		next.setEnabled(false);
 		next.addClickHandler((e) -> fireEvent(new Event.SetGalleryInfoNext()));
 		cancel.addClickHandler((e) -> fireEvent(new Event.Cancel()));
 

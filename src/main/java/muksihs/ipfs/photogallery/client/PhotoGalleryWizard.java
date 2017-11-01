@@ -9,12 +9,11 @@ import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.web.bindery.event.shared.binder.EventBinder;
 import com.google.web.bindery.event.shared.binder.EventHandler;
 
+import muksihs.ipfs.photogallery.client.ViewHandler.ShowView;
+import muksihs.ipfs.photogallery.client.ViewHandler.View;
 import muksihs.ipfs.photogallery.shared.ImageData;
 import muksihs.ipfs.photogallery.shared.IpfsGateway;
 import muksihs.ipfs.photogallery.ui.GlobalEventBus;
-import muksihs.ipfs.photogallery.ui.ViewHandler;
-import muksihs.ipfs.photogallery.ui.ViewHandler.ShowView;
-import muksihs.ipfs.photogallery.ui.ViewHandler.View;
 
 public class PhotoGalleryWizard implements ScheduledCommand, GlobalEventBus {
 
@@ -58,6 +57,11 @@ public class PhotoGalleryWizard implements ScheduledCommand, GlobalEventBus {
 			return !ready;
 		}, 250);
 	}
+	
+	@EventHandler
+	protected void setGalleryInfoNext(Event.SetGalleryInfoNext event) {
+		fireEvent(new ShowView(View.PostGallery));
+	}
 
 	@EventHandler
 	protected void getAppVersion(Event.GetAppVersion event) {
@@ -72,7 +76,7 @@ public class PhotoGalleryWizard implements ScheduledCommand, GlobalEventBus {
 	}
 
 	@EventHandler
-	protected void ipfsLoadDone(Event.IpfsLoadDone event) {
+	protected void storeImagesDone(Event.StoreImagesDone event) {
 		fireEvent(new ShowView(View.SetGalleryInfo));
 	}
 

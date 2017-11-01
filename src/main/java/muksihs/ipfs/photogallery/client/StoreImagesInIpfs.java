@@ -55,6 +55,7 @@ public class StoreImagesInIpfs implements GlobalEventBus, ScheduledCommand {
 
 	private void doImageHeadRequest(ListIterator<ImageData> iImages) {
 		if (!iImages.hasNext()) {
+			fireEvent(new Event.StoreImagesDone());
 			return;
 		}
 		ImageData image = iImages.next();
@@ -123,7 +124,6 @@ public class StoreImagesInIpfs implements GlobalEventBus, ScheduledCommand {
 
 	private Void putNextImage(PutState state) {
 		if (!state.hasNext()) {
-			fireEvent(new Event.IpfsLoadDone());
 			fireEvent(new Event.SetXhrProgress(0));
 			/*
 			 * update all images to use most recent hash, leave gateways as-is though

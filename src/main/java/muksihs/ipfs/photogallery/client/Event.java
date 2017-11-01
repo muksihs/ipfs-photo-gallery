@@ -134,7 +134,7 @@ public interface Event {
 	public static class IpfsGatewayReady extends GenericEvent {
 	}
 
-	public class IpfsLoadDone extends GenericEvent {
+	public class StoreImagesDone extends GenericEvent {
 
 	}
 
