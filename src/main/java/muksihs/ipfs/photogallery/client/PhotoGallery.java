@@ -7,7 +7,6 @@ import com.google.web.bindery.event.shared.binder.EventBinder;
 import com.google.web.bindery.event.shared.binder.EventHandler;
 
 import muksihs.ipfs.photogallery.ui.GlobalEventBus;
-import muksihs.ipfs.photogallery.ui.MainView;
 import steemjs.SteemApi;
 import steemjs.TrendingTagsResult;
 
@@ -19,8 +18,6 @@ public class PhotoGallery implements EntryPoint, GlobalEventBus {
 	@Override
 	public void onModuleLoad() {
 		eventBinder.bindEventHandlers(this, eventBus);
-		MainView mainView = new MainView(eventBus);
-//		app = new PhotoGalleryApp();
 		app = new PhotoGalleryWizard();
 		Scheduler.get().scheduleDeferred(app);
 	}
