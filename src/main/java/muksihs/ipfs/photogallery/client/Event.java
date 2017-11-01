@@ -3,7 +3,6 @@ package muksihs.ipfs.photogallery.client;
 import com.google.web.bindery.event.shared.binder.GenericEvent;
 
 import elemental2.dom.FileList;
-import muksihs.ipfs.photogallery.shared.GalleryInfo;
 import muksihs.ipfs.photogallery.shared.ImageData;
 
 public interface Event {

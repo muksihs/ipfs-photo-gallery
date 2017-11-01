@@ -2,7 +2,6 @@ package muksihs.ipfs.photogallery.client;
 
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Set;
@@ -17,9 +16,7 @@ import com.google.gwt.user.client.Timer;
 
 import elemental2.dom.DomGlobal;
 import elemental2.dom.HTMLImageElement;
-import elemental2.dom.ProgressEvent;
 import elemental2.dom.XMLHttpRequest;
-import elemental2.dom.XMLHttpRequest.OnloadendCallbackFn;
 import muksihs.ipfs.photogallery.shared.ImageData;
 import muksihs.ipfs.photogallery.shared.Ipfs;
 import muksihs.ipfs.photogallery.shared.IpfsGateway;
