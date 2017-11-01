@@ -8,6 +8,7 @@ import muksihs.ipfs.photogallery.client.DeferredEventBus;
 
 public interface GlobalEventBus {
 	EventBus eventBus = new DeferredEventBus() {
+		@Override
 		public void fireEvent(com.google.web.bindery.event.shared.Event<?> event) {
 			if (event != null) {
 //				GWT.log("event: " + event.getClass().getSimpleName());
@@ -17,6 +18,7 @@ public interface GlobalEventBus {
 			super.fireEvent(event);
 		};
 
+		@Override
 		public void fireEventFromSource(com.google.web.bindery.event.shared.Event<?> event, Object source) {
 			if (event != null) {
 				GWT.log("event with source: " + event.getClass().getSimpleName());

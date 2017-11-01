@@ -26,6 +26,7 @@ public abstract class EventBusComposite extends Composite implements GlobalEvent
 		}
 	}
 	
+	@Override
 	protected void onUnload() {
 		try {
 			registration.removeHandler();

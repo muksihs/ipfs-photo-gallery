@@ -264,8 +264,8 @@ public class StoreImagesInIpfs implements GlobalEventBus, ScheduledCommand {
 
 	private String zeroPadded(int length, int ix) {
 		ix++;
-		int zeroCount = String.valueOf((int) length).length();
-		int digitCount = String.valueOf((int) ix).length();
-		return StringUtils.repeat("0", zeroCount - digitCount) + String.valueOf((int) ix);
+		int zeroCount = String.valueOf(length).length();
+		int digitCount = String.valueOf(ix).length();
+		return StringUtils.repeat("0", zeroCount - digitCount) + String.valueOf(ix);
 	}
 }
