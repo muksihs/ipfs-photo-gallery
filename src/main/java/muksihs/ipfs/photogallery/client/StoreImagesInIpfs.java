@@ -260,11 +260,8 @@ public class StoreImagesInIpfs implements GlobalEventBus, ScheduledCommand {
 				Timer failsafe = new Timer() {
 					@Override
 					public void run() {
-						if (img.hasAttribute("src")) {
-							img.removeAttribute("src");
-							img.onerror.onInvoke(null);
-							GWT.log("image load abort - took too long!");
-						}
+						onImageLoadFail(state, loadState, img);
+						GWT.log("image load abort - took too long!");
 					}
 				};
 				failsafe.schedule(3000);
