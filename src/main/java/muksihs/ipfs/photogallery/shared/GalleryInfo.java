@@ -1,25 +1,38 @@
 package muksihs.ipfs.photogallery.shared;
 
+import java.util.List;
+
 public class GalleryInfo {
 
-	public void setDescription(String value) {
-		// TODO Auto-generated method stub
-		
+	private String description;
+	private String title;
+	private List<String> tags;
+
+	public GalleryInfo setDescription(String value) {
+		this.description=value;
+		return this;
 	}
 
-	public void setTitle(String value) {
-		// TODO Auto-generated method stub
-		
+	public GalleryInfo setTitle(String value) {
+		this.title=value;
+		return this;
+	}
+	
+	public GalleryInfo setTags(List<String> value) {
+		this.tags=value;
+		return this;
 	}
 
-	public void setUserName(String value) {
-		// TODO Auto-generated method stub
-		
+	public String getDescription() {
+		return description;
 	}
 
-	public void setPostingKey(String value) {
-		// TODO Auto-generated method stub
-		
+	public String getTitle() {
+		return title;
+	}
+
+	public List<String> getTags() {
+		return tags;
 	}
 	
 }

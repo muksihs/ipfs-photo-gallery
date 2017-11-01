@@ -22,7 +22,7 @@
 
 	<!-- UI -->
 	<inherits name="gwt.material.design.GwtMaterialWithJQuery" />
-	<inherits name="gwt.material.design.themes.ThemeBlue" />
+<!-- 	<inherits name="gwt.material.design.themes.ThemeBlue" /> -->
 	<inherits name="gwt.material.design.addins.GwtMaterialAddins" />
 	
 	<set-configuration-property name="CssResource.conversionMode"

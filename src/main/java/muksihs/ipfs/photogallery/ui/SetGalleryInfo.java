@@ -1,5 +1,7 @@
 package muksihs.ipfs.photogallery.ui;
 
+import java.util.Arrays;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -24,26 +26,20 @@ public class SetGalleryInfo extends EventBusComposite {
 	@UiField
 	protected MaterialTextBox title;
 	@UiField
+	protected MaterialTextBox tags;
+	@UiField
 	protected MaterialRichEditor description;
-	@UiField
-	protected MaterialTextBox username;
-	@UiField
-	protected MaterialTextBox key;
 	@UiField
 	protected MaterialButton cancel;
 	@UiField
 	protected MaterialButton next;
-	@UiField
-	protected MaterialTextBox tags;
 	
 	@EventHandler
 	protected void getGalleryInfoPageValues(Event.GetGalleryInfoPageValues event) {
 		GalleryInfo galleryInfo = new GalleryInfo();
 		galleryInfo.setTitle(title.getValue());
 		galleryInfo.setDescription(description.getValue());
-		galleryInfo.setUserName(username.getValue());
-		galleryInfo.setPostingKey(key.getValue());
-		galleryInfo.setTitle(tags.getValue());
+		galleryInfo.setTags(Arrays.asList(tags.getValue().split("\\s")));
 		fireEvent(new Event.GalleryInfo(galleryInfo));
 	}
 	
