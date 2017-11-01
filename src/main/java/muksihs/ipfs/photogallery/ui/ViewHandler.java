@@ -26,8 +26,10 @@ public class ViewHandler implements GlobalEventBus {
 			return message;
 		}
 	}
-	
-	interface MyEventBinder extends EventBinder<ViewHandler>{}
+
+	interface MyEventBinder extends EventBinder<ViewHandler> {
+	}
+
 	public static class ShowView extends GenericEvent {
 		private final View view;
 
@@ -59,32 +61,33 @@ public class ViewHandler implements GlobalEventBus {
 		if (activeView != null) {
 			root.remove(activeView);
 		}
-		activeView=view;
-		if (activeView!=null) {
+		activeView = view;
+		if (activeView != null) {
 			root.add(activeView);
 		}
 	}
-	
+
 	@EventHandler
 	protected void showAlert(Event.AlertMessage event) {
 		MaterialModal alert = new MaterialModal();
 		alert.setTitle("ALERT!");
 		alert.add(new MaterialTitle(event.getMessage(), event.getMessage()));
-		alert.addCloseHandler((e)->alert.removeFromParent());
+		alert.addCloseHandler((e) -> alert.removeFromParent());
 		MaterialButton btn = new MaterialButton("OK");
-		btn.addClickHandler((e)->alert.close());
+		btn.addClickHandler((e) -> alert.close());
 		alert.add(btn);
 		RootPanel.get().add(alert);
 		alert.open();
 	}
-	
+
 	@EventHandler
 	protected void showLoading(ShowLoading event) {
 		MaterialLoader.loading(event.isLoading());
 	}
+
 	@EventHandler
 	protected void showView(ShowView event) {
-		GWT.log("view: "+String.valueOf(event.view));
+		GWT.log("view: " + String.valueOf(event.view));
 		switch (event.getView()) {
 		case SetGalleryInfo:
 			replaceView(new SetGalleryInfo());

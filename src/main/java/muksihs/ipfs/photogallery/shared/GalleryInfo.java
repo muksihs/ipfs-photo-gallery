@@ -15,24 +15,24 @@ public class GalleryInfo {
 	public List<String> getTags() {
 		return tags;
 	}
-	
+
 	public String getTitle() {
 		return title;
 	}
 
 	public GalleryInfo setDescription(String value) {
-		this.description=value;
+		this.description = value;
 		return this;
 	}
 
 	public GalleryInfo setTags(List<String> value) {
-		this.tags=value;
+		this.tags = value;
 		return this;
 	}
 
 	public GalleryInfo setTitle(String value) {
-		this.title=value;
+		this.title = value;
 		return this;
 	}
-	
+
 }

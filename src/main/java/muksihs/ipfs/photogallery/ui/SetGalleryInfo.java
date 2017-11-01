@@ -18,11 +18,12 @@ import muksihs.ipfs.photogallery.shared.GalleryInfo;
 
 public class SetGalleryInfo extends EventBusComposite {
 
-	interface MyEventBinder extends EventBinder<SetGalleryInfo>{}
+	interface MyEventBinder extends EventBinder<SetGalleryInfo> {
+	}
 
 	interface SetGalleryInfoUiBinder extends UiBinder<Widget, SetGalleryInfo> {
 	}
-	
+
 	private static SetGalleryInfoUiBinder uiBinder = GWT.create(SetGalleryInfoUiBinder.class);
 	@UiField
 	protected MaterialTextBox title;
@@ -32,47 +33,40 @@ public class SetGalleryInfo extends EventBusComposite {
 	protected MaterialRichEditor description;
 	@UiField
 	protected MaterialButton cancel;
-	
+
 	@UiField
 	protected MaterialButton next;
-	
+
 	public SetGalleryInfo() {
 		initWidget(uiBinder.createAndBindUi(this));
 		title.setAllowBlank(false);
 		description.setAllowBlank(false);
-		
+
 		next.setEnabled(false);
-		next.addClickHandler((e)->fireEvent(new Event.SetGalleryInfoNext()));
-		cancel.addClickHandler((e)->fireEvent(new Event.Cancel()));
-		
+		next.addClickHandler((e) -> fireEvent(new Event.SetGalleryInfoNext()));
+		cancel.addClickHandler((e) -> fireEvent(new Event.Cancel()));
+
 		ToolbarButton[] noOptions = new ToolbarButton[0];
-		
-		description.setStyleOptions(ToolbarButton.STYLE,
-				ToolbarButton.BOLD,
-				ToolbarButton.ITALIC,
-				ToolbarButton.UNDERLINE,
-				ToolbarButton.STRIKETHROUGH,
-				ToolbarButton.CLEAR,
-				ToolbarButton.SUPERSCRIPT,
+
+		description.setStyleOptions(ToolbarButton.STYLE, ToolbarButton.BOLD, ToolbarButton.ITALIC,
+				ToolbarButton.UNDERLINE, ToolbarButton.STRIKETHROUGH, ToolbarButton.CLEAR, ToolbarButton.SUPERSCRIPT,
 				ToolbarButton.SUBSCRIPT);
 		description.setFontOptions(noOptions);
 		description.setColorOptions(noOptions);
-//		description.setUndoOptions(noOptions);
+		// description.setUndoOptions(noOptions);
 		description.setCkMediaOptions(noOptions);
 		description.setMiscOptions(ToolbarButton.LINK,
-//				ToolbarButton.PICTURE,
-//				ToolbarButton.TABLE,
+				// ToolbarButton.PICTURE,
+				// ToolbarButton.TABLE,
 				ToolbarButton.HR,
-//				ToolbarButton.FULLSCREEN,
+				// ToolbarButton.FULLSCREEN,
 				ToolbarButton.CODE_VIEW);
-		description.setParaOptions(ToolbarButton.UL,
-				ToolbarButton.OL,
-//				ToolbarButton.PARAGRAPH,
-				ToolbarButton.LEFT,
-				ToolbarButton.CENTER,
-//				ToolbarButton.RIGHT,
+		description.setParaOptions(ToolbarButton.UL, ToolbarButton.OL,
+				// ToolbarButton.PARAGRAPH,
+				ToolbarButton.LEFT, ToolbarButton.CENTER,
+				// ToolbarButton.RIGHT,
 				ToolbarButton.JUSTIFY);
-		
+
 		description.setHeightOptions(noOptions);
 		description.setDisableDragAndDrop(true);
 	}
@@ -81,6 +75,7 @@ public class SetGalleryInfo extends EventBusComposite {
 	protected <T extends EventBinder<EventBusComposite>> T getEventBinder() {
 		return GWT.create(MyEventBinder.class);
 	};
+
 	@EventHandler
 	protected void getGalleryInfoPageValues(Event.GetGalleryInfoPageValues event) {
 		GalleryInfo galleryInfo = new GalleryInfo();

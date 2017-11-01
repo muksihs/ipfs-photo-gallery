@@ -16,8 +16,8 @@ import muksihs.ipfs.photogallery.ui.GlobalEventBus;
 
 public class LoadFileImages implements GlobalEventBus {
 	public native String createObjectURL(elemental2.dom.Blob bb) /*-{
-		return $wnd.URL.createObjectURL(bb);
-	}-*/;
+																	return $wnd.URL.createObjectURL(bb);
+																	}-*/;
 
 	public Void createThumbnail(FileList files, int ix, ImageData imageData, HTMLImageElement image) {
 		double scale;

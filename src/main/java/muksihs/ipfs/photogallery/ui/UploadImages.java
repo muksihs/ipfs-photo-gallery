@@ -16,43 +16,44 @@ import muksihs.ipfs.photogallery.client.Event;
 
 public class UploadImages extends EventBusComposite {
 
-	interface MyEventBinder extends EventBinder<UploadImages>{}
+	interface MyEventBinder extends EventBinder<UploadImages> {
+	}
 
 	interface UploadImagesUiBinder extends UiBinder<Widget, UploadImages> {
 	}
-	
+
 	private static UploadImagesUiBinder uiBinder = GWT.create(UploadImagesUiBinder.class);
-	
+
 	@UiField
 	protected MaterialPanel previewPanel;
-	
+
 	@UiField
 	protected MaterialProgress progress;
 
 	@UiField
 	protected MaterialProgress xhrProgress;
-	
+
 	public UploadImages() {
 		initWidget(uiBinder.createAndBindUi(this));
 	}
-	
+
 	@Override
 	protected <T extends EventBinder<EventBusComposite>> T getEventBinder() {
 		return GWT.create(MyEventBinder.class);
 	}
-	
+
 	@EventHandler
 	protected void setProgress(Event.SetProgress event) {
 		progress.setType(ProgressType.DETERMINATE);
 		progress.setPercent(Math.floor(event.getPercent()));
 	}
-	
+
 	@EventHandler
 	protected void setProgress(Event.SetXhrProgress event) {
 		xhrProgress.setType(ProgressType.DETERMINATE);
 		xhrProgress.setPercent(Math.floor(event.getPercent()));
 	}
-	
+
 	@EventHandler
 	protected void setProgress(Event.SetXhrProgressIndeterminate event) {
 		xhrProgress.setType(ProgressType.INDETERMINATE);
@@ -61,7 +62,7 @@ public class UploadImages extends EventBusComposite {
 	@EventHandler
 	protected void updatePreviewPanel(Event.AddToPreviewPanel event) {
 		FileReader reader = new FileReader();
-		reader.onloadend=(e)->{
+		reader.onloadend = (e) -> {
 			MaterialImage image = new MaterialImage(reader.result.asString());
 			image.setCaption(event.getImageData().getName());
 			image.setTitle(event.getImageData().getName());

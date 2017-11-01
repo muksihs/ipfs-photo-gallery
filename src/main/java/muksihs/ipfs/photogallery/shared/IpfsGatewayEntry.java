@@ -4,16 +4,16 @@ import java.util.Date;
 
 public class IpfsGatewayEntry {
 	private Date expires;
-	private long latency=-1;
-	private int fails=0;
-	
+	private long latency = -1;
+	private int fails = 0;
+
 	private boolean writeable;
 	private boolean alive;
 	private String baseUrl;
 
 	public IpfsGatewayEntry() {
-		this.alive=false;
-		this.writeable=false;
+		this.alive = false;
+		this.writeable = false;
 	}
 
 	public IpfsGatewayEntry(String baseUrl, boolean writeable) {
@@ -21,7 +21,7 @@ public class IpfsGatewayEntry {
 		setBaseUrl(baseUrl);
 		setWriteable(writeable);
 	}
-	
+
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj) {
@@ -44,9 +44,9 @@ public class IpfsGatewayEntry {
 		return true;
 	}
 
-	public void fail(){
+	public void fail() {
 		fails++;
-		if (fails>2) {
+		if (fails > 2) {
 			setAlive(false);
 		}
 	}
@@ -54,15 +54,18 @@ public class IpfsGatewayEntry {
 	public String getBaseUrl() {
 		return baseUrl;
 	}
+
 	public Date getExpires() {
-		if (expires==null) {
+		if (expires == null) {
 			return new Date(0);
 		}
 		return expires;
 	}
+
 	public long getLatency() {
 		return latency;
 	}
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -70,25 +73,30 @@ public class IpfsGatewayEntry {
 		result = prime * result + ((baseUrl == null) ? 0 : baseUrl.hashCode());
 		return result;
 	}
-	
+
 	public boolean isAlive() {
 		return alive;
 	}
+
 	public boolean isWriteable() {
 		return writeable;
 	}
-	public void resetFail(){
-		fails=0;
+
+	public void resetFail() {
+		fails = 0;
 	}
+
 	public void setAlive(boolean alive) {
 		this.alive = alive;
 		if (alive) {
-			fails=0;
+			fails = 0;
 		}
 	}
+
 	public void setBaseUrl(String baseUrl) {
 		this.baseUrl = baseUrl;
 	}
+
 	public void setExpires(Date expires) {
 		this.expires = expires;
 	}

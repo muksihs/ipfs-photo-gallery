@@ -34,6 +34,7 @@ public class IpfsGatewayCache implements GlobalEventBus {
 	protected interface IgCodec extends JsonEncoderDecoder<IpfsGatewayEntry> {
 
 	}
+
 	private static final int SECOND = 1000;
 
 	public static final int MINUTE = SECOND * 60;
@@ -78,10 +79,10 @@ public class IpfsGatewayCache implements GlobalEventBus {
 			tmp = "{ \"list\":" + g.proxyGateways().getText() + "}";
 		} else {
 			/**
-			 * can't round robin the writable gateways until we get at least one
-			 * with CORS http headers properly set to be able to read the
-			 * ipfs-hash response header. So generate a single entry
-			 * representing the IPFS host we are being hosted from.
+			 * can't round robin the writable gateways until we get at least one with CORS
+			 * http headers properly set to be able to read the ipfs-hash response header.
+			 * So generate a single entry representing the IPFS host we are being hosted
+			 * from.
 			 */
 			tmp = StringUtils.substringBefore(GWT.getHostPageBaseURL(), "/ipfs/");
 			tmp = "{ \"list\": [\"" + tmp + "/ipfs/\"]}";
@@ -212,7 +213,7 @@ public class IpfsGatewayCache implements GlobalEventBus {
 				cache.remove(key);
 			}
 		}
-		cache.put(IpfsGatewayCache.class.getName(),String.valueOf(System.currentTimeMillis()+24*60*MINUTE));
+		cache.put(IpfsGatewayCache.class.getName(), String.valueOf(System.currentTimeMillis() + 24 * 60 * MINUTE));
 	}
 
 	private void legacyCookieCleanup() {
@@ -248,11 +249,11 @@ public class IpfsGatewayCache implements GlobalEventBus {
 		}
 		String testImg;
 		if (new Random().nextBoolean()) {
-			testImg=Consts.NSFW;
+			testImg = Consts.NSFW;
 		} else {
-			testImg=Consts.PLACEHOLDER;
+			testImg = Consts.PLACEHOLDER;
 		}
-		String pingUrl = g.getBaseUrl()+ testImg;
+		String pingUrl = g.getBaseUrl() + testImg;
 		RequestBuilder rb = new RequestBuilder(RequestBuilder.HEAD, pingUrl);
 		rb.setTimeoutMillis(1000);
 		g.setAlive(false);
@@ -271,8 +272,8 @@ public class IpfsGatewayCache implements GlobalEventBus {
 	}
 
 	/**
-	 * Check to see if we have at least one alive writable gateway, if no
-	 * writable gateways exists, force expire all gateways
+	 * Check to see if we have at least one alive writable gateway, if no writable
+	 * gateways exists, force expire all gateways
 	 * 
 	 * @return
 	 */

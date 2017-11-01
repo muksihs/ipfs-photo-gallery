@@ -17,33 +17,34 @@ import muksihs.ipfs.photogallery.ui.ViewHandler.ShowView;
 import muksihs.ipfs.photogallery.ui.ViewHandler.View;
 
 public class PhotoGalleryWizard implements ScheduledCommand, GlobalEventBus {
-	
-	interface MyEventBinder extends EventBinder<PhotoGalleryWizard> {}
-	
+
+	interface MyEventBinder extends EventBinder<PhotoGalleryWizard> {
+	}
+
 	private static final MyEventBinder eventBinder = GWT.create(MyEventBinder.class);
 
-	private List<ImageData> imageDataList=new ArrayList<>();
+	private List<ImageData> imageDataList = new ArrayList<>();
 
 	public PhotoGalleryWizard() {
 		eventBinder.bindEventHandlers(this, eventBus);
 		IpfsGatewayCache.get();
 		new ViewHandler();
 	}
-	
+
 	@EventHandler
 	protected void addImages(Event.AddImages event) {
-		if (event.getFiles()==null||event.getFiles().length==0) {
+		if (event.getFiles() == null || event.getFiles().length == 0) {
 			return;
 		}
 		fireEvent(new Event.EnableSelectImages(false));
 		new LoadFileImages().load(event.getFiles());
 	}
-	
+
 	@EventHandler
 	protected void addImagesDone(Event.AddImagesDone event) {
 		fireEvent(new Event.EnableSelectImages(true));
 	}
-	
+
 	@Override
 	public void execute() {
 		fireEvent(new Event.AppLoaded());
@@ -57,32 +58,33 @@ public class PhotoGalleryWizard implements ScheduledCommand, GlobalEventBus {
 			return !ready;
 		}, 250);
 	}
-	
+
 	@EventHandler
 	protected void getAppVersion(Event.GetAppVersion event) {
 		fireEvent(new Event.DisplayAppVersion("20171101"));
 	}
-	
+
 	@EventHandler
 	protected void imageDataAdded(Event.ImageDataAdded event) {
 		imageDataList.add(event.getData());
 		fireEvent(new Event.AddToPreviewPanel(event.getData()));
 		fireEvent(new Event.UpdateImageCount(imageDataList.size()));
 	}
+
 	@EventHandler
 	protected void ipfsLoadDone(Event.IpfsLoadDone event) {
 		fireEvent(new ShowView(View.SetGalleryInfo));
 	}
-	
+
 	@EventHandler
 	protected void removeImageFromList(Event.RemoveImage event) {
-		if (event.getIndex()<0 || event.getIndex()>=imageDataList.size()) {
+		if (event.getIndex() < 0 || event.getIndex() >= imageDataList.size()) {
 			return;
 		}
 		imageDataList.remove(event.getIndex());
 		fireEvent(new Event.UpdateImageCount(imageDataList.size()));
 	}
-	
+
 	@EventHandler
 	protected void selectImagesNext(Event.SelectImagesNext event) {
 		fireEvent(new ShowView(View.UploadImages));

@@ -27,5 +27,6 @@ public class SteemBroadcast {
 	 *            Success or failure.
 	 */
 	public static native void comment(String wif, String parentAuthor, String parentPermLink, String author,
-			String permLink, String title, String body, CommentMetadata metadata, SteemCallback<CommentResult> callback);
+			String permLink, String title, String body, CommentMetadata metadata,
+			SteemCallback<CommentResult> callback);
 }

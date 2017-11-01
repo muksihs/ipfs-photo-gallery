@@ -61,13 +61,13 @@ public class IpfsGateway {
 				return null;
 			}
 			IpfsGatewayEntry g = shuffled.remove(0);
-			if (g.getBaseUrl().contains("//127.")){
+			if (g.getBaseUrl().contains("//127.")) {
 				return getAny();
 			}
-			if (g.getBaseUrl().contains("//localhost/")){
+			if (g.getBaseUrl().contains("//localhost/")) {
 				return getAny();
 			}
-			if (g.getBaseUrl().contains("//localhost:")){
+			if (g.getBaseUrl().contains("//localhost:")) {
 				return getAny();
 			}
 			if (g.isAlive() && !g.isWriteable()) {
@@ -90,13 +90,13 @@ public class IpfsGateway {
 				return null;
 			}
 			IpfsGatewayEntry g = shuffled.remove(0);
-			if (g.getBaseUrl().contains("//127.")){
+			if (g.getBaseUrl().contains("//127.")) {
 				return getAnyReadonly();
 			}
-			if (g.getBaseUrl().contains("//localhost/")){
+			if (g.getBaseUrl().contains("//localhost/")) {
 				return getAnyReadonly();
 			}
-			if (g.getBaseUrl().contains("//localhost:")){
+			if (g.getBaseUrl().contains("//localhost:")) {
 				return getAnyReadonly();
 			}
 			if (g.isAlive() && !g.isWriteable()) {

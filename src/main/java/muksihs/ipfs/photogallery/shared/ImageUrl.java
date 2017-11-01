@@ -10,6 +10,7 @@ public class ImageUrl {
 		this.setThumb(thumb);
 		this.setImage(image);
 	}
+
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj) {
@@ -52,18 +53,19 @@ public class ImageUrl {
 		}
 		return true;
 	}
+
 	public String getImage() {
 		return image;
 	}
 
-	public String getImgUrl(){
+	public String getImgUrl() {
 		StringBuilder sb = new StringBuilder();
 		sb.append(ipfsGateway);
-		if (!ipfsGateway.endsWith("/")){
+		if (!ipfsGateway.endsWith("/")) {
 			sb.append("/");
 		}
 		sb.append(ipfsHash);
-		if (!ipfsHash.endsWith("/")){
+		if (!ipfsHash.endsWith("/")) {
 			sb.append("/");
 		}
 		sb.append(image);
@@ -82,14 +84,14 @@ public class ImageUrl {
 		return thumb;
 	}
 
-	public String getThumbUrl(){
+	public String getThumbUrl() {
 		StringBuilder sb = new StringBuilder();
 		sb.append(ipfsGateway);
-		if (!ipfsGateway.endsWith("/")){
+		if (!ipfsGateway.endsWith("/")) {
 			sb.append("/");
 		}
 		sb.append(ipfsHash);
-		if (!ipfsHash.endsWith("/")){
+		if (!ipfsHash.endsWith("/")) {
 			sb.append("/");
 		}
 		sb.append(thumb);

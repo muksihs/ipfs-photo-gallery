@@ -11,6 +11,7 @@ public abstract class EventBusComposite extends Composite implements GlobalEvent
 	}
 
 	protected HandlerRegistration registration;
+
 	public EventBusComposite() {
 	}
 
@@ -25,7 +26,7 @@ public abstract class EventBusComposite extends Composite implements GlobalEvent
 			GWT.log(e.getMessage(), e);
 		}
 	}
-	
+
 	@Override
 	protected void onUnload() {
 		try {

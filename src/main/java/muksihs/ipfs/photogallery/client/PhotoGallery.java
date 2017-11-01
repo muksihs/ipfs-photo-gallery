@@ -11,10 +11,12 @@ import steemjs.SteemApi;
 import steemjs.TrendingTagsResult;
 
 public class PhotoGallery implements EntryPoint, GlobalEventBus {
-	interface MyEventBinder extends EventBinder<PhotoGallery> {}
+	interface MyEventBinder extends EventBinder<PhotoGallery> {
+	}
+
 	private final MyEventBinder eventBinder = GWT.create(MyEventBinder.class);
 	private PhotoGalleryWizard app;
-	
+
 	public void getTrendingTags() {
 		GWT.log("getTrendingTags");
 		SteemApi.getTrendingTags("", 2, (error, result) -> {
@@ -42,7 +44,7 @@ public class PhotoGallery implements EntryPoint, GlobalEventBus {
 		});
 
 	}
-	
+
 	@EventHandler
 	protected void onAppLoaded(Event.AppLoaded event) {
 		GWT.log("App loaded.");

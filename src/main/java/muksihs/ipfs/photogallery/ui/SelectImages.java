@@ -36,7 +36,7 @@ public class SelectImages extends EventBusComposite {
 
 	@UiField
 	protected FileUpload fileUpload;
-	
+
 	@UiField
 	protected MaterialPanel previewPanel;
 
@@ -53,7 +53,7 @@ public class SelectImages extends EventBusComposite {
 		fileUpload.getElement().setAttribute("accept", "image/*");
 		fileUpload.addChangeHandler(this::addFilesToUploadQueue);
 		next.setEnabled(false);
-		next.addClickHandler((e)->fireEvent(new Event.SelectImagesNext()));
+		next.addClickHandler((e) -> fireEvent(new Event.SelectImagesNext()));
 	}
 
 	private void addFilesToUploadQueue(ChangeEvent event) {
@@ -88,8 +88,8 @@ public class SelectImages extends EventBusComposite {
 	}
 
 	private Void showListEditOptions(MaterialImage image) {
-		int ix=0;
-		for (Widget child: previewPanel.getChildren()) {
+		int ix = 0;
+		for (Widget child : previewPanel.getChildren()) {
 			if (child instanceof MaterialImage) {
 				if (child == image) {
 					break;
@@ -97,28 +97,28 @@ public class SelectImages extends EventBusComposite {
 				ix++;
 			}
 		}
-		final int iy=ix;
-		
+		final int iy = ix;
+
 		MaterialModal modal = new MaterialModal();
 		modal.setTitle("Image Options");
 		MaterialButton btnCancel = new MaterialButton("CANCEL");
-		modal.addCloseHandler((e)->modal.removeFromParent());
-		btnCancel.addClickHandler((e)->modal.close());
+		modal.addCloseHandler((e) -> modal.removeFromParent());
+		btnCancel.addClickHandler((e) -> modal.close());
 		MaterialButton btnRemove = new MaterialButton("REMOVE");
-		btnRemove.addClickHandler((e)->{
-			modal.getChildren().forEach(w->{
+		btnRemove.addClickHandler((e) -> {
+			modal.getChildren().forEach(w -> {
 				if (w instanceof HasEnabled) {
-					((HasEnabled)w).setEnabled(false);
+					((HasEnabled) w).setEnabled(false);
 				}
 			});
 			modal.setEnabled(false);
 			fireEvent(new Event.RemoveImage(iy));
-			MaterialAnimation anim=new MaterialAnimation();
+			MaterialAnimation anim = new MaterialAnimation();
 			anim.delay(0);
 			anim.duration(300);
 			anim.setInfinite(false);
 			anim.setTransition(Transition.FADEOUT);
-			anim.animate(image, ()->{
+			anim.animate(image, () -> {
 				image.removeFromParent();
 				modal.close();
 			});
@@ -129,14 +129,14 @@ public class SelectImages extends EventBusComposite {
 		modal.add(child);
 		child.add(new MaterialImage(image.getUrl()));
 		previewPanel.add(modal);
-		Scheduler.get().scheduleDeferred(()->modal.open());
+		Scheduler.get().scheduleDeferred(() -> modal.open());
 		return null;
 	}
 
 	@EventHandler
 	protected void updateImageCount(Event.UpdateImageCount event) {
-		GWT.log("Have "+event.getCount()+" images in the gallery.");
-		if (event.getCount()==0) {
+		GWT.log("Have " + event.getCount() + " images in the gallery.");
+		if (event.getCount() == 0) {
 			next.setEnabled(false);
 		}
 	}
@@ -144,11 +144,11 @@ public class SelectImages extends EventBusComposite {
 	@EventHandler
 	protected void updatePreviewPanel(Event.AddToPreviewPanel event) {
 		FileReader reader = new FileReader();
-		reader.onloadend=(e)->{
+		reader.onloadend = (e) -> {
 			MaterialImage image = new MaterialImage(reader.result.asString());
 			image.setCaption(event.getImageData().getName());
 			image.setTitle(event.getImageData().getName());
-			image.addClickHandler((e2)->showListEditOptions(image));
+			image.addClickHandler((e2) -> showListEditOptions(image));
 			previewPanel.add(image);
 			return null;
 		};

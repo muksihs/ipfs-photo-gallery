@@ -4,7 +4,7 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-@JsonIgnoreProperties(ignoreUnknown=true)
+@JsonIgnoreProperties(ignoreUnknown = true)
 @SuppressWarnings("serial")
 public class StringList {
 	private List<String> list;
@@ -16,5 +16,5 @@ public class StringList {
 	public void setList(List<String> list) {
 		this.list = list;
 	}
-	
+
 }

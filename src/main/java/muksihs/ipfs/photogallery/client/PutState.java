@@ -13,7 +13,7 @@ public class PutState {
 	public String getHash() {
 		return hash;
 	}
-	
+
 	public ImageData getImageData() {
 		return images.get(index);
 	}
@@ -52,7 +52,7 @@ public class PutState {
 	}
 
 	public PutState setAllIpfsHashes(String ipfsHash) {
-		for (ImageData image: images) {
+		for (ImageData image : images) {
 			image.setIpfsHash(ipfsHash);
 		}
 		return this;
