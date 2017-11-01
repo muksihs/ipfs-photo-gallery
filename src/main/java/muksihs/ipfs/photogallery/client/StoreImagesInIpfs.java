@@ -255,7 +255,19 @@ public class StoreImagesInIpfs implements GlobalEventBus, ScheduledCommand {
 			/*
 			 * Don't start loading imgs until event hooks and max fail count are set!
 			 */
-			defer(() -> img.setAttribute("src", url));
+			defer(() -> {
+				img.setAttribute("src", url);
+				Timer failsafe = new Timer() {
+					@Override
+					public void run() {
+						if (img.hasAttribute("src")) {
+							img.removeAttribute("src");
+							img.onerror.onInvoke(null);
+						}
+					}
+				};
+				failsafe.schedule(1000);
+			});
 		}
 		return null;
 	}
