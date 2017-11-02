@@ -16,7 +16,7 @@
 	<inherits name='com.google.web.bindery.event.EventBinder'/>
 	
 	<!-- steemjs -->
-	<inherits name="steemjs.SteemJs" />
+	<inherits name="steem.Steem" />
 	<!-- HTML5 -->
 	<inherits name="elemental2.dom.Dom" />
 
