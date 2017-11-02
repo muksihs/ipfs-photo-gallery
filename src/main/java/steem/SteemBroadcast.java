@@ -1,9 +1,8 @@
 package steem;
 
-import jsinterop.annotations.JsMethod;
 import jsinterop.annotations.JsType;
 
-@JsType(name = "broadcast", namespace = "steem", isNative=true)
+@JsType(namespace = "steem", name = "broadcast", isNative = true)
 public class SteemBroadcast {
 	/**
 	 * 
@@ -27,8 +26,14 @@ public class SteemBroadcast {
 	 * @param callback
 	 *            Success or failure.
 	 */
-	@JsMethod
-	public static native void comment(String wif, String parentAuthor, String parentPermLink, String author,
-			String permLink, String title, String body, CommentMetadata metadata,
+	public static native void comment( //
+			String wif, //
+			String parentAuthor, //
+			String parentPermLink, //
+			String author, //
+			String permLink, //
+			String title, //
+			String body, //
+			CommentMetadata metadata, //
 			SteemCallback<CommentResult> callback);
 }

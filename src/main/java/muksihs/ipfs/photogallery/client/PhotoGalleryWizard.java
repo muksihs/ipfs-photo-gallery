@@ -17,6 +17,7 @@ import com.google.gwt.dom.client.NodeList;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.web.bindery.event.shared.binder.EventBinder;
 import com.google.web.bindery.event.shared.binder.EventHandler;
@@ -134,12 +135,15 @@ public class PhotoGalleryWizard implements ScheduledCommand, GlobalEventBus {
 		ImageData image;
 		image = iter.next();
 		if (image!=null) {
+			HTMLPanel p = new HTMLPanel("");
 			Anchor a = new Anchor();
-			a.setHref(image.getImageUrl());
 			Image i = new Image();
-			i.setUrl(image.getThumbUrl());
+			p.getElement().appendChild(a.getElement());
 			a.getElement().appendChild(i.getElement());
-			sb.appendHtmlConstant(a.getHTML());
+			a.setHref(image.getImageUrl());
+			a.setTarget("_blank");
+			i.setUrl(image.getThumbUrl());
+			sb.appendHtmlConstant(p.getElement().getInnerHTML());
 		}
 	}
 
@@ -178,10 +182,12 @@ public class PhotoGalleryWizard implements ScheduledCommand, GlobalEventBus {
 			body = getGalleryHtml4();
 			title = galleryInfo.getTitle();
 			permLink = System.currentTimeMillis() + "-" + galleryInfo.getTitle().replaceAll("[^a-zA-Z0-9]", "-");
+			permLink = permLink.toLowerCase().replaceAll("-+", "-");
 			author = userName;
 			parentPermLink = galleryInfo.getTags().iterator().next();
-			parentAuthor = event.getUserName();
+			parentAuthor = "";
 			wif = event.getPostingKey();
+			GWT.log("Posting key: '"+wif+"'");
 		} catch (Exception e1) {
 			GWT.log(e1.getMessage(), e1);
 			DomGlobal.console.log(e1);
@@ -214,7 +220,7 @@ public class PhotoGalleryWizard implements ScheduledCommand, GlobalEventBus {
 			"p", "img", "ol", "ul", "li", "table", //
 			"tr", "td", "thead", "center", "strong", //
 			"b", "em", "i", "strike", "u", "cite", //
-			"blockquote", "pre"));
+			"blockquote", "pre", "br", "hr"));
 
 	public static native JsArray<Node> getAttributes(Element elem)/*-{
 																	return elem.attributes;
