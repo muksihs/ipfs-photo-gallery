@@ -1,4 +1,4 @@
-package steemjs;
+package steem;
 
 import com.google.gwt.json.client.JSONValue;
 

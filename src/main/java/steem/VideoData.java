@@ -1,4 +1,4 @@
-package steemjs;
+package steem;
 
 import jsinterop.annotations.JsProperty;
 import jsinterop.annotations.JsType;
