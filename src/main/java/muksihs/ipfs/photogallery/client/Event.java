@@ -165,6 +165,32 @@ public interface Event {
 			this.postingKey=postingKey;
 			this.tipAmount=tipAmount;
 		}
+		
+		
+
+		@Override
+		public String toString() {
+			StringBuilder builder = new StringBuilder();
+			builder.append("PostGallery [");
+			if (tipAmount != null) {
+				builder.append("tipAmount=");
+				builder.append(tipAmount);
+				builder.append(", ");
+			}
+			if (postingKey != null) {
+				builder.append("postingKey=");
+				builder.append(postingKey);
+				builder.append(", ");
+			}
+			if (userName != null) {
+				builder.append("userName=");
+				builder.append(userName);
+			}
+			builder.append("]");
+			return builder.toString();
+		}
+
+
 
 		public Integer getTipAmount() {
 			return tipAmount;

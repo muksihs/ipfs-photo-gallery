@@ -8,6 +8,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.web.bindery.event.shared.binder.EventBinder;
 import com.google.web.bindery.event.shared.binder.EventHandler;
 
+import elemental2.dom.DomGlobal;
 import gwt.material.design.client.ui.MaterialButton;
 import gwt.material.design.client.ui.MaterialIntegerBox;
 import gwt.material.design.client.ui.MaterialPanel;
@@ -59,7 +60,10 @@ public class PostGallery extends EventBusComposite {
 			tipAmount.setValue(tipAmount.getValue());
 		});
 		post.addClickHandler((e)->{
-			fireEvent(new Event.PostGallery(username.getValue(), postingKey.getValue(), tipAmount.getValue()));
+			DomGlobal.console.log("Posting...");
+			Event.PostGallery event = new Event.PostGallery(username.getValue(), postingKey.getValue(), tipAmount.getValue());
+			GWT.log("Event data: "+event.toString());
+			fireEvent(event);
 		});
 	}
 	

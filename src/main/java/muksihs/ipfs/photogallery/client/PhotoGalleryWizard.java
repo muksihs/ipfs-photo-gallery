@@ -5,7 +5,6 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.Set;
 
 import com.google.gwt.core.client.GWT;
@@ -29,11 +28,11 @@ import muksihs.ipfs.photogallery.shared.GalleryInfo;
 import muksihs.ipfs.photogallery.shared.ImageData;
 import muksihs.ipfs.photogallery.shared.IpfsGateway;
 import muksihs.ipfs.photogallery.ui.GlobalEventBus;
-import steemjs.CommentMetadata;
-import steemjs.CommentResult;
-import steemjs.SteemBroadcast;
-import steemjs.SteemCallback;
-import steemjs.SteemError;
+import steem.CommentMetadata;
+import steem.CommentResult;
+import steem.SteemBroadcast;
+import steem.SteemCallback;
+import steem.SteemError;
 
 public class PhotoGalleryWizard implements ScheduledCommand, GlobalEventBus {
 
@@ -145,8 +144,8 @@ public class PhotoGalleryWizard implements ScheduledCommand, GlobalEventBus {
 	}
 
 	@EventHandler
-	protected void postGallery(Event.PostGallery event) {
-		GWT.log("postGallery");
+	protected void doPostGallery(Event.PostGallery event) {
+		DomGlobal.console.log("doPostGallery");
 		SteemCallback<CommentResult> callback = new SteemCallback<CommentResult>() {
 			@Override
 			public void onResult(SteemError error, CommentResult result) {
@@ -163,19 +162,38 @@ public class PhotoGalleryWizard implements ScheduledCommand, GlobalEventBus {
 		while (userName.startsWith("@")) {
 			userName = userName.substring(1).trim();
 		}
-		CommentMetadata metadata = new CommentMetadata();
-		metadata.setApp("MuksihsPhotoGalleryMaker/1.0");
-		metadata.setFormat("html");
-		metadata.setTags((String[]) galleryInfo.getTags().toArray());
-		String body = getGalleryHtml4();
-		String title = galleryInfo.getTitle();
-		String permLink = System.currentTimeMillis() + "-" + galleryInfo.getTitle().replaceAll("[^a-zA-Z0-9]", "-");
-		String author = userName;
-		String parentPermLink = galleryInfo.getTags().iterator().next();
-		String parentAuthor = event.getUserName();
-		String wif = event.getPostingKey();
+		CommentMetadata metadata;
+		String body="";
+		String title="";
+		String permLink="";
+		String author="";
+		String parentPermLink="";
+		String parentAuthor="";
+		String wif="";
+		metadata = new CommentMetadata();
+		try {
+			metadata.setApp("MuksihsPhotoGalleryMaker/1.0");
+			metadata.setFormat("html");
+			metadata.setTags(galleryInfo.getTags().toArray(new String[0]));
+			body = getGalleryHtml4();
+			title = galleryInfo.getTitle();
+			permLink = System.currentTimeMillis() + "-" + galleryInfo.getTitle().replaceAll("[^a-zA-Z0-9]", "-");
+			author = userName;
+			parentPermLink = galleryInfo.getTags().iterator().next();
+			parentAuthor = event.getUserName();
+			wif = event.getPostingKey();
+		} catch (Exception e1) {
+			GWT.log(e1.getMessage(), e1);
+			DomGlobal.console.log(e1);
+		}
 
-		SteemBroadcast.comment(wif, parentAuthor, parentPermLink, author, permLink, title, body, metadata, callback);
+		try {
+			DomGlobal.console.log("SteemBroadcast.comment");
+			SteemBroadcast.comment(wif, parentAuthor, parentPermLink, author, permLink, title, body, metadata, callback);
+		} catch (Exception e) {
+			GWT.log(e.getMessage(), e);
+			DomGlobal.console.log(e);
+		}
 	}
 
 	private String useDeprecatedHtml4Tags(String htmlText) {

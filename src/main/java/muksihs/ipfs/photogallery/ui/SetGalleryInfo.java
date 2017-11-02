@@ -13,7 +13,6 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.BlurEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.Window.Location;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.web.bindery.event.shared.binder.EventBinder;
 import com.google.web.bindery.event.shared.binder.EventHandler;
@@ -24,7 +23,6 @@ import gwt.material.design.addins.client.richeditor.base.constants.ToolbarButton
 import gwt.material.design.client.ui.MaterialButton;
 import gwt.material.design.client.ui.MaterialTextBox;
 import muksihs.ipfs.photogallery.client.Event;
-import muksihs.ipfs.photogallery.shared.Consts;
 import muksihs.ipfs.photogallery.shared.GalleryInfo;
 
 public class SetGalleryInfo extends EventBusComposite {
@@ -145,9 +143,6 @@ public class SetGalleryInfo extends EventBusComposite {
 
 		description.setHeightOptions(noOptions);
 		description.setDisableDragAndDrop(true);
-		if (Location.getHost().contains("localhost:8080")) {
-			description.setValue(Consts.TEST_HTML);
-		}
 	}
 
 	@Override

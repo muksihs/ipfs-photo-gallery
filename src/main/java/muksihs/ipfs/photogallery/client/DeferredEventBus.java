@@ -1,5 +1,6 @@
 package muksihs.ipfs.photogallery.client;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.web.bindery.event.shared.Event;
@@ -16,6 +17,7 @@ public class DeferredEventBus extends SimpleEventBus {
 
 	@Override
 	public void fireEvent(Event<?> event) {
+		GWT.log("event: "+event.getClass().getSimpleName());
 		defer(() -> super.fireEvent(event));
 	}
 

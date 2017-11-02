@@ -2,13 +2,15 @@ package muksihs.ipfs.photogallery.client;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.GWT.UncaughtExceptionHandler;
 import com.google.gwt.core.client.Scheduler;
 import com.google.web.bindery.event.shared.binder.EventBinder;
 import com.google.web.bindery.event.shared.binder.EventHandler;
 
+import elemental2.dom.DomGlobal;
 import muksihs.ipfs.photogallery.ui.GlobalEventBus;
-import steemjs.SteemApi;
-import steemjs.TrendingTagsResult;
+import steem.SteemApi;
+import steem.TrendingTagsResult;
 
 public class PhotoGallery implements EntryPoint, GlobalEventBus {
 	interface MyEventBinder extends EventBinder<PhotoGallery> {
@@ -16,11 +18,18 @@ public class PhotoGallery implements EntryPoint, GlobalEventBus {
 
 	private final MyEventBinder eventBinder = GWT.create(MyEventBinder.class);
 	private PhotoGalleryWizard app;
+	private UncaughtExceptionHandler handler=new UncaughtExceptionHandler() {
+		@Override
+		public void onUncaughtException(Throwable e) {
+			GWT.log(e.getMessage(), e);
+			DomGlobal.console.log(e.getMessage(), e);
+		}
+	};
 
 	public void getTrendingTags() {
-		GWT.log("getTrendingTags");
+		DomGlobal.console.log("getTrendingTags");
 		SteemApi.getTrendingTags("", 2, (error, result) -> {
-			GWT.log("getTrendingTags#callback");
+			DomGlobal.console.log("getTrendingTags#callback");
 			if (result != null) {
 				for (TrendingTagsResult r : result) {
 					StringBuilder builder = new StringBuilder();
@@ -35,10 +44,10 @@ public class PhotoGallery implements EntryPoint, GlobalEventBus {
 						builder.append("getTrending()=").append(r.getTrending());
 					builder.append("]");
 
-					GWT.log(r.getName() + ": " + builder.toString());
+					DomGlobal.console.log(r.getName() + ": " + builder.toString(), result);
 				}
 			} else {
-				GWT.log("error: " + String.valueOf(error));
+				DomGlobal.console.log("error: ",error);
 				Scheduler.get().scheduleDeferred(this::getTrendingTags);
 			}
 		});
@@ -48,10 +57,12 @@ public class PhotoGallery implements EntryPoint, GlobalEventBus {
 	@EventHandler
 	protected void onAppLoaded(Event.AppLoaded event) {
 		GWT.log("App loaded.");
+		getTrendingTags();
 	}
 
 	@Override
 	public void onModuleLoad() {
+		GWT.setUncaughtExceptionHandler(handler);
 		eventBinder.bindEventHandlers(this, eventBus);
 		app = new PhotoGalleryWizard();
 		Scheduler.get().scheduleDeferred(app);
