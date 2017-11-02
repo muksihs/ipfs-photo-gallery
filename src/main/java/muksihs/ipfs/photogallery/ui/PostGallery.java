@@ -1,29 +1,47 @@
 package muksihs.ipfs.photogallery.ui;
 
-import java.util.List;
-
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.editor.client.Editor;
-import com.google.gwt.editor.client.EditorError;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.ValueBoxBase.TextAlignment;
 import com.google.gwt.user.client.ui.Widget;
-import com.google.gwt.validation.client.impl.Validation;
 import com.google.web.bindery.event.shared.binder.EventBinder;
+import com.google.web.bindery.event.shared.binder.EventHandler;
 
-import gwt.material.design.client.base.validator.Validator;
-import gwt.material.design.client.constants.TextAlign;
+import gwt.material.design.client.ui.MaterialButton;
 import gwt.material.design.client.ui.MaterialIntegerBox;
+import gwt.material.design.client.ui.MaterialPanel;
+import gwt.material.design.client.ui.MaterialTextBox;
+import gwt.material.design.client.ui.MaterialTitle;
+import muksihs.ipfs.photogallery.client.Event;
 
 public class PostGallery extends EventBusComposite {
 	
 	@UiField
 	protected MaterialIntegerBox tipAmount;
+	@UiField
+	protected MaterialTextBox username;
+	@UiField
+	protected MaterialTextBox postingKey;
+	@UiField
+	protected MaterialButton post;
+	@UiField
+	protected MaterialTitle previewTitle;
+	@UiField
+	protected MaterialPanel previewPanel;
 
 	private static PostGalleryUiBinder uiBinder = GWT.create(PostGalleryUiBinder.class);
 
 	interface PostGalleryUiBinder extends UiBinder<Widget, PostGallery> {
+	}
+	
+	@EventHandler
+	protected void setPreviewTitle(Event.SetPreviewTitle event) {
+		previewTitle.setTitle(event.getTitle());
+	}
+	@EventHandler
+	protected void setPreviewHtml(Event.SetPreviewHtml event) {
+		previewPanel.getElement().setInnerHTML(event.getPreviewHtml());
 	}
 
 	public PostGallery() {
@@ -40,8 +58,18 @@ public class PostGallery extends EventBusComposite {
 			}
 			tipAmount.setValue(tipAmount.getValue());
 		});
+		post.addClickHandler((e)->{
+			fireEvent(new Event.PostGallery(username.getValue(), postingKey.getValue(), tipAmount.getValue()));
+		});
 	}
-
+	
+	@Override
+	protected void onLoad() {
+		super.onLoad();
+		GWT.log("firing: Event.ViewLoaded");
+		fireEvent(new Event.WantsHtmlDisplayed());
+	}
+	
 	interface MyEventBinder extends EventBinder<PostGallery>{}
 	@Override
 	protected <T extends EventBinder<EventBusComposite>> T getEventBinder() {

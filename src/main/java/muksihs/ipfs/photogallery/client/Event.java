@@ -6,6 +6,24 @@ import elemental2.dom.FileList;
 import muksihs.ipfs.photogallery.shared.ImageData;
 
 public interface Event {
+	public class SetPreviewTitle extends GenericEvent {
+
+		private final String title;
+
+		public SetPreviewTitle(String title) {
+			this.title=title;
+		}
+
+		public String getTitle() {
+			return title;
+		}
+
+	}
+
+	public class GetGalleryInfo extends GenericEvent {
+
+	}
+
 	public class AddImages extends GenericEvent {
 		private final FileList files;
 
@@ -35,9 +53,11 @@ public interface Event {
 	}
 
 	public static class AlertMessage extends GenericEvent {
-		private String message;
+		private final String message;
+		private final String title;
 
-		public AlertMessage(String string) {
+		public AlertMessage(String title, String string) {
+			this.title = title;
 			this.message = string;
 		}
 
@@ -45,8 +65,8 @@ public interface Event {
 			return message;
 		}
 
-		public void setMessage(String message) {
-			this.message = message;
+		public String getTitle() {
+			return title;
 		}
 	}
 
@@ -103,10 +123,6 @@ public interface Event {
 
 	}
 
-	public class GetGalleryInfoPageValues extends GenericEvent {
-
-	}
-
 	public class GetPostingKey extends GenericEvent {
 
 	}
@@ -139,6 +155,28 @@ public interface Event {
 	}
 
 	public static class PostGallery extends GenericEvent {
+
+		private final Integer tipAmount;
+		private final String postingKey;
+		private final String userName;
+
+		public PostGallery(String userName, String postingKey, Integer tipAmount) {
+			this.userName=userName;
+			this.postingKey=postingKey;
+			this.tipAmount=tipAmount;
+		}
+
+		public Integer getTipAmount() {
+			return tipAmount;
+		}
+
+		public String getPostingKey() {
+			return postingKey;
+		}
+
+		public String getUserName() {
+			return userName;
+		}
 
 	}
 
@@ -365,9 +403,6 @@ public interface Event {
 			this.files = files;
 		}
 
-	}
-
-	public static class ViewLoaded extends GenericEvent {
 	}
 
 	public static class WantsColumns extends GenericEvent {

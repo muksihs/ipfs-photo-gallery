@@ -13,7 +13,7 @@
 	<m:MaterialButton ui:field="next" style='display: inline-block;' text="NEXT"></m:MaterialButton>
 	</m:MaterialPanel>
 	<m:MaterialTextBox ui:field="title" label="Title" title="Enter Gallery Post Title" placeholder="Enter Gallery Post Title"></m:MaterialTextBox>
-	<m:MaterialTextBox ui:field="tags" label="Tags" placeholder="Enter up to 5 tags. The first tag will be the main category for the post."></m:MaterialTextBox>
+	<m:MaterialTextBox ui:field="tags" label="Tags" placeholder="Enter up to 5 tags. Use only lowercase letters and digits. You may include one dash. The first tag will be the main category for the post."></m:MaterialTextBox>
 	<m:MaterialDivider></m:MaterialDivider>
 	<ma:richeditor.MaterialRichEditor ui:field="description" title="Description" placeholder="Enter Gallery Description and Post Text"/>
 	<m:MaterialDivider></m:MaterialDivider>

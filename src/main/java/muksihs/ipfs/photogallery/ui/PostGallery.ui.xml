@@ -3,20 +3,19 @@
 	xmlns:g="urn:import:com.google.gwt.user.client.ui" xmlns:m="urn:import:gwt.material.design.client.ui"
 	xmlns:x="urn:import:muksihs.ipfs.photogallery.ui">
 	<ui:style>
-	
 	</ui:style>
 	<m:MaterialPanel style='margin: auto; text-align: center; max-width:840px;'>
 		<x:HeaderBlock></x:HeaderBlock>
 		<m:MaterialPanel style='margin: auto; text-align: right; max-width:840px;'>
 			<m:MaterialButton ui:field="cancel" style='display: inline-block;'
 				text="CANCEL"></m:MaterialButton>
-			<m:MaterialButton ui:field="next" style='display: inline-block;'
+			<m:MaterialButton ui:field="post" style='display: inline-block;'
 				text="POST"></m:MaterialButton>
 		</m:MaterialPanel>
 		<m:MaterialPanel style='margin: auto; text-align: left; max-width:840px;'>
-		<m:MaterialTextBox style='display: inline-block; margn: 8px;' ui:field="username" label="Steem Username"
+		<m:MaterialTextBox style='display: inline-block; margin: 8px;' ui:field="username" label="Steem Username"
 			title="Steem Username" placeholder="Enter your steem username. Your username will not be saved."></m:MaterialTextBox>
-		<m:MaterialIntegerBox ui:field="tipAmount"  style='margin: 8px; display: inline-block;' label="Tip Muksihs by (percent)"
+		<m:MaterialIntegerBox ui:field="tipAmount"  style='min-width: 10em; margin: 8px; display: inline-block;' label="Tip Muksihs by (percent)"
 			value="15" validateOnBlur="true" placeholder="The delegate amount to tip Muksihs with for creating this software. Any value in the range of 0 to 100."></m:MaterialIntegerBox>
 		<m:MaterialTextBox ui:field="postingKey" style='margin: 8px;' label="Private Posting Key"
 			placeholder="Enter your private posting key. The key will not be saved."></m:MaterialTextBox>
@@ -25,9 +24,14 @@
 		<m:MaterialLabel style='text-align: justify;'
 			text="This post is not guarenteed to display the same on steemit.com, as of the date this version of Muksihs' Photo Gallery Maker was published, they only supported a subset of deprecated HTML4 methods for basic text formatting. This program will attempt to convert the inline HTML5 styles to steemit.com compatible HTML4 tags."></m:MaterialLabel>
 		<m:MaterialDivider></m:MaterialDivider>
+		<m:MaterialPanel style="text-align: left;" class="Markdown">
+		<m:MaterialTitle ui:field="previewTitle"></m:MaterialTitle>
+		<m:MaterialDivider></m:MaterialDivider>
 		<m:MaterialPanel ui:field="previewPanel"
-			style='margin: auto; text-align: left; max-width:840px;'>
+			style='margin: auto; text-align: left;'>
 			<m:MaterialLabel text="Preview Area"></m:MaterialLabel>
 		</m:MaterialPanel>
+		</m:MaterialPanel>
+		<m:MaterialDivider></m:MaterialDivider>
 	</m:MaterialPanel>
 </ui:UiBinder> 

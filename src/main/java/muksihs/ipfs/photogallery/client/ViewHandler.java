@@ -76,7 +76,7 @@ public class ViewHandler implements GlobalEventBus {
 	protected void showAlert(Event.AlertMessage event) {
 		MaterialModal alert = new MaterialModal();
 		alert.setTitle("ALERT!");
-		alert.add(new MaterialTitle(event.getMessage(), event.getMessage()));
+		alert.add(new MaterialTitle(event.getTitle(), event.getMessage()));
 		alert.addCloseHandler((e) -> alert.removeFromParent());
 		MaterialButton btn = new MaterialButton("OK");
 		btn.addClickHandler((e) -> alert.close());

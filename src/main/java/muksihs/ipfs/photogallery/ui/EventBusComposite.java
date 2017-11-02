@@ -19,6 +19,7 @@ public abstract class EventBusComposite extends Composite implements GlobalEvent
 
 	@Override
 	protected void onLoad() {
+		GWT.log(this.getClass().getSimpleName()+"#onLoad");
 		try {
 			registration = getEventBinder().bindEventHandlers(this, eventBus);
 			super.onLoad();

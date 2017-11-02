@@ -55,7 +55,6 @@ public class StoreImagesInIpfs implements GlobalEventBus, ScheduledCommand {
 
 	private void doImageHeadRequest(ListIterator<ImageData> iImages) {
 		if (!iImages.hasNext()) {
-			fireEvent(new Event.StoreImagesDone());
 			return;
 		}
 		ImageData image = iImages.next();
@@ -134,6 +133,10 @@ public class StoreImagesInIpfs implements GlobalEventBus, ScheduledCommand {
 			 * ipfs-hash in the background (sequentially)
 			 */
 			doImageHeadRequest(state.getImages().listIterator());
+			/*
+			 * While head requests are firing, go ahead and show post editor
+			 */
+			fireEvent(new Event.StoreImagesDone());
 			return null;
 		}
 		state.resetFails();
@@ -144,7 +147,7 @@ public class StoreImagesInIpfs implements GlobalEventBus, ScheduledCommand {
 	private Void putThumb(PutState state, String newHash, double status) {
 		if ((int) status == 405) {
 			GWT.log("put not supported on this gateway!");
-			fireEvent(new Event.AlertMessage(
+			fireEvent(new Event.AlertMessage( "IPFS Gateway Error",
 					"This IPFS gateway does not support uploads via PUT!\nPlease select a different gateway!"));
 			return null;
 		}
@@ -170,8 +173,7 @@ public class StoreImagesInIpfs implements GlobalEventBus, ScheduledCommand {
 	private void retryPutImage(PutState state) {
 		state.incFails();
 		if (state.getPutFails() > 5) {
-			fireEvent(new Event.AlertMessage("Too Many Upload Failures!"));
-			fireEvent(new Event.AlertMessage("Aborting!"));
+			fireEvent(new Event.AlertMessage("IPFS Gateway Error", "Too Many Upload Failures!\nAborting!"));
 			return;
 		}
 		GWT.log("retryPutImage: " + state.getImageData().getName());
@@ -260,8 +262,11 @@ public class StoreImagesInIpfs implements GlobalEventBus, ScheduledCommand {
 				Timer failsafe = new Timer() {
 					@Override
 					public void run() {
+						if (loadState.loaded) {
+							return;
+						}
 						onImageLoadFail(state, loadState, img);
-						GWT.log("image load abort - took too long!");
+						GWT.log("image load failed - timeout");
 					}
 				};
 				failsafe.schedule(3000);
