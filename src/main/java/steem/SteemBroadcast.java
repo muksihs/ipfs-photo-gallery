@@ -4,8 +4,9 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONParser;
-import com.google.gwt.json.client.JSONValue;
 
 import jsinterop.annotations.JsOverlay;
 import jsinterop.annotations.JsType;
@@ -18,7 +19,7 @@ public class SteemBroadcast {
 
 		public String toJson() {
 			StringBuilder sb = new StringBuilder();
-			sb.append("{ beneficiaries: [\n");
+			sb.append("{ \"beneficiaries\": [\n");
 			Iterator<Beneficiary> ib = beneficiaries.iterator();
 			while (ib.hasNext()) {
 				Beneficiary b = ib.next();
@@ -39,18 +40,18 @@ public class SteemBroadcast {
 
 		/**
 		 * 
-		 * @param username Who is to receive the benefits.
-		 * @param percent The amount of benefits in whole percents (no fractionals).
+		 * @param account Who is to receive the benefits.
+		 * @param weight The amount of benefits in whole percents (no fractionals).
 		 */
-		public Beneficiary(String username, int percent) {
-			this.account=username;
-			if (percent<0) {
-				percent=0;
+		public Beneficiary(String account, int weight) {
+			this.account=account;
+			if (weight<0) {
+				weight=0;
 			}
-			if (percent>100) {
-				percent=100;
+			if (weight>100) {
+				weight=100;
 			}
-			this.weight=100*percent;
+			this.weight=weight;
 		}
 
 		public String toJson() {
@@ -58,7 +59,7 @@ public class SteemBroadcast {
 			sb.append("{ \"account\": \"");
 			sb.append(escapeJson(account));
 			sb.append("\", \"weight\": ");
-			sb.append(weight);
+			sb.append(weight*100);
 			sb.append("}");
 			return sb.toString();
 		}
@@ -138,11 +139,11 @@ public class SteemBroadcast {
 	public static void commentOptions(String wif, String author, //
 			String permlink, CommentOptionsExtensions extensions, //
 			SteemCallback<CommentResult> callback) {
-		JSONValue extensionsJson = JSONParser.parseStrict(extensions.toJson());
+		JSONArray extensionsJson = JSONParser.parseStrict(extensions.toJson()).isArray();
 		commentOptions( //
 				wif, author, permlink, //
 				"1000000.000 SBD", 10000, true, true, //
-				extensionsJson, callback);
+				extensionsJson.getJavaScriptObject(), callback);
 	}
 
 	/**
@@ -157,7 +158,7 @@ public class SteemBroadcast {
 	 * @param percentSteemDollars
 	 * @param allowVotes
 	 * @param allowCurationRewards
-	 * @param extensions
+	 * @param javaScriptObject
 	 * @param callback
 	 */
 	public static native void commentOptions(//
@@ -168,7 +169,7 @@ public class SteemBroadcast {
 			int percentSteemDollars, //
 			boolean allowVotes, //
 			boolean allowCurationRewards, //
-			JSONValue extensions, //
+			JavaScriptObject javaScriptObject, //
 			SteemCallback<CommentResult> callback);
 
 	@JsOverlay
