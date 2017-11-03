@@ -88,6 +88,7 @@ public class SteemBroadcast {
 		}
 
 	}
+	@JsOverlay
 	private static String escapeJson(String string) {
 		string = string.replace("\\", "\\\\");
 		string = string.replace("\"", "\\\"");
