@@ -10,6 +10,7 @@ import java.util.Random;
 
 import org.apache.commons.lang3.StringUtils;
 import org.fusesource.restygwt.client.JsonEncoderDecoder;
+import org.fusesource.restygwt.client.JsonEncoderDecoder.DecodingException;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
@@ -57,7 +58,15 @@ public class IpfsGatewayCache implements GlobalEventBus {
 		StorageMap cache = instance.cache;
 		IpfsGateway.getGateways().forEach((g) -> {
 			String jsonTxt = cache.get(IpfsGatewayEntry.class.getSimpleName() + ":" + g.getBaseUrl());
-			IpfsGatewayEntry cached = instance.codec.decode(JSONParser.parseStrict(jsonTxt));
+			if (jsonTxt==null||jsonTxt.trim().isEmpty()) {
+				return;
+			}
+			IpfsGatewayEntry cached;
+			try {
+				cached = instance.codec.decode(JSONParser.parseStrict(jsonTxt));
+			} catch (DecodingException e) {
+				return;
+			}
 			if (cached != null) {
 				g.setAlive(cached.isAlive());
 				g.setExpires(cached.getExpires());
