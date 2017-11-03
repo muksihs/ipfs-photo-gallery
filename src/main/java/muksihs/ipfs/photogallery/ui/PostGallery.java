@@ -18,33 +18,25 @@ import muksihs.ipfs.photogallery.client.Event;
 
 public class PostGallery extends EventBusComposite {
 	
+	interface MyEventBinder extends EventBinder<PostGallery>{}
+	interface PostGalleryUiBinder extends UiBinder<Widget, PostGallery> {
+	}
+	private static PostGalleryUiBinder uiBinder = GWT.create(PostGalleryUiBinder.class);
 	@UiField
 	protected MaterialIntegerBox tipAmount;
 	@UiField
 	protected MaterialTextBox username;
 	@UiField
 	protected MaterialTextBox postingKey;
+
 	@UiField
 	protected MaterialButton post;
+
 	@UiField
 	protected MaterialTitle previewTitle;
+	
 	@UiField
 	protected MaterialPanel previewPanel;
-
-	private static PostGalleryUiBinder uiBinder = GWT.create(PostGalleryUiBinder.class);
-
-	interface PostGalleryUiBinder extends UiBinder<Widget, PostGallery> {
-	}
-	
-	@EventHandler
-	protected void setPreviewTitle(Event.SetPreviewTitle event) {
-		previewTitle.setTitle(event.getTitle());
-	}
-	@EventHandler
-	protected void setPreviewHtml(Event.SetPreviewHtml event) {
-		previewPanel.getElement().setInnerHTML(event.getPreviewHtml());
-	}
-
 	public PostGallery() {
 		initWidget(uiBinder.createAndBindUi(this));
 		tipAmount.setMin("0");
@@ -66,6 +58,11 @@ public class PostGallery extends EventBusComposite {
 			fireEvent(event);
 		});
 	}
+
+	@Override
+	protected <T extends EventBinder<EventBusComposite>> T getEventBinder() {
+		return GWT.create(MyEventBinder.class);
+	}
 	
 	@Override
 	protected void onLoad() {
@@ -74,10 +71,13 @@ public class PostGallery extends EventBusComposite {
 		fireEvent(new Event.WantsHtmlDisplayed());
 	}
 	
-	interface MyEventBinder extends EventBinder<PostGallery>{}
-	@Override
-	protected <T extends EventBinder<EventBusComposite>> T getEventBinder() {
-		return GWT.create(MyEventBinder.class);
+	@EventHandler
+	protected void setPreviewHtml(Event.SetPreviewHtml event) {
+		previewPanel.getElement().setInnerHTML(event.getPreviewHtml());
+	}
+	@EventHandler
+	protected void setPreviewTitle(Event.SetPreviewTitle event) {
+		previewTitle.setTitle(event.getTitle());
 	}
 
 }

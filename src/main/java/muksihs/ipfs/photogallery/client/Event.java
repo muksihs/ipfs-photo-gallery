@@ -6,44 +6,6 @@ import elemental2.dom.FileList;
 import muksihs.ipfs.photogallery.shared.ImageData;
 
 public interface Event {
-	public class PostSuccess extends GenericEvent {
-
-		private final String author;
-		private final String permLink;
-
-		public PostSuccess(String author, String permLink) {
-			this.author=author;
-			this.permLink=permLink;
-		}
-
-		public String getAuthor() {
-			return author;
-		}
-
-		public String getPermLink() {
-			return permLink;
-		}
-
-	}
-
-	public class SetPreviewTitle extends GenericEvent {
-
-		private final String title;
-
-		public SetPreviewTitle(String title) {
-			this.title=title;
-		}
-
-		public String getTitle() {
-			return title;
-		}
-
-	}
-
-	public class GetGalleryInfo extends GenericEvent {
-
-	}
-
 	public class AddImages extends GenericEvent {
 		private final FileList files;
 
@@ -143,6 +105,10 @@ public interface Event {
 
 	}
 
+	public class GetGalleryInfo extends GenericEvent {
+
+	}
+
 	public class GetPostingKey extends GenericEvent {
 
 	}
@@ -170,10 +136,6 @@ public interface Event {
 	public static class IpfsGatewayReady extends GenericEvent {
 	}
 
-	public class StoreImagesDone extends GenericEvent {
-
-	}
-
 	public static class PostGallery extends GenericEvent {
 
 		private final Integer tipAmount;
@@ -187,6 +149,20 @@ public interface Event {
 		}
 		
 		
+
+		public String getPostingKey() {
+			return postingKey;
+		}
+
+
+
+		public Integer getTipAmount() {
+			return tipAmount;
+		}
+
+		public String getUserName() {
+			return userName;
+		}
 
 		@Override
 		public String toString() {
@@ -210,18 +186,24 @@ public interface Event {
 			return builder.toString();
 		}
 
+	}
 
+	public class PostSuccess extends GenericEvent {
 
-		public Integer getTipAmount() {
-			return tipAmount;
+		private final String author;
+		private final String permLink;
+
+		public PostSuccess(String author, String permLink) {
+			this.author=author;
+			this.permLink=permLink;
 		}
 
-		public String getPostingKey() {
-			return postingKey;
+		public String getAuthor() {
+			return author;
 		}
 
-		public String getUserName() {
-			return userName;
+		public String getPermLink() {
+			return permLink;
 		}
 
 	}
@@ -293,6 +275,20 @@ public interface Event {
 		public void setPreviewHtml(String previewHtml) {
 			this.previewHtml = previewHtml;
 		}
+	}
+
+	public class SetPreviewTitle extends GenericEvent {
+
+		private final String title;
+
+		public SetPreviewTitle(String title) {
+			this.title=title;
+		}
+
+		public String getTitle() {
+			return title;
+		}
+
 	}
 
 	public class SetProgress extends GenericEvent {
@@ -377,6 +373,10 @@ public interface Event {
 		public boolean isLoading() {
 			return loading;
 		}
+
+	}
+
+	public class StoreImagesDone extends GenericEvent {
 
 	}
 

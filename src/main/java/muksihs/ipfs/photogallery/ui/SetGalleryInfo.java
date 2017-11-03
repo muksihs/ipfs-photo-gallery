@@ -46,6 +46,66 @@ public class SetGalleryInfo extends EventBusComposite {
 	@UiField
 	protected MaterialButton next;
 
+	public SetGalleryInfo() {
+		initWidget(uiBinder.createAndBindUi(this));
+		title.setAllowBlank(false);
+		description.setAllowBlank(false);
+
+		tags.setValue("photos");
+		tags.addBlurHandler(this::validateTags);
+
+		next.addClickHandler((e) -> fireEvent(new Event.SetGalleryInfoNext()));
+		cancel.addClickHandler((e) -> fireEvent(new Event.Cancel()));
+
+		ToolbarButton[] noOptions = new ToolbarButton[0];
+
+		description.setStyleOptions(ToolbarButton.STYLE, ToolbarButton.BOLD, ToolbarButton.ITALIC,
+				ToolbarButton.UNDERLINE, ToolbarButton.STRIKETHROUGH, ToolbarButton.CLEAR, ToolbarButton.SUPERSCRIPT,
+				ToolbarButton.SUBSCRIPT);
+		description.setFontOptions(noOptions);
+		description.setColorOptions(noOptions);
+		// description.setUndoOptions(noOptions);
+		description.setCkMediaOptions(noOptions);
+		description.setMiscOptions(ToolbarButton.LINK,
+				// ToolbarButton.PICTURE,
+				// ToolbarButton.TABLE,
+				ToolbarButton.HR,
+				// ToolbarButton.FULLSCREEN,
+				ToolbarButton.CODE_VIEW);
+		description.setParaOptions(ToolbarButton.UL, ToolbarButton.OL,
+				// ToolbarButton.PARAGRAPH,
+				ToolbarButton.LEFT, ToolbarButton.CENTER,
+				// ToolbarButton.RIGHT,
+				ToolbarButton.JUSTIFY);
+
+		description.setHeightOptions(noOptions);
+		description.setDisableDragAndDrop(true);
+	}
+
+	@Override
+	protected <T extends EventBinder<EventBusComposite>> T getEventBinder() {
+		return GWT.create(MyEventBinder.class);
+	}
+
+	@EventHandler
+	protected void getGalleryInfo(Event.GetGalleryInfo event) {
+		GWT.log("getGalleryInfo");
+		GalleryInfo info;
+		try {
+			GWT.log("Title: "+title.getValue());
+			GWT.log("Tags: "+tags.getValue());
+			GWT.log("Description: "+description.getValue());
+			List<String> tagsAsList = Arrays.asList(tags.getValue().split("\\s"));
+			info = new GalleryInfo().setTitle(title.getValue()) //
+					.setDescription(description.getValue()) //
+					.setTags(tagsAsList);
+			fireEvent(new Event.GalleryInfo(info));
+		} catch (Exception e) {
+			GWT.log(e.getMessage(), e);
+			DomGlobal.console.log(e);
+		}
+	}
+
 	protected void validateTags(BlurEvent e) {
 		List<String> asList = new ArrayList<>(Arrays.asList(tags.getValue().split("\\s")));
 		ListIterator<String> li = asList.listIterator();
@@ -88,65 +148,5 @@ public class SetGalleryInfo extends EventBusComposite {
 			asList.subList(5, asList.size()).clear();
 		}
 		tags.setValue(StringUtils.join(asList, " "));
-	}
-
-	@EventHandler
-	protected void getGalleryInfo(Event.GetGalleryInfo event) {
-		GWT.log("getGalleryInfo");
-		GalleryInfo info;
-		try {
-			GWT.log("Title: "+title.getValue());
-			GWT.log("Tags: "+tags.getValue());
-			GWT.log("Description: "+description.getValue());
-			List<String> tagsAsList = Arrays.asList(tags.getValue().split("\\s"));
-			info = new GalleryInfo().setTitle(title.getValue()) //
-					.setDescription(description.getValue()) //
-					.setTags(tagsAsList);
-			fireEvent(new Event.GalleryInfo(info));
-		} catch (Exception e) {
-			GWT.log(e.getMessage(), e);
-			DomGlobal.console.log(e);
-		}
-	}
-
-	public SetGalleryInfo() {
-		initWidget(uiBinder.createAndBindUi(this));
-		title.setAllowBlank(false);
-		description.setAllowBlank(false);
-
-		tags.setValue("photos");
-		tags.addBlurHandler(this::validateTags);
-
-		next.addClickHandler((e) -> fireEvent(new Event.SetGalleryInfoNext()));
-		cancel.addClickHandler((e) -> fireEvent(new Event.Cancel()));
-
-		ToolbarButton[] noOptions = new ToolbarButton[0];
-
-		description.setStyleOptions(ToolbarButton.STYLE, ToolbarButton.BOLD, ToolbarButton.ITALIC,
-				ToolbarButton.UNDERLINE, ToolbarButton.STRIKETHROUGH, ToolbarButton.CLEAR, ToolbarButton.SUPERSCRIPT,
-				ToolbarButton.SUBSCRIPT);
-		description.setFontOptions(noOptions);
-		description.setColorOptions(noOptions);
-		// description.setUndoOptions(noOptions);
-		description.setCkMediaOptions(noOptions);
-		description.setMiscOptions(ToolbarButton.LINK,
-				// ToolbarButton.PICTURE,
-				// ToolbarButton.TABLE,
-				ToolbarButton.HR,
-				// ToolbarButton.FULLSCREEN,
-				ToolbarButton.CODE_VIEW);
-		description.setParaOptions(ToolbarButton.UL, ToolbarButton.OL,
-				// ToolbarButton.PARAGRAPH,
-				ToolbarButton.LEFT, ToolbarButton.CENTER,
-				// ToolbarButton.RIGHT,
-				ToolbarButton.JUSTIFY);
-
-		description.setHeightOptions(noOptions);
-		description.setDisableDragAndDrop(true);
-	}
-
-	@Override
-	protected <T extends EventBinder<EventBusComposite>> T getEventBinder() {
-		return GWT.create(MyEventBinder.class);
 	};
 }

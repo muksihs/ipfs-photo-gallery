@@ -13,6 +13,75 @@ import jsinterop.annotations.JsType;
 @JsType(namespace = "steem", name = "broadcast", isNative = true)
 public class SteemBroadcast {
 	
+	public static class Beneficiaries {
+		public List<Beneficiary> beneficiaries = new ArrayList<>();
+
+		public String toJson() {
+			StringBuilder sb = new StringBuilder();
+			sb.append("{ beneficiaries: [\n");
+			Iterator<Beneficiary> ib = beneficiaries.iterator();
+			while (ib.hasNext()) {
+				Beneficiary b = ib.next();
+				sb.append("   ");
+				sb.append(b.toJson());
+				if (ib.hasNext()) {
+					sb.append(",\n");
+				}
+			}
+			sb.append("]}\n");
+			return sb.toString();
+		}
+	}
+	
+	public static class Beneficiary {
+		private final String account;
+		private final int weight;
+
+		/**
+		 * 
+		 * @param username Who is to receive the benefits.
+		 * @param percent The amount of benefits in whole percents (no fractionals).
+		 */
+		public Beneficiary(String username, int percent) {
+			this.account=username;
+			if (percent<0) {
+				percent=0;
+			}
+			if (percent>100) {
+				percent=100;
+			}
+			this.weight=100*percent;
+		}
+
+		public String toJson() {
+			StringBuilder sb = new StringBuilder();
+			sb.append("{ \"account\": \"");
+			sb.append(escapeJson(account));
+			sb.append("\", \"weight\": ");
+			sb.append(weight);
+			sb.append("}");
+			return sb.toString();
+		}
+
+	}
+
+	public static class CommentOptionsExtensions {
+		public Beneficiaries beneficiaries;
+
+		public String toJson() {
+			/*
+			 * this is a weird looking JSON array .... [[ type_number, {} ]] and has a magic
+			 * type number in it!
+			 */
+			StringBuilder sb = new StringBuilder();
+			sb.append("[[");
+			sb.append(ExtensionsType.COMMENT_PAYOUT_BENEFICIARIES.getTypeId());
+			sb.append(",\n");
+			sb.append(beneficiaries.toJson());
+			sb.append("]]");
+			return sb.toString();
+		}
+	}
 	public static enum ExtensionsType {
 	    COMMENT_PAYOUT_BENEFICIARIES(0);
 		private final int typeId;
@@ -23,7 +92,7 @@ public class SteemBroadcast {
 			return typeId;
 		}
 	}
-	
+
 	/**
 	 * 
 	 * @param wif
@@ -57,81 +126,23 @@ public class SteemBroadcast {
 			CommentMetadata metadata, //
 			SteemCallback<CommentResult> callback);
 
-	public static class Beneficiary {
-		private final String account;
-		private final int weight;
-
-		/**
-		 * 
-		 * @param username Who is to receive the benefits.
-		 * @param percent The amount of benefits in whole percents (no fractionals).
-		 */
-		public Beneficiary(String username, int percent) {
-			this.account=username;
-			if (percent<0) {
-				percent=0;
-			}
-			if (percent>100) {
-				percent=100;
-			}
-			this.weight=100*percent;
-		}
-
-		public String toJson() {
-			StringBuilder sb = new StringBuilder();
-			sb.append("{ \"account\": \"");
-			sb.append(escapeJson(account));
-			sb.append("\", \"weight\": ");
-			sb.append(weight);
-			sb.append("}");
-			return sb.toString();
-		}
-
-	}
+	/**
+	 * 
+	 * @param wif
+	 * @param author
+	 * @param permlink
+	 * @param extensions
+	 * @param callback
+	 */
 	@JsOverlay
-	private static String escapeJson(String string) {
-		string = string.replace("\\", "\\\\");
-		string = string.replace("\"", "\\\"");
-		string = string.replace("/", "\\/");
-		return string;
-	}
-
-	public static class Beneficiaries {
-		public List<Beneficiary> beneficiaries = new ArrayList<>();
-
-		public String toJson() {
-			StringBuilder sb = new StringBuilder();
-			sb.append("{ beneficiaries: [\n");
-			Iterator<Beneficiary> ib = beneficiaries.iterator();
-			while (ib.hasNext()) {
-				Beneficiary b = ib.next();
-				sb.append("   ");
-				sb.append(b.toJson());
-				if (ib.hasNext()) {
-					sb.append(",\n");
-				}
-			}
-			sb.append("]}\n");
-			return sb.toString();
-		}
-	}
-
-	public static class CommentOptionsExtensions {
-		public Beneficiaries beneficiaries;
-
-		public String toJson() {
-			/*
-			 * this is a weird looking JSON array .... [[ type_number, {} ]] and has a magic
-			 * type number in it!
-			 */
-			StringBuilder sb = new StringBuilder();
-			sb.append("[[");
-			sb.append(ExtensionsType.COMMENT_PAYOUT_BENEFICIARIES.getTypeId());
-			sb.append(",\n");
-			sb.append(beneficiaries.toJson());
-			sb.append("]]");
-			return sb.toString();
-		}
+	public static void commentOptions(String wif, String author, //
+			String permlink, CommentOptionsExtensions extensions, //
+			SteemCallback<CommentResult> callback) {
+		JSONValue extensionsJson = JSONParser.parseStrict(extensions.toJson());
+		commentOptions( //
+				wif, author, permlink, //
+				"1000000.000 SBD", 10000, true, true, //
+				extensionsJson, callback);
 	}
 
 	/**
@@ -160,22 +171,11 @@ public class SteemBroadcast {
 			JSONValue extensions, //
 			SteemCallback<CommentResult> callback);
 
-	/**
-	 * 
-	 * @param wif
-	 * @param author
-	 * @param permlink
-	 * @param extensions
-	 * @param callback
-	 */
 	@JsOverlay
-	public static void commentOptions(String wif, String author, //
-			String permlink, CommentOptionsExtensions extensions, //
-			SteemCallback<CommentResult> callback) {
-		JSONValue extensionsJson = JSONParser.parseStrict(extensions.toJson());
-		commentOptions( //
-				wif, author, permlink, //
-				"1000000.000 SBD", 10000, true, true, //
-				extensionsJson, callback);
+	private static String escapeJson(String string) {
+		string = string.replace("\\", "\\\\");
+		string = string.replace("\"", "\\\"");
+		string = string.replace("/", "\\/");
+		return string;
 	}
 }
