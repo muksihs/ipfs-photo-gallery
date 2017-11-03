@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.apache.commons.lang3.StringEscapeUtils;
-
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.json.client.JSONValue;
 
@@ -82,12 +80,19 @@ public class SteemBroadcast {
 		public String toJson() {
 			StringBuilder sb = new StringBuilder();
 			sb.append("{ \"account\": \"");
-			sb.append(StringEscapeUtils.escapeJson(account));
+			sb.append(escapeJson(account));
 			sb.append("\", \"weight\": ");
 			sb.append(weight);
 			sb.append("}");
 			return sb.toString();
 		}
+
+	}
+	private static String escapeJson(String string) {
+		string = string.replace("\\", "\\\\");
+		string = string.replace("\"", "\\\"");
+		string = string.replace("/", "\\/");
+		return string;
 	}
 
 	public static class Beneficiaries {
