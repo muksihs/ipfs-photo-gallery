@@ -25,6 +25,7 @@ import com.google.web.bindery.event.shared.binder.EventHandler;
 
 import elemental2.dom.DomGlobal;
 import gwt.material.design.client.ui.MaterialLoader;
+import gwt.material.design.client.ui.html.Span;
 import muksihs.ipfs.photogallery.client.ViewHandler.ShowView;
 import muksihs.ipfs.photogallery.client.ViewHandler.View;
 import muksihs.ipfs.photogallery.shared.GalleryInfo;
@@ -40,6 +41,16 @@ import steem.SteemCallback;
 import steem.SteemError;
 
 public class PhotoGalleryWizard implements ScheduledCommand, GlobalEventBus {
+
+	private static final String STYLE_PULL_LEFT = "float: left; padding-left: 1rem; max-width: 50%;";
+
+	private static final String STYLE_PULL_RIGHT = "float: right; padding-left: 1rem; max-width: 50%;";
+
+	private static final String ATTR_STYLE = "style";
+
+	private static final String STEEMIT_PULL_LEFT = "pull-left";
+
+	private static final String STEEMIT_PULL_RIGHT = "pull-right";
 
 	interface MyEventBinder extends EventBinder<PhotoGalleryWizard> {
 	}
@@ -85,7 +96,8 @@ public class PhotoGalleryWizard implements ScheduledCommand, GlobalEventBus {
 			i.setUrl(image.getThumbUrl());
 			sb.appendHtmlConstant(p.getElement().getInnerHTML());
 		} else {
-			sb.appendHtmlConstant("<img src='https://ipfs.io/ipfs/QmQ4keX7r9YnoARDgq4YJBqRwABcfXsnnE8EkD5EnjtLVH/placeholder.png'/>");
+			sb.appendHtmlConstant(
+					"<img src='https://ipfs.io/ipfs/QmQ4keX7r9YnoARDgq4YJBqRwABcfXsnnE8EkD5EnjtLVH/placeholder.png'/>");
 		}
 	}
 
@@ -130,14 +142,15 @@ public class PhotoGalleryWizard implements ScheduledCommand, GlobalEventBus {
 			while (tmp.endsWith("-")) {
 				tmp = tmp.substring(0, tmp.length() - 1);
 			}
-			tmp = tmp.toLowerCase().replaceAll("-+", "-") + "-" + new java.sql.Date(System.currentTimeMillis()).toString() + "-" + System.currentTimeMillis();
+			tmp = tmp.toLowerCase().replaceAll("-+", "-") + "-"
+					+ new java.sql.Date(System.currentTimeMillis()).toString() + "-" + System.currentTimeMillis();
 			while (tmp.startsWith("-")) {
 				tmp = tmp.substring(1);
 			}
-			permLink=tmp;
+			permLink = tmp;
 			author = userName;
 			parentPermLink = galleryInfo.getTags().iterator().next();
-			parentAuthor="";
+			parentAuthor = "";
 			wif = event.getPostingKey();
 			GWT.log("Posting key: '" + wif + "'");
 		} catch (Exception e1) {
@@ -204,9 +217,10 @@ public class PhotoGalleryWizard implements ScheduledCommand, GlobalEventBus {
 
 	@EventHandler
 	protected void getAppVersion(Event.GetAppVersion event) {
-		fireEvent(new Event.DisplayAppVersion("20171101"));
+		fireEvent(new Event.DisplayAppVersion("20171102"));
 	}
 
+	//TODO: Use GWT DOM elements to ensure correct structure!
 	public String getGalleryHtml4() {
 		SafeHtmlBuilder sb = new SafeHtmlBuilder();
 		try {
@@ -236,18 +250,38 @@ public class PhotoGalleryWizard implements ScheduledCommand, GlobalEventBus {
 				sb.appendHtmlConstant("</div>");
 			}
 			sb.appendHtmlConstant("</div>");
-			//add link HTML, this method auto escapes the URL is needed.
-			HTML linkHtml = new HTML("<div class='pull-right'>");
+			/*
+			 * add link HTML, this method auto escapes the URL if needed. yeah.. this is
+			 * hacky... but does generate correct HTML structure automatically!
+			 */
+			Span span1 = new Span("Created with ");
+			Span span2 = new Span("Muksih's Photo Gallery Maker");
+			Span span3 = new Span(".");
 			Anchor a = new Anchor();
 			a.setHref(Location.getHref());
-			linkHtml.getElement().appendChild(a.getElement());
-			HTML linkText = new HTML("Created with <span>Muksih's Photo Gallery Maker</span>.");
-			a.getElement().appendChild(linkText.getElement());
+			a.getElement().appendChild(span2.getElement());
+			HTML pullRight = new HTML();
+			markPullRight(pullRight.getElement());
+			pullRight.getElement().appendChild(span1.getElement());
+			pullRight.getElement().appendChild(a.getElement());
+			pullRight.getElement().appendChild(span3.getElement());
+			HTML linkHtml = new HTML();
+			linkHtml.getElement().appendChild(pullRight.getElement());
 			sb.appendHtmlConstant(linkHtml.getHTML());
 		} catch (Exception e) {
 			GWT.log(e.getMessage(), e);
 		}
 		return sb.toSafeHtml().asString();
+	}
+
+	private void markPullRight(Element element) {
+		element.addClassName(STEEMIT_PULL_RIGHT);
+		element.setAttribute(ATTR_STYLE, STYLE_PULL_RIGHT);
+	}
+	
+	private void markPullLeft(Element element) {
+		element.addClassName(STEEMIT_PULL_LEFT);
+		element.setAttribute(ATTR_STYLE, STYLE_PULL_LEFT);
 	}
 
 	@EventHandler
@@ -328,9 +362,9 @@ public class PhotoGalleryWizard implements ScheduledCommand, GlobalEventBus {
 			if (aname.equals("class")) {
 				continue;
 			}
-			if (aname.equals("style")) {
-				String style = node.getAttribute("style").toLowerCase().replaceAll("\\s+", " ");
-				node.removeAttribute("style");
+			if (aname.equals(ATTR_STYLE)) {
+				String style = node.getAttribute(ATTR_STYLE).toLowerCase().replaceAll("\\s+", " ");
+				node.removeAttribute(ATTR_STYLE);
 				List<String> styles = new ArrayList<>(Arrays.asList(style.split("\\s*;\\s*")));
 				Iterator<String> iStyles = styles.iterator();
 				style: while (iStyles.hasNext()) {
@@ -356,7 +390,7 @@ public class PhotoGalleryWizard implements ScheduledCommand, GlobalEventBus {
 						continue style;
 					}
 				}
-				node.removeAttribute("style");
+				node.removeAttribute(ATTR_STYLE);
 			}
 			continue attrs;
 		}
