@@ -250,6 +250,7 @@ public class PhotoGalleryWizard implements ScheduledCommand, GlobalEventBus {
 				sb.appendHtmlConstant("</div>");
 			}
 			sb.appendHtmlConstant("</div>");
+			sb.appendHtmlConstant("<hr/>");
 			/*
 			 * add link HTML, this method auto escapes the URL if needed. yeah.. this is
 			 * hacky... but does generate correct HTML structure automatically!
@@ -268,6 +269,7 @@ public class PhotoGalleryWizard implements ScheduledCommand, GlobalEventBus {
 			HTML linkHtml = new HTML();
 			linkHtml.getElement().appendChild(pullRight.getElement());
 			sb.appendHtmlConstant(linkHtml.getHTML());
+			sb.appendHtmlConstant("<hr/>");
 		} catch (Exception e) {
 			GWT.log(e.getMessage(), e);
 		}
