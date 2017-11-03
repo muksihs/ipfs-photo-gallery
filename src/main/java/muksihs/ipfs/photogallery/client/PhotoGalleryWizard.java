@@ -186,7 +186,7 @@ public class PhotoGalleryWizard implements ScheduledCommand, GlobalEventBus {
 					GWT.log("RESULT: " + result);
 					MaterialLoader.loading(true);
 					CommentOptionsExtensions extensions = new CommentOptionsExtensions();
-					extensions.beneficiaries.beneficiaries.add(new Beneficiary("muksihs", event.getTipAmount() * 100));
+					extensions.beneficiaries.beneficiaries.add(new Beneficiary("muksihs", event.getTipAmount()));
 					SteemBroadcast.commentOptions(wif, author, permLink, extensions, doneCallback);
 				}
 			}
