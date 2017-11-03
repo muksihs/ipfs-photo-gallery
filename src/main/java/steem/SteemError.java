@@ -2,32 +2,21 @@ package steem;
 
 import com.google.gwt.json.client.JSONValue;
 
-import jsinterop.annotations.JsProperty;
+import jsinterop.annotations.JsPackage;
 import jsinterop.annotations.JsType;
 
-@JsType(isNative = true)
+@JsType(isNative = true, namespace = JsPackage.GLOBAL, name = "?")
 public interface SteemError {
-	@JsType(isNative = true)
+	@JsType(isNative = true, namespace = JsPackage.GLOBAL, name = "?")
 	public static interface SteemErrorData {
-		@JsProperty
-		public int getCode();
-
-		@JsProperty
-		public String getMessage();
-
-		@JsProperty
-		public String getName();
-
-		@JsProperty
-		public JSONValue getStack();
+		int getCode();
+		String getMessage();
+		String getName();
+		JSONValue getStack();
+		
 	}
 
-	@JsProperty
-	public int getCode();
-
-	@JsProperty
-	public SteemErrorData getData();
-
-	@JsProperty
-	public String getMessage();
+	int getCode();
+	SteemErrorData getData();
+	String getMessage();
 }

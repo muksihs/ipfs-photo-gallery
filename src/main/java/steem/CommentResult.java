@@ -1,7 +1,8 @@
 package steem;
 
+import jsinterop.annotations.JsPackage;
 import jsinterop.annotations.JsType;
 
-@JsType(isNative = true)
-public abstract class CommentResult {
+@JsType(isNative = true, namespace = JsPackage.GLOBAL, name = "?")
+public interface CommentResult {
 }

@@ -23,6 +23,7 @@ import com.google.web.bindery.event.shared.binder.EventBinder;
 import com.google.web.bindery.event.shared.binder.EventHandler;
 
 import elemental2.dom.DomGlobal;
+import gwt.material.design.client.ui.MaterialLoader;
 import muksihs.ipfs.photogallery.client.ViewHandler.ShowView;
 import muksihs.ipfs.photogallery.client.ViewHandler.View;
 import muksihs.ipfs.photogallery.shared.GalleryInfo;
@@ -32,6 +33,8 @@ import muksihs.ipfs.photogallery.ui.GlobalEventBus;
 import steem.CommentMetadata;
 import steem.CommentResult;
 import steem.SteemBroadcast;
+import steem.SteemBroadcast.Beneficiary;
+import steem.SteemBroadcast.CommentOptionsExtensions;
 import steem.SteemCallback;
 import steem.SteemError;
 
@@ -134,7 +137,7 @@ public class PhotoGalleryWizard implements ScheduledCommand, GlobalEventBus {
 		}
 		ImageData image;
 		image = iter.next();
-		if (image!=null) {
+		if (image != null) {
 			HTMLPanel p = new HTMLPanel("");
 			Anchor a = new Anchor();
 			Image i = new Image();
@@ -150,30 +153,19 @@ public class PhotoGalleryWizard implements ScheduledCommand, GlobalEventBus {
 	@EventHandler
 	protected void doPostGallery(Event.PostGallery event) {
 		DomGlobal.console.log("doPostGallery");
-		SteemCallback<CommentResult> callback = new SteemCallback<CommentResult>() {
-			@Override
-			public void onResult(SteemError error, CommentResult result) {
-				if (error != null) {
-					DomGlobal.console.log("ERROR: ", error);
-				}
-				if (result != null) {
-					DomGlobal.console.log("RESULT: ", result);
-				}
-			}
-		};
 		String userName = event.getUserName();
 		userName = userName.trim();
 		while (userName.startsWith("@")) {
 			userName = userName.substring(1).trim();
 		}
-		CommentMetadata metadata;
-		String body="";
-		String title="";
-		String permLink="";
-		String author="";
-		String parentPermLink="";
-		String parentAuthor="";
-		String wif="";
+		final CommentMetadata metadata;
+		final String body;
+		final String title;
+		final String permLink;
+		final String author;
+		final String parentPermLink;
+		final String parentAuthor;
+		final String wif;
 		metadata = new CommentMetadata();
 		try {
 			metadata.setApp("MuksihsPhotoGalleryMaker/1.0");
@@ -181,24 +173,65 @@ public class PhotoGalleryWizard implements ScheduledCommand, GlobalEventBus {
 			metadata.setTags(galleryInfo.getTags().toArray(new String[0]));
 			body = getGalleryHtml4();
 			title = galleryInfo.getTitle();
-			permLink = System.currentTimeMillis() + "-" + galleryInfo.getTitle().replaceAll("[^a-zA-Z0-9]", "-");
-			permLink = permLink.toLowerCase().replaceAll("-+", "-");
+			String tmp = galleryInfo.getTitle().toLowerCase().replaceAll("[^a-z0-9]", "-");
+			while (tmp.endsWith("-")) {
+				tmp = tmp.substring(0, tmp.length() - 1);
+			}
+			tmp = tmp.toLowerCase().replaceAll("-+", "-") + "-" + new java.sql.Date(System.currentTimeMillis()).toString() + "-" + System.currentTimeMillis();
+			while (tmp.startsWith("-")) {
+				tmp = tmp.substring(1);
+			}
+			permLink=tmp;
 			author = userName;
 			parentPermLink = galleryInfo.getTags().iterator().next();
-			parentAuthor = "";
+			parentAuthor="";
 			wif = event.getPostingKey();
-			GWT.log("Posting key: '"+wif+"'");
+			GWT.log("Posting key: '" + wif + "'");
 		} catch (Exception e1) {
 			GWT.log(e1.getMessage(), e1);
-			DomGlobal.console.log(e1);
+			return;
 		}
+
+		SteemCallback<CommentResult> doneCallback = new SteemCallback<CommentResult>() {
+			@Override
+			public void onResult(SteemError error, CommentResult result) {
+				MaterialLoader.loading(false);
+				if (error != null) {
+					GWT.log("ERROR: " + error);
+					fireEvent(new Event.AlertMessage("ERROR!", error.getMessage()));
+				}
+				if (result != null) {
+					GWT.log("RESULT: " + result);
+					fireEvent(new Event.PostSuccess(author, permLink));
+				}
+			}
+		};
+
+		SteemCallback<CommentResult> callback = new SteemCallback<CommentResult>() {
+			@Override
+			public void onResult(SteemError error, CommentResult result) {
+				MaterialLoader.loading(false);
+				if (error != null) {
+					GWT.log("ERROR: " + error);
+				}
+				if (result != null) {
+					GWT.log("RESULT: " + result);
+					MaterialLoader.loading(true);
+					CommentOptionsExtensions extensions = new CommentOptionsExtensions();
+					extensions.beneficiaries.beneficiaries.add(new Beneficiary("muksihs", event.getTipAmount() * 100));
+					SteemBroadcast.commentOptions(wif, author, permLink, extensions, doneCallback);
+				}
+			}
+		};
 
 		try {
 			DomGlobal.console.log("SteemBroadcast.comment");
-			SteemBroadcast.comment(wif, parentAuthor, parentPermLink, author, permLink, title, body, metadata, callback);
+			MaterialLoader.loading(true);
+			SteemBroadcast.comment(wif, parentAuthor, parentPermLink, author, permLink, title, body, metadata,
+					callback);
 		} catch (Exception e) {
+			MaterialLoader.loading(false);
 			GWT.log(e.getMessage(), e);
-			DomGlobal.console.log(e);
 		}
 	}
 

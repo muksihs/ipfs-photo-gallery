@@ -6,6 +6,26 @@ import elemental2.dom.FileList;
 import muksihs.ipfs.photogallery.shared.ImageData;
 
 public interface Event {
+	public class PostSuccess extends GenericEvent {
+
+		private final String author;
+		private final String permLink;
+
+		public PostSuccess(String author, String permLink) {
+			this.author=author;
+			this.permLink=permLink;
+		}
+
+		public String getAuthor() {
+			return author;
+		}
+
+		public String getPermLink() {
+			return permLink;
+		}
+
+	}
+
 	public class SetPreviewTitle extends GenericEvent {
 
 		private final String title;
