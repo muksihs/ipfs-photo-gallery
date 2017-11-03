@@ -14,7 +14,7 @@ import jsinterop.annotations.JsType;
 public class SteemBroadcast {
 	
 	public static class Beneficiaries {
-		public List<Beneficiary> beneficiaries = new ArrayList<>();
+		public final List<Beneficiary> beneficiaries = new ArrayList<>();
 
 		public String toJson() {
 			StringBuilder sb = new StringBuilder();
@@ -66,7 +66,7 @@ public class SteemBroadcast {
 	}
 
 	public static class CommentOptionsExtensions {
-		public Beneficiaries beneficiaries;
+		public final Beneficiaries beneficiaries = new Beneficiaries();
 
 		public String toJson() {
 			/*

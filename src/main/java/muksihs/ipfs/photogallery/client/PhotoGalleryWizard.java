@@ -81,6 +81,8 @@ public class PhotoGalleryWizard implements ScheduledCommand, GlobalEventBus {
 
 	public void addImage(SafeHtmlBuilder sb, Iterator<ImageData> iter) {
 		if (!iter.hasNext()) {
+			sb.appendHtmlConstant(
+					"<img src='https://ipfs.io/ipfs/QmQ4keX7r9YnoARDgq4YJBqRwABcfXsnnE8EkD5EnjtLVH/placeholder.png'/>");
 			return;
 		}
 		ImageData image;
@@ -228,7 +230,7 @@ public class PhotoGalleryWizard implements ScheduledCommand, GlobalEventBus {
 			String description = galleryInfo.getDescription();
 			sb.appendHtmlConstant(useDeprecatedHtml4Tags(description));
 			sb.appendHtmlConstant("</div>");
-			sb.appendHtmlConstant("<hr/>");
+			sb.appendHtmlConstant("<hr style='clear: both;'/>");
 			Iterator<ImageData> iter = imageDataList.iterator();
 			sb.appendHtmlConstant("<div>");
 			while (iter.hasNext()) {
@@ -250,7 +252,7 @@ public class PhotoGalleryWizard implements ScheduledCommand, GlobalEventBus {
 				sb.appendHtmlConstant("</div>");
 			}
 			sb.appendHtmlConstant("</div>");
-			sb.appendHtmlConstant("<hr/>");
+			sb.appendHtmlConstant("<hr style='clear: both;'/>");
 			/*
 			 * add link HTML, this method auto escapes the URL if needed. yeah.. this is
 			 * hacky... but does generate correct HTML structure automatically!
@@ -269,7 +271,7 @@ public class PhotoGalleryWizard implements ScheduledCommand, GlobalEventBus {
 			HTML linkHtml = new HTML();
 			linkHtml.getElement().appendChild(pullRight.getElement());
 			sb.appendHtmlConstant(linkHtml.getHTML());
-			sb.appendHtmlConstant("<hr/>");
+			sb.appendHtmlConstant("<hr style='clear: both;'/>");
 		} catch (Exception e) {
 			GWT.log(e.getMessage(), e);
 		}
