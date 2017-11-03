@@ -3,6 +3,7 @@ package muksihs.ipfs.photogallery.ui;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.Window.Location;
 import com.google.gwt.user.client.ui.ValueBoxBase.TextAlignment;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.web.bindery.event.shared.binder.EventBinder;
@@ -22,6 +23,10 @@ public class PostGallery extends EventBusComposite {
 	interface PostGalleryUiBinder extends UiBinder<Widget, PostGallery> {
 	}
 	private static PostGalleryUiBinder uiBinder = GWT.create(PostGalleryUiBinder.class);
+
+	@UiField
+	protected MaterialButton cancel;
+	
 	@UiField
 	protected MaterialIntegerBox tipAmount;
 	@UiField
@@ -39,6 +44,7 @@ public class PostGallery extends EventBusComposite {
 	protected MaterialPanel previewPanel;
 	public PostGallery() {
 		initWidget(uiBinder.createAndBindUi(this));
+		cancel.addClickHandler((e)->Location.reload());
 		tipAmount.setMin("0");
 		tipAmount.setMax("100");
 		tipAmount.setAlignment(TextAlignment.RIGHT);

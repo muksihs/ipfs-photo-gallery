@@ -73,6 +73,10 @@ public class PhotoGalleryWizard implements ScheduledCommand, GlobalEventBus {
 
 	private GalleryInfo galleryInfo;
 
+	private String author;
+
+	private String permLink;
+
 	public PhotoGalleryWizard() {
 		eventBinder.bindEventHandlers(this, eventBus);
 		IpfsGatewayCache.get();
@@ -221,7 +225,14 @@ public class PhotoGalleryWizard implements ScheduledCommand, GlobalEventBus {
 	
 	@EventHandler
 	protected void onPostGalleryDone(Event.PostGalleryDone event) {
+		this.author=event.getAuthor();
+		this.permLink=event.getPermLink();
 		fireEvent(new ShowView(View.ViewPost));
+	}
+	
+	@EventHandler
+	protected void getLinkInfo(Event.GetViewLinkInfo event) {
+		fireEvent(new Event.LinkInfo(author, permLink));
 	}
 
 	@EventHandler

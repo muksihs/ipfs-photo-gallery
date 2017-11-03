@@ -15,6 +15,7 @@
 		<m:MaterialButton ui:field="next" enabled="false"
 			text="Next"
 			title="The next step is to upload the selected images and thumbnails into the IPFS cloud."></m:MaterialButton>
+		<m:MaterialLabel text="You can remove unwanted images by selecting them and then tapping [REMOVE]."></m:MaterialLabel>
 		<m:MaterialPanel
 			style='margin: auto; border-width: 4px; border-color: black; border-style: solid;'
 			ui:field="previewPanel"></m:MaterialPanel>

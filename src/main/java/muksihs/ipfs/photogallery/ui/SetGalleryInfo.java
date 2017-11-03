@@ -13,6 +13,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.BlurEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.Window.Location;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.web.bindery.event.shared.binder.EventBinder;
 import com.google.web.bindery.event.shared.binder.EventHandler;
@@ -55,7 +56,7 @@ public class SetGalleryInfo extends EventBusComposite {
 		tags.addBlurHandler(this::validateTags);
 
 		next.addClickHandler((e) -> fireEvent(new Event.SetGalleryInfoNext()));
-		cancel.addClickHandler((e) -> fireEvent(new Event.Cancel()));
+		cancel.addClickHandler((e) -> Location.reload());
 
 		ToolbarButton[] noOptions = new ToolbarButton[0];
 

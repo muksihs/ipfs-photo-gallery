@@ -1,0 +1,16 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+	xmlns:g="urn:import:com.google.gwt.user.client.ui" xmlns:m="urn:import:gwt.material.design.client.ui"
+	xmlns:x="urn:import:muksihs.ipfs.photogallery.ui">
+	<ui:style>
+	
+	</ui:style>
+	<m:MaterialPanel style='margin: auto; text-align: center; max-width:840px;'>
+	<x:HeaderBlock></x:HeaderBlock>
+	<m:MaterialTitle title="Success! Your gallery has been posted."></m:MaterialTitle>
+	<m:MaterialButton enabled="false" ui:field="another" text="Post another gallery"></m:MaterialButton>
+	<m:MaterialLink enabled="false" ui:field="steemit" text="View gallery at steemit.com"></m:MaterialLink>
+	<m:MaterialLink enabled="false" ui:field="chainbb" text="View gallery at chainbb.com"></m:MaterialLink>
+	<m:MaterialLink enabled="false" ui:field="busyorg" text="View gallery at busy.org"></m:MaterialLink>
+	</m:MaterialPanel>
+</ui:UiBinder> 

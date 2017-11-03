@@ -7,6 +7,30 @@ import elemental2.dom.FileList;
 import muksihs.ipfs.photogallery.shared.ImageData;
 
 public interface Event {
+	public class LinkInfo extends GenericEvent {
+
+		private final String author;
+		private final String permLink;
+
+		public LinkInfo(String author, String permLink) {
+			this.author=author;
+			this.permLink = permLink;
+		}
+
+		public String getAuthor() {
+			return author;
+		}
+
+		public String getPermLink() {
+			return permLink;
+		}
+
+	}
+
+	public class GetViewLinkInfo extends GenericEvent {
+
+	}
+
 	public class PostGalleryDone extends GenericEvent {
 		private final String author;
 		private final String permLink;
