@@ -14,11 +14,11 @@ import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Node;
 import com.google.gwt.dom.client.NodeList;
-import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.dom.client.Style.Clear;
+import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Window.Location;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.web.bindery.event.shared.binder.EventBinder;
 import com.google.web.bindery.event.shared.binder.EventHandler;
@@ -79,33 +79,34 @@ public class PhotoGalleryWizard implements ScheduledCommand, GlobalEventBus {
 		new ViewHandler();
 	}
 
-	public void addImage(SafeHtmlBuilder sb, Iterator<ImageData> iter) {
+	public void addImage(Element parent, Iterator<ImageData> iter) {
 		if (!iter.hasNext()) {
-			sb.appendHtmlConstant(
-					"<img src='https://ipfs.io/ipfs/QmQ4keX7r9YnoARDgq4YJBqRwABcfXsnnE8EkD5EnjtLVH/placeholder.png'/>");
+			Image i = new Image();
+			i.setUrl("https://ipfs.io/ipfs/QmQ4keX7r9YnoARDgq4YJBqRwABcfXsnnE8EkD5EnjtLVH/placeholder.png");
+			parent.appendChild(i.getElement());
 			return;
 		}
 		ImageData image;
 		image = iter.next();
 		if (image != null) {
-			HTMLPanel p = new HTMLPanel("");
 			Anchor a = new Anchor();
 			Image i = new Image();
-			p.getElement().appendChild(a.getElement());
 			a.getElement().appendChild(i.getElement());
 			a.setHref(image.getImageUrl());
 			a.setTarget("_blank");
 			i.setUrl(image.getThumbUrl());
-			sb.appendHtmlConstant(p.getElement().getInnerHTML());
+			parent.appendChild(a.getElement());
 		} else {
-			sb.appendHtmlConstant(
-					"<img src='https://ipfs.io/ipfs/QmQ4keX7r9YnoARDgq4YJBqRwABcfXsnnE8EkD5EnjtLVH/placeholder.png'/>");
+			Image i = new Image();
+			i.setUrl("https://ipfs.io/ipfs/QmQ4keX7r9YnoARDgq4YJBqRwABcfXsnnE8EkD5EnjtLVH/placeholder.png");
+			parent.appendChild(i.getElement());
 		}
 	}
 
 	@EventHandler
 	protected void addImages(Event.AddImages event) {
 		if (event.getFiles() == null || event.getFiles().length == 0) {
+			fireEvent(new Event.EnableSelectImages(true));
 			return;
 		}
 		fireEvent(new Event.EnableSelectImages(false));
@@ -138,7 +139,7 @@ public class PhotoGalleryWizard implements ScheduledCommand, GlobalEventBus {
 			metadata.setApp("MuksihsPhotoGalleryMaker/1.0");
 			metadata.setFormat("html");
 			metadata.setTags(galleryInfo.getTags().toArray(new String[0]));
-			body = getGalleryHtml4();
+			body = getGalleryHtml4().getHTML();
 			title = galleryInfo.getTitle();
 			String tmp = galleryInfo.getTitle().toLowerCase().replaceAll("[^a-z0-9]", "-");
 			while (tmp.endsWith("-")) {
@@ -167,10 +168,11 @@ public class PhotoGalleryWizard implements ScheduledCommand, GlobalEventBus {
 				if (error != null) {
 					GWT.log("ERROR: " + error);
 					fireEvent(new Event.AlertMessage("ERROR!", error.getMessage()));
+					fireEvent(new Event.PostGalleryDone(author, permLink));
 				}
 				if (result != null) {
 					GWT.log("RESULT: " + result);
-					fireEvent(new Event.PostSuccess(author, permLink));
+					fireEvent(new Event.PostGalleryDone(author, permLink));
 				}
 			}
 		};
@@ -216,66 +218,84 @@ public class PhotoGalleryWizard implements ScheduledCommand, GlobalEventBus {
 			return !ready;
 		}, 250);
 	}
+	
+	@EventHandler
+	protected void onPostGalleryDone(Event.PostGalleryDone event) {
+		fireEvent(new ShowView(View.ViewPost));
+	}
 
 	@EventHandler
 	protected void getAppVersion(Event.GetAppVersion event) {
-		fireEvent(new Event.DisplayAppVersion("20171102"));
+		fireEvent(new Event.DisplayAppVersion("20171103"));
 	}
 
-	//TODO: Use GWT DOM elements to ensure correct structure!
-	public String getGalleryHtml4() {
-		SafeHtmlBuilder sb = new SafeHtmlBuilder();
+	public HTML getGalleryHtml4() {
+		HTML gallery = new HTML();
 		try {
-			sb.appendHtmlConstant("<div>");
-			String description = galleryInfo.getDescription();
-			sb.appendHtmlConstant(useDeprecatedHtml4Tags(description));
-			sb.appendHtmlConstant("</div>");
-			sb.appendHtmlConstant("<hr style='clear: both;'/>");
+			gallery.getElement().appendChild(useDeprecatedHtml4Tags(galleryInfo.getDescription()));
+			gallery.getElement().appendChild(new HTML("<hr style='clear: both;'/>").getElement());
 			Iterator<ImageData> iter = imageDataList.iterator();
-			sb.appendHtmlConstant("<div>");
+			HTML imageDiv = new HTML();
+			gallery.getElement().appendChild(imageDiv.getElement());
 			while (iter.hasNext()) {
-				sb.appendHtmlConstant("<div class='pull-left'>");
-				sb.appendHtmlConstant("<div class='pull-left'>");
-				addImage(sb, iter);
-				sb.appendHtmlConstant("</div>");
-				sb.appendHtmlConstant("<div class='pull-right'>");
-				addImage(sb, iter);
-				sb.appendHtmlConstant("</div>");
-				sb.appendHtmlConstant("</div>");
-				sb.appendHtmlConstant("<div class='pull-right'>");
-				sb.appendHtmlConstant("<div class='pull-left'>");
-				addImage(sb, iter);
-				sb.appendHtmlConstant("</div>");
-				sb.appendHtmlConstant("<div class='pull-right'>");
-				addImage(sb, iter);
-				sb.appendHtmlConstant("</div>");
-				sb.appendHtmlConstant("</div>");
+				HTML row = new HTML();
+				row.getElement().getStyle().setClear(Clear.BOTH);
+				row.getElement().addClassName("image-row");
+				row.getElement().addClassName("clear-both");
+				imageDiv.getElement().appendChild(row.getElement());
+				
+				HTML col1=new HTML();
+				markPullLeft(col1.getElement());
+				row.getElement().appendChild(col1.getElement());
+				
+				HTML pic1=new HTML();
+				markPullLeft(pic1.getElement());
+				addImage(pic1.getElement(), iter);
+				col1.getElement().appendChild(pic1.getElement());
+				
+				HTML pic2=new HTML();
+				markPullRight(pic2.getElement());
+				addImage(pic2.getElement(), iter);
+				col1.getElement().appendChild(pic2.getElement());
+				
+				HTML col2=new HTML();
+				markPullRight(col2.getElement());
+				row.getElement().appendChild(col2.getElement());
+				
+				HTML pic3=new HTML();
+				markPullLeft(pic3.getElement());
+				addImage(pic3.getElement(), iter);
+				col2.getElement().appendChild(pic3.getElement());
+				
+				HTML pic4=new HTML();
+				markPullRight(pic4.getElement());
+				addImage(pic4.getElement(), iter);
+				col2.getElement().appendChild(pic4.getElement());
 			}
-			sb.appendHtmlConstant("</div>");
-			sb.appendHtmlConstant("<hr style='clear: both;'/>");
+			gallery.getElement().appendChild(new HTML("<hr style='clear: both;'/>").getElement());
 			/*
 			 * add link HTML, this method auto escapes the URL if needed. yeah.. this is
 			 * hacky... but does generate correct HTML structure automatically!
 			 */
-			Span span1 = new Span("Created with ");
+			Span span1 = new Span("Post your own photo gallery!");
+			Element br = DOM.createElement("br");
 			Span span2 = new Span("Muksih's Photo Gallery Maker");
-			Span span3 = new Span(".");
 			Anchor a = new Anchor();
 			a.setHref(Location.getHref());
 			a.getElement().appendChild(span2.getElement());
 			HTML pullRight = new HTML();
 			markPullRight(pullRight.getElement());
 			pullRight.getElement().appendChild(span1.getElement());
+			pullRight.getElement().appendChild(br);
 			pullRight.getElement().appendChild(a.getElement());
-			pullRight.getElement().appendChild(span3.getElement());
 			HTML linkHtml = new HTML();
 			linkHtml.getElement().appendChild(pullRight.getElement());
-			sb.appendHtmlConstant(linkHtml.getHTML());
-			sb.appendHtmlConstant("<hr style='clear: both;'/>");
+			gallery.getElement().appendChild(linkHtml.getElement());
+			gallery.getElement().appendChild(new HTML("<hr style='clear: both;'/>").getElement());
 		} catch (Exception e) {
 			GWT.log(e.getMessage(), e);
 		}
-		return sb.toSafeHtml().asString();
+		return gallery;
 	}
 
 	private void markPullRight(Element element) {
@@ -330,9 +350,9 @@ public class PhotoGalleryWizard implements ScheduledCommand, GlobalEventBus {
 
 	private void updatePostPreview() {
 		GWT.log("updatePostPreview");
-		String htmlString = getGalleryHtml4();
+		HTML galleryHtml = getGalleryHtml4();
 		fireEvent(new Event.SetPreviewTitle(galleryInfo.getTitle()));
-		fireEvent(new Event.SetPreviewHtml(htmlString));
+		fireEvent(new Event.SetPreviewHtml(galleryHtml));
 	}
 
 	private void useDeprecatedHtml4Tags(Element node) {
@@ -409,16 +429,14 @@ public class PhotoGalleryWizard implements ScheduledCommand, GlobalEventBus {
 		}
 	}
 
-	private String useDeprecatedHtml4Tags(String htmlText) {
+	private Element useDeprecatedHtml4Tags(String htmlText) {
 		HTML html = new HTML(htmlText);
 		try {
-			Element element = html.getElement();
-			useDeprecatedHtml4Tags(element);
+			useDeprecatedHtml4Tags(html.getElement());
 		} catch (Exception e) {
 			GWT.log(e.getMessage(), e);
-			return htmlText;
 		}
-		return html.getElement().getInnerHTML();
+		return html.getElement();
 	}
 
 	@EventHandler

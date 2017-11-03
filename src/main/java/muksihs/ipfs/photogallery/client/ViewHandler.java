@@ -18,6 +18,7 @@ import muksihs.ipfs.photogallery.ui.PostGallery;
 import muksihs.ipfs.photogallery.ui.SelectImages;
 import muksihs.ipfs.photogallery.ui.SetGalleryInfo;
 import muksihs.ipfs.photogallery.ui.UploadImages;
+import muksihs.ipfs.photogallery.ui.ViewGalleryPost;
 
 public class ViewHandler implements GlobalEventBus {
 	public static class DisplayMessage extends GenericEvent {
@@ -48,7 +49,7 @@ public class ViewHandler implements GlobalEventBus {
 	}
 
 	public static enum View {
-		Loading, SelectImages, UploadImages, SetGalleryInfo, PostGallery;
+		Loading, SelectImages, UploadImages, SetGalleryInfo, PostGallery, ViewPost;
 	}
 
 	private static final MyEventBinder eventBinder = GWT.create(MyEventBinder.class);
@@ -108,6 +109,9 @@ public class ViewHandler implements GlobalEventBus {
 			break;
 		case UploadImages:
 			replaceView(new UploadImages());
+			break;
+		case ViewPost:
+			replaceView(new ViewGalleryPost());
 			break;
 		}
 	}

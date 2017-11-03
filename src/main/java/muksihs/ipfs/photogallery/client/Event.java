@@ -1,11 +1,27 @@
 package muksihs.ipfs.photogallery.client;
 
+import com.google.gwt.user.client.ui.HTML;
 import com.google.web.bindery.event.shared.binder.GenericEvent;
 
 import elemental2.dom.FileList;
 import muksihs.ipfs.photogallery.shared.ImageData;
 
 public interface Event {
+	public class PostGalleryDone extends GenericEvent {
+		private final String author;
+		private final String permLink;
+		public PostGalleryDone(String author, String permLink) {
+			this.author=author;
+			this.permLink=permLink;
+		}
+		public String getPermLink() {
+			return permLink;
+		}
+		public String getAuthor() {
+			return author;
+		}
+	}
+
 	public class AddImages extends GenericEvent {
 		private final FileList files;
 
@@ -188,26 +204,6 @@ public interface Event {
 
 	}
 
-	public class PostSuccess extends GenericEvent {
-
-		private final String author;
-		private final String permLink;
-
-		public PostSuccess(String author, String permLink) {
-			this.author=author;
-			this.permLink=permLink;
-		}
-
-		public String getAuthor() {
-			return author;
-		}
-
-		public String getPermLink() {
-			return permLink;
-		}
-
-	}
-
 	public class RemoveImage extends GenericEvent {
 		private final int index;
 
@@ -262,18 +258,14 @@ public interface Event {
 	}
 
 	public static class SetPreviewHtml extends GenericEvent {
-		private String previewHtml;
+		private final HTML previewHtml;
 
-		public SetPreviewHtml(String previewHtml) {
-			this.previewHtml = previewHtml;
+		public SetPreviewHtml(HTML galleryHtml) {
+			this.previewHtml = galleryHtml;
 		}
 
-		public String getPreviewHtml() {
+		public HTML getPreviewHtml() {
 			return previewHtml;
-		}
-
-		public void setPreviewHtml(String previewHtml) {
-			this.previewHtml = previewHtml;
 		}
 	}
 
