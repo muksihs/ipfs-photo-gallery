@@ -17,17 +17,14 @@ import com.google.gwt.dom.client.NodeList;
 import com.google.gwt.dom.client.Style.Clear;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Window.Location;
-import com.google.gwt.user.client.ui.Anchor;
-import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.Image;
 import com.google.web.bindery.event.shared.binder.EventBinder;
 import com.google.web.bindery.event.shared.binder.EventHandler;
 
 import elemental2.dom.DomGlobal;
 import gwt.material.design.client.ui.MaterialLoader;
-import gwt.material.design.client.ui.html.Span;
 import muksihs.ipfs.photogallery.client.ViewHandler.ShowView;
 import muksihs.ipfs.photogallery.client.ViewHandler.View;
+import muksihs.ipfs.photogallery.shared.Consts;
 import muksihs.ipfs.photogallery.shared.GalleryInfo;
 import muksihs.ipfs.photogallery.shared.ImageData;
 import muksihs.ipfs.photogallery.shared.IpfsGateway;
@@ -77,6 +74,8 @@ public class PhotoGalleryWizard implements ScheduledCommand, GlobalEventBus {
 
 	private String permLink;
 
+	private String category;
+
 	public PhotoGalleryWizard() {
 		eventBinder.bindEventHandlers(this, eventBus);
 		IpfsGatewayCache.get();
@@ -85,25 +84,25 @@ public class PhotoGalleryWizard implements ScheduledCommand, GlobalEventBus {
 
 	public void addImage(Element parent, Iterator<ImageData> iter) {
 		if (!iter.hasNext()) {
-			Image i = new Image();
-			i.setUrl("https://ipfs.io/ipfs/QmQ4keX7r9YnoARDgq4YJBqRwABcfXsnnE8EkD5EnjtLVH/placeholder.png");
-			parent.appendChild(i.getElement());
+			Element i = DOM.createImg();
+			i.setAttribute("src", "https://ipfs.io/ipfs/" + Consts.PLACEHOLDER);
+			parent.appendChild(i);
 			return;
 		}
 		ImageData image;
 		image = iter.next();
 		if (image != null) {
-			Anchor a = new Anchor();
-			Image i = new Image();
-			a.getElement().appendChild(i.getElement());
-			a.setHref(image.getImageUrl());
-			a.setTarget("_blank");
-			i.setUrl(image.getThumbUrl());
-			parent.appendChild(a.getElement());
+			Element a = DOM.createAnchor();
+			Element i = DOM.createImg();
+			a.appendChild(i);
+			a.setAttribute("href", image.getImageUrl());
+			a.setAttribute("target", "_blank");
+			i.setAttribute("src", image.getThumbUrl());
+			parent.appendChild(a);
 		} else {
-			Image i = new Image();
-			i.setUrl("https://ipfs.io/ipfs/QmQ4keX7r9YnoARDgq4YJBqRwABcfXsnnE8EkD5EnjtLVH/placeholder.png");
-			parent.appendChild(i.getElement());
+			Element i = DOM.createImg();
+			i.setAttribute("src", "https://ipfs.io/ipfs/" + Consts.PLACEHOLDER);
+			parent.appendChild(i);
 		}
 	}
 
@@ -135,7 +134,7 @@ public class PhotoGalleryWizard implements ScheduledCommand, GlobalEventBus {
 		final String title;
 		final String permLink;
 		final String author;
-		final String parentPermLink;
+		final String firstTag;
 		final String parentAuthor;
 		final String wif;
 		metadata = new CommentMetadata();
@@ -143,7 +142,9 @@ public class PhotoGalleryWizard implements ScheduledCommand, GlobalEventBus {
 			metadata.setApp("MuksihsPhotoGalleryMaker/1.0");
 			metadata.setFormat("html");
 			metadata.setTags(galleryInfo.getTags().toArray(new String[0]));
-			body = getGalleryHtml4().getHTML();
+			Element wrapper = DOM.createDiv();
+			wrapper.appendChild(getGalleryHtml4());
+			body = wrapper.getInnerHTML();
 			title = galleryInfo.getTitle();
 			String tmp = galleryInfo.getTitle().toLowerCase().replaceAll("[^a-z0-9]", "-");
 			while (tmp.endsWith("-")) {
@@ -156,7 +157,7 @@ public class PhotoGalleryWizard implements ScheduledCommand, GlobalEventBus {
 			}
 			permLink = tmp;
 			author = userName;
-			parentPermLink = galleryInfo.getTags().iterator().next();
+			firstTag = galleryInfo.getTags().iterator().next();
 			parentAuthor = "";
 			wif = event.getPostingKey();
 			GWT.log("Posting key: '" + wif + "'");
@@ -172,11 +173,11 @@ public class PhotoGalleryWizard implements ScheduledCommand, GlobalEventBus {
 				if (error != null) {
 					GWT.log("ERROR: " + error);
 					fireEvent(new Event.AlertMessage("ERROR!", error.getMessage()));
-					fireEvent(new Event.PostGalleryDone(author, permLink));
+					fireEvent(new Event.PostGalleryDone(author, firstTag, permLink));
 				}
 				if (result != null) {
 					GWT.log("RESULT: " + result);
-					fireEvent(new Event.PostGalleryDone(author, permLink));
+					fireEvent(new Event.PostGalleryDone(author, firstTag, permLink));
 				}
 			}
 		};
@@ -201,8 +202,7 @@ public class PhotoGalleryWizard implements ScheduledCommand, GlobalEventBus {
 		try {
 			DomGlobal.console.log("SteemBroadcast.comment");
 			MaterialLoader.loading(true);
-			SteemBroadcast.comment(wif, parentAuthor, parentPermLink, author, permLink, title, body, metadata,
-					callback);
+			SteemBroadcast.comment(wif, parentAuthor, firstTag, author, permLink, title, body, metadata, callback);
 		} catch (Exception e) {
 			MaterialLoader.loading(false);
 			GWT.log(e.getMessage(), e);
@@ -222,17 +222,18 @@ public class PhotoGalleryWizard implements ScheduledCommand, GlobalEventBus {
 			return !ready;
 		}, 250);
 	}
-	
+
 	@EventHandler
 	protected void onPostGalleryDone(Event.PostGalleryDone event) {
-		this.author=event.getAuthor();
-		this.permLink=event.getPermLink();
+		this.author = event.getAuthor();
+		this.category = event.getCategory();
+		this.permLink = event.getPermLink();
 		fireEvent(new ShowView(View.ViewPost));
 	}
-	
+
 	@EventHandler
 	protected void getLinkInfo(Event.GetViewLinkInfo event) {
-		fireEvent(new Event.LinkInfo(author, permLink));
+		fireEvent(new Event.LinkInfo(author, category, permLink));
 	}
 
 	@EventHandler
@@ -240,69 +241,72 @@ public class PhotoGalleryWizard implements ScheduledCommand, GlobalEventBus {
 		fireEvent(new Event.DisplayAppVersion("20171103"));
 	}
 
-	public HTML getGalleryHtml4() {
-		HTML gallery = new HTML();
+	public Element getGalleryHtml4() {
+		Element gallery = DOM.createDiv();
+		Element hr = DOM.createElement("hr");
+		hr.getStyle().setClear(Clear.BOTH);
 		try {
-			gallery.getElement().appendChild(useDeprecatedHtml4Tags(galleryInfo.getDescription()));
-			gallery.getElement().appendChild(new HTML("<hr style='clear: both;'/>").getElement());
+			gallery.appendChild(useDeprecatedHtml4Tags(galleryInfo.getDescription()));
+			gallery.appendChild(hr.cloneNode(true));
 			Iterator<ImageData> iter = imageDataList.iterator();
-			HTML imageDiv = new HTML();
-			gallery.getElement().appendChild(imageDiv.getElement());
+			Element imageDiv = DOM.createDiv();
+			gallery.appendChild(imageDiv);
 			while (iter.hasNext()) {
-				HTML row = new HTML();
-				row.getElement().getStyle().setClear(Clear.BOTH);
-				row.getElement().addClassName("image-row");
-				row.getElement().addClassName("clear-both");
-				imageDiv.getElement().appendChild(row.getElement());
-				
-				HTML col1=new HTML();
-				markPullLeft(col1.getElement());
-				row.getElement().appendChild(col1.getElement());
-				
-				HTML pic1=new HTML();
-				markPullLeft(pic1.getElement());
-				addImage(pic1.getElement(), iter);
-				col1.getElement().appendChild(pic1.getElement());
-				
-				HTML pic2=new HTML();
-				markPullRight(pic2.getElement());
-				addImage(pic2.getElement(), iter);
-				col1.getElement().appendChild(pic2.getElement());
-				
-				HTML col2=new HTML();
-				markPullRight(col2.getElement());
-				row.getElement().appendChild(col2.getElement());
-				
-				HTML pic3=new HTML();
-				markPullLeft(pic3.getElement());
-				addImage(pic3.getElement(), iter);
-				col2.getElement().appendChild(pic3.getElement());
-				
-				HTML pic4=new HTML();
-				markPullRight(pic4.getElement());
-				addImage(pic4.getElement(), iter);
-				col2.getElement().appendChild(pic4.getElement());
+				Element row = DOM.createDiv();
+				row.getStyle().setClear(Clear.BOTH);
+				row.addClassName("image-row");
+				imageDiv.appendChild(row);
+
+				Element col1 = DOM.createDiv();
+				markPullLeft(col1);
+				row.appendChild(col1);
+
+				Element pic1 = DOM.createDiv();
+				markPullLeft(pic1);
+				addImage(pic1, iter);
+				col1.appendChild(pic1);
+
+				Element pic2 = DOM.createDiv();
+				markPullRight(pic2);
+				addImage(pic2, iter);
+				col1.appendChild(pic2);
+
+				Element col2 = DOM.createDiv();
+				markPullRight(col2);
+				row.appendChild(col2);
+
+				Element pic3 = DOM.createDiv();
+				markPullLeft(pic3);
+				addImage(pic3, iter);
+				col2.appendChild(pic3);
+
+				Element pic4 = DOM.createDiv();
+				markPullRight(pic4);
+				addImage(pic4, iter);
+				col2.appendChild(pic4);
 			}
-			gallery.getElement().appendChild(new HTML("<hr style='clear: both;'/>").getElement());
+			gallery.appendChild(hr.cloneNode(true));
 			/*
 			 * add link HTML, this method auto escapes the URL if needed. yeah.. this is
 			 * hacky... but does generate correct HTML structure automatically!
 			 */
-			Span span1 = new Span("Post your own photo gallery!");
+			Element span1 = DOM.createSpan();
+			span1.setInnerText("Post your own photo gallery!");
 			Element br = DOM.createElement("br");
-			Span span2 = new Span("Muksih's Photo Gallery Maker");
-			Anchor a = new Anchor();
-			a.setHref(Location.getHref());
-			a.getElement().appendChild(span2.getElement());
-			HTML pullRight = new HTML();
-			markPullRight(pullRight.getElement());
-			pullRight.getElement().appendChild(span1.getElement());
-			pullRight.getElement().appendChild(br);
-			pullRight.getElement().appendChild(a.getElement());
-			HTML linkHtml = new HTML();
-			linkHtml.getElement().appendChild(pullRight.getElement());
-			gallery.getElement().appendChild(linkHtml.getElement());
-			gallery.getElement().appendChild(new HTML("<hr style='clear: both;'/>").getElement());
+			Element span2 = DOM.createSpan();
+			span2.setInnerText("Muksih's Photo Gallery Maker");
+			Element a = DOM.createAnchor();
+			a.setAttribute("href", Location.getHref());
+			a.appendChild(span2);
+			Element pullRight = DOM.createDiv();
+			markPullRight(pullRight);
+			pullRight.appendChild(span1);
+			pullRight.appendChild(br);
+			pullRight.appendChild(a);
+			Element linkHtml = DOM.createDiv();
+			linkHtml.appendChild(pullRight);
+			gallery.appendChild(linkHtml);
+			gallery.appendChild(hr.cloneNode(true));
 		} catch (Exception e) {
 			GWT.log(e.getMessage(), e);
 		}
@@ -313,7 +317,7 @@ public class PhotoGalleryWizard implements ScheduledCommand, GlobalEventBus {
 		element.addClassName(STEEMIT_PULL_RIGHT);
 		element.setAttribute(ATTR_STYLE, STYLE_PULL_RIGHT);
 	}
-	
+
 	private void markPullLeft(Element element) {
 		element.addClassName(STEEMIT_PULL_LEFT);
 		element.setAttribute(ATTR_STYLE, STYLE_PULL_LEFT);
@@ -361,7 +365,7 @@ public class PhotoGalleryWizard implements ScheduledCommand, GlobalEventBus {
 
 	private void updatePostPreview() {
 		GWT.log("updatePostPreview");
-		HTML galleryHtml = getGalleryHtml4();
+		Element galleryHtml = getGalleryHtml4();
 		fireEvent(new Event.SetPreviewTitle(galleryInfo.getTitle()));
 		fireEvent(new Event.SetPreviewHtml(galleryHtml));
 	}
@@ -441,13 +445,14 @@ public class PhotoGalleryWizard implements ScheduledCommand, GlobalEventBus {
 	}
 
 	private Element useDeprecatedHtml4Tags(String htmlText) {
-		HTML html = new HTML(htmlText);
+		Element html = DOM.createDiv();
+		html.setInnerHTML(htmlText);
 		try {
-			useDeprecatedHtml4Tags(html.getElement());
+			useDeprecatedHtml4Tags(html);
 		} catch (Exception e) {
 			GWT.log(e.getMessage(), e);
 		}
-		return html.getElement();
+		return html;
 	}
 
 	@EventHandler

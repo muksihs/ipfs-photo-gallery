@@ -80,7 +80,7 @@ public class PostGallery extends EventBusComposite {
 	@EventHandler
 	protected void setPreviewHtml(Event.SetPreviewHtml event) {
 		previewPanel.getElement().removeAllChildren();
-		previewPanel.getElement().appendChild(event.getPreviewHtml().getElement());
+		previewPanel.getElement().appendChild(event.getPreviewHtml());
 	}
 	@EventHandler
 	protected void setPreviewTitle(Event.SetPreviewTitle event) {

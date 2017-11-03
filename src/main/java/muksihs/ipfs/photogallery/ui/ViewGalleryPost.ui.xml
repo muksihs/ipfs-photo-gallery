@@ -6,11 +6,18 @@
 	
 	</ui:style>
 	<m:MaterialPanel style='margin: auto; text-align: center; max-width:840px;'>
-	<x:HeaderBlock></x:HeaderBlock>
-	<m:MaterialTitle title="Success! Your gallery has been posted."></m:MaterialTitle>
-	<m:MaterialButton enabled="false" ui:field="another" text="Post another gallery"></m:MaterialButton>
-	<m:MaterialLink enabled="false" ui:field="steemit" text="View gallery at steemit.com"></m:MaterialLink>
-	<m:MaterialLink enabled="false" ui:field="chainbb" text="View gallery at chainbb.com"></m:MaterialLink>
-	<m:MaterialLink enabled="false" ui:field="busyorg" text="View gallery at busy.org"></m:MaterialLink>
+		<x:HeaderBlock></x:HeaderBlock>
+		<m:MaterialTitle title="Success! Your gallery has been posted."></m:MaterialTitle>
+		<m:MaterialButton enabled="false" ui:field="another"
+			text="Post another gallery"></m:MaterialButton>
+		<m:MaterialDivider></m:MaterialDivider>
+		<m:MaterialLink target="_blank" enabled="false" ui:field="steemit"
+			text="View gallery at steemit.com"></m:MaterialLink>
+		<m:MaterialDivider></m:MaterialDivider>
+		<m:MaterialLink target="_blank" enabled="false" ui:field="chainbb"
+			text="View gallery at chainbb.com"></m:MaterialLink>
+		<m:MaterialDivider></m:MaterialDivider>
+		<m:MaterialLink target="_blank" enabled="false" ui:field="busyorg"
+			text="View gallery at busy.org"></m:MaterialLink>
 	</m:MaterialPanel>
 </ui:UiBinder> 

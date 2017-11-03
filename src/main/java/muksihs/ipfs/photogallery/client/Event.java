@@ -1,6 +1,6 @@
 package muksihs.ipfs.photogallery.client;
 
-import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.dom.client.Element;
 import com.google.web.bindery.event.shared.binder.GenericEvent;
 
 import elemental2.dom.FileList;
@@ -11,9 +11,11 @@ public interface Event {
 
 		private final String author;
 		private final String permLink;
+		private final String category;
 
-		public LinkInfo(String author, String permLink) {
-			this.author=author;
+		public LinkInfo(String author, String category, String permLink) {
+			this.author = author;
+			this.category = category;
 			this.permLink = permLink;
 		}
 
@@ -25,6 +27,10 @@ public interface Event {
 			return permLink;
 		}
 
+		public String getCategory() {
+			return category;
+		}
+
 	}
 
 	public class GetViewLinkInfo extends GenericEvent {
@@ -34,15 +40,24 @@ public interface Event {
 	public class PostGalleryDone extends GenericEvent {
 		private final String author;
 		private final String permLink;
-		public PostGalleryDone(String author, String permLink) {
-			this.author=author;
-			this.permLink=permLink;
+		private final String category;
+
+		public PostGalleryDone(String author, String category, String permLink) {
+			this.author = author;
+			this.category = category;
+			this.permLink = permLink;
 		}
+
 		public String getPermLink() {
 			return permLink;
 		}
+
 		public String getAuthor() {
 			return author;
+		}
+
+		public String getCategory() {
+			return category;
 		}
 	}
 
@@ -183,18 +198,14 @@ public interface Event {
 		private final String userName;
 
 		public PostGallery(String userName, String postingKey, Integer tipAmount) {
-			this.userName=userName;
-			this.postingKey=postingKey;
-			this.tipAmount=tipAmount;
+			this.userName = userName;
+			this.postingKey = postingKey;
+			this.tipAmount = tipAmount;
 		}
-		
-		
 
 		public String getPostingKey() {
 			return postingKey;
 		}
-
-
 
 		public Integer getTipAmount() {
 			return tipAmount;
@@ -282,13 +293,13 @@ public interface Event {
 	}
 
 	public static class SetPreviewHtml extends GenericEvent {
-		private final HTML previewHtml;
+		private final Element previewHtml;
 
-		public SetPreviewHtml(HTML galleryHtml) {
+		public SetPreviewHtml(Element galleryHtml) {
 			this.previewHtml = galleryHtml;
 		}
 
-		public HTML getPreviewHtml() {
+		public Element getPreviewHtml() {
 			return previewHtml;
 		}
 	}
@@ -298,7 +309,7 @@ public interface Event {
 		private final String title;
 
 		public SetPreviewTitle(String title) {
-			this.title=title;
+			this.title = title;
 		}
 
 		public String getTitle() {

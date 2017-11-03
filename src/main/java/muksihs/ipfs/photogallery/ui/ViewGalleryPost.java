@@ -13,7 +13,7 @@ import gwt.material.design.client.ui.MaterialLink;
 import muksihs.ipfs.photogallery.client.Event;
 
 public class ViewGalleryPost extends EventBusComposite {
-	
+
 	@UiField
 	protected MaterialButton another;
 	@UiField
@@ -32,24 +32,27 @@ public class ViewGalleryPost extends EventBusComposite {
 		initWidget(uiBinder.createAndBindUi(this));
 	}
 
-	interface MyEventBinder extends EventBinder<ViewGalleryPost>{};
+	interface MyEventBinder extends EventBinder<ViewGalleryPost> {
+	};
+
 	@Override
 	protected <T extends EventBinder<EventBusComposite>> T getEventBinder() {
 		return GWT.create(MyEventBinder.class);
 	}
-	
+
 	@EventHandler
 	protected void linkInfo(Event.LinkInfo event) {
 		another.setEnabled(true);
-		another.addClickHandler((e)->Location.reload());
-		steemit.setHref("https://www.steemit.com/@"+event.getAuthor()+"/"+event.getPermLink());
+		another.addClickHandler((e) -> Location.reload());
+		String href = event.getCategory() + "/" + "@" + event.getAuthor() + "/" + event.getPermLink();
+		steemit.setHref("https://www.steemit.com/" + href);
 		steemit.setEnabled(true);
-		chainbb.setHref("https://www.chainbb.com/@"+event.getAuthor()+"/"+event.getPermLink());
+		chainbb.setHref("https://www.chainbb.com/" + href);
 		chainbb.setEnabled(true);
-		busyorg.setHref("https://www.busy.org/@"+event.getAuthor()+"/"+event.getPermLink());
+		busyorg.setHref("https://www.busy.org/" + href);
 		busyorg.setEnabled(true);
 	}
-	
+
 	@Override
 	protected void onLoad() {
 		super.onLoad();
