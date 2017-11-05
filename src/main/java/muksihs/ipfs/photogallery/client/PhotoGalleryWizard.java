@@ -21,8 +21,10 @@ import com.google.gwt.dom.client.ImageElement;
 import com.google.gwt.dom.client.Node;
 import com.google.gwt.dom.client.NodeList;
 import com.google.gwt.dom.client.Style.Clear;
+import com.google.gwt.dom.client.Style.TextAlign;
 import com.google.gwt.dom.client.Text;
 import com.google.gwt.user.client.DOM;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window.Location;
 import com.google.web.bindery.event.shared.binder.EventBinder;
 import com.google.web.bindery.event.shared.binder.EventHandler;
@@ -46,9 +48,9 @@ import steem.SteemError;
 
 public class PhotoGalleryWizard implements ScheduledCommand, GlobalEventBus {
 
-	private static final String STYLE_PULL_LEFT = "float: left; padding-left: 1rem; max-width: 50%;";
+	private static final String STYLE_PULL_LEFT = "float: left; padding: 4px; max-width: 50%;";
 
-	private static final String STYLE_PULL_RIGHT = "float: right; padding-left: 1rem; max-width: 50%;";
+	private static final String STYLE_PULL_RIGHT = "float: right; padding: 4px; max-width: 50%;";
 
 	private static final String ATTR_STYLE = "style";
 
@@ -100,25 +102,40 @@ public class PhotoGalleryWizard implements ScheduledCommand, GlobalEventBus {
 		ImageData image;
 		image = iter.next();
 		if (image != null) {
+			DivElement imgBox = dom.createDivElement();
+			parent.appendChild(imgBox);
+			imgBox.getStyle().setTextAlign(TextAlign.CENTER);
+			Element center = dom.createElement("center");
+			imgBox.appendChild(center);
+			
+			imgBox.appendChild(center);
 			AnchorElement a = dom.createAnchorElement();
 			ImageElement i = dom.createImageElement();
 			a.appendChild(i);
 			a.setHref(image.getImageUrl());
 			a.setTarget("_blank");
 			i.setSrc(image.getThumbUrl());
-			parent.appendChild(a);
+			center.appendChild(a);
+			
 			Text txt1 = dom.createTextNode("[");
 			a = dom.createAnchorElement();
-			a.setInnerText("View Larger Image");
+			a.setInnerText("View Image");
+			a.setHref(image.getImageUrl());
+			a.setTarget("_blank");
 			Text txt2 = dom.createTextNode("]");
-			parent.appendChild(dom.createBRElement());
-			parent.appendChild(txt1);
-			parent.appendChild(a);
-			parent.appendChild(txt2);
+			center.appendChild(dom.createBRElement());
+			center.appendChild(txt1);
+			center.appendChild(a);
+			center.appendChild(txt2);
 		} else {
+			DivElement imgBox = dom.createDivElement();
+			parent.appendChild(imgBox);
+			imgBox.getStyle().setTextAlign(TextAlign.CENTER);
+			Element center = dom.createElement("center");
+			imgBox.appendChild(center);
 			ImageElement i = dom.createImageElement();
 			i.setAttribute("src", "https://ipfs.io/ipfs/" + Consts.PLACEHOLDER);
-			parent.appendChild(i);
+			center.appendChild(i);
 		}
 	}
 
@@ -380,8 +397,31 @@ public class PhotoGalleryWizard implements ScheduledCommand, GlobalEventBus {
 	private void updatePostPreview() {
 		GWT.log("updatePostPreview");
 		Element galleryHtml = getGalleryHtml4();
+		addTimedImageReloadHooks(galleryHtml);
 		fireEvent(new Event.SetPreviewTitle(galleryInfo.getTitle()));
 		fireEvent(new Event.SetPreviewHtml(galleryHtml));
+	}
+
+	private void addTimedImageReloadHooks(Element element) {
+		if ("img".equals(element.getTagName())) {
+			final String src = element.getAttribute("src");
+			new Timer() {
+				@Override
+				public void run() {
+					element.setAttribute("src", "");
+					Scheduler.get().scheduleDeferred(()->element.setAttribute("src", src));
+				}
+			}.scheduleRepeating(500);
+		}
+		if (element.hasChildNodes()) {
+			for (int ix=0; ix<element.getChildCount(); ix++) {
+				Node child = element.getChild(ix);
+				if (child.getNodeType()!=Node.ELEMENT_NODE) {
+					continue;
+				}
+				addTimedImageReloadHooks((Element) child);
+			}
+		}
 	}
 
 	private void useDeprecatedHtml4Tags(Element node) {

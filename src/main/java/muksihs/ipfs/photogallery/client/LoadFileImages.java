@@ -16,7 +16,39 @@ import muksihs.ipfs.photogallery.ui.GlobalEventBus;
 
 public class LoadFileImages implements GlobalEventBus {
 
-	public Void createThumbnail(FileList files, int ix, ImageData imageData, HTMLImageElement image) {
+	private Void resizeImage(FileList files, int ix, ImageData imageData, HTMLImageElement image) {
+		double scale;
+		double w = image.width;
+		double h = image.height;
+		/*
+		 * scale image down
+		 */
+		if (w > h) {
+			scale = Consts.imageMaxSize / w;
+		} else {
+			scale = Consts.imageMaxSize / h;
+		}
+		/*
+		 * if image is already small enough, skip resize step
+		 */
+		if (scale > 1) {
+			GWT.log("resizeImage: skip");
+			createThumbnail(files, ix, imageData, image);
+			return null;
+		}
+		// resize image
+		HTMLCanvasElement canvas = (HTMLCanvasElement) DomGlobal.document.createElement("canvas");
+		canvas.width = image.width * scale;
+		canvas.height = image.height * scale;
+		CanvasRenderingContext2D ctx = (CanvasRenderingContext2D) (Object) canvas.getContext("2d");
+		ctx.drawImage(image, 0, 0, image.width * scale, image.height * scale);
+		String mime = image.src.contains(";base64,iVBOR") ? "image/png" : "image/jpeg";
+		canvas.toBlob((resized) -> createThumbnail(files, ix, imageData.setImageData(resized), image), mime,
+				Consts.imageJpgQuality);
+		return null;
+	}
+
+	private Void createThumbnail(FileList files, int ix, ImageData imageData, HTMLImageElement image) {
 		double scale;
 		double w = image.width;
 		double h = image.height;
@@ -24,9 +56,9 @@ public class LoadFileImages implements GlobalEventBus {
 		 * size to fit
 		 */
 		if (w > h) {
-			scale = Consts.maxSize / w;
+			scale = Consts.thumbMaxSize / w;
 		} else {
-			scale = Consts.maxSize / h;
+			scale = Consts.thumbMaxSize / h;
 		}
 		// draw thumbnail image
 		HTMLCanvasElement canvas = (HTMLCanvasElement) DomGlobal.document.createElement("canvas");
@@ -39,7 +71,7 @@ public class LoadFileImages implements GlobalEventBus {
 			fireEvent(new Event.ImageDataAdded(imageData.setThumbData(blob)));
 			loadNextDataUrl(files, ix + 1);
 			return null;
-		}, mime, Consts.jpgQuality);
+		}, mime, Consts.thumbJpgQuality);
 		return null;
 	}
 
@@ -47,8 +79,7 @@ public class LoadFileImages implements GlobalEventBus {
 		loadNextDataUrl(files, 0);
 	}
 
-	// private List<ImageData> dataUrls=new ArrayList<>();
-	protected Void loadNextDataUrl(FileList files, int ix) {
+	private Void loadNextDataUrl(FileList files, int ix) {
 		if (ix >= files.length) {
 			fireEvent(new Event.AddImagesDone());
 			return null;
@@ -63,12 +94,13 @@ public class LoadFileImages implements GlobalEventBus {
 		return null;
 	}
 
-	public Void onFileLoaded(FileList files, int ix, ResultUnionType result) {
+	private Void onFileLoaded(FileList files, int ix, ResultUnionType result) {
 		File file = files.getAt(ix);
 		HTMLImageElement image = (HTMLImageElement) DomGlobal.document.createElement("img");
+		image.setAttribute("style", "orientation: from-image;");
 		image.onabort = (e) -> loadNextDataUrl(files, ix + 1);// skip non-image file
 		image.onerror = (e) -> loadNextDataUrl(files, ix + 1);// skip non-image file
-		image.onload = (e) -> createThumbnail(files, ix, new ImageData(file.slice(), null, file.name), image);
+		image.onload = (e) -> resizeImage(files, ix, new ImageData(file.slice(), null, file.name), image);
 		image.src = result.asString();
 		return null;
 	}

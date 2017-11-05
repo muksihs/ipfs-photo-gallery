@@ -2,6 +2,8 @@ package muksihs.ipfs.photogallery.ui;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.dom.client.Document;
+import com.google.gwt.dom.client.Style.TextAlign;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -16,6 +18,7 @@ import elemental2.dom.DomGlobal;
 import elemental2.dom.FileList;
 import elemental2.dom.FileReader;
 import elemental2.dom.HTMLInputElement;
+import gwt.material.design.client.constants.Display;
 import gwt.material.design.client.ui.MaterialButton;
 import gwt.material.design.client.ui.MaterialImage;
 import gwt.material.design.client.ui.MaterialModal;
@@ -23,6 +26,7 @@ import gwt.material.design.client.ui.MaterialPanel;
 import gwt.material.design.client.ui.animate.MaterialAnimation;
 import gwt.material.design.client.ui.animate.Transition;
 import muksihs.ipfs.photogallery.client.Event;
+import muksihs.ipfs.photogallery.shared.Consts;
 
 public class SelectImages extends EventBusComposite {
 
@@ -118,8 +122,8 @@ public class SelectImages extends EventBusComposite {
 			anim.duration(300);
 			anim.setInfinite(false);
 			anim.setTransition(Transition.FADEOUT);
-			anim.animate(image, () -> {
-				image.removeFromParent();
+			anim.animate(image.getParent(), () -> {
+				image.getParent().removeFromParent();
 				modal.close();
 			});
 		});
@@ -145,11 +149,26 @@ public class SelectImages extends EventBusComposite {
 	protected void updatePreviewPanel(Event.AddToPreviewPanel event) {
 		FileReader reader = new FileReader();
 		reader.onloadend = (e) -> {
+			Document dom = Document.get();
+			String title = event.getImageData().getName();
+			String size = "["+Math.ceil(event.getImageData().getImageData().size/Consts.KB)+" KB]";
+			MaterialPanel imgBox = new MaterialPanel();
+			imgBox.setPadding(4);
+			imgBox.setMaxWidth("24%");
+			imgBox.setDisplay(Display.INLINE_BLOCK);
+			imgBox.getElement().getStyle().setTextAlign(TextAlign.CENTER);
 			MaterialImage image = new MaterialImage(reader.result.asString());
 			image.setCaption(event.getImageData().getName());
-			image.setTitle(event.getImageData().getName());
+			image.setTitle(title+" "+size);
+			image.setWidth("100%");
 			image.addClickHandler((e2) -> showListEditOptions(image));
-			previewPanel.add(image);
+			image.setHoverable(true);
+			imgBox.add(image);
+			imgBox.getElement().appendChild(dom.createBRElement());
+			imgBox.getElement().appendChild(dom.createTextNode(title));
+			imgBox.getElement().appendChild(dom.createBRElement());
+			imgBox.getElement().appendChild(dom.createTextNode(size));
+			previewPanel.add(imgBox);
 			return null;
 		};
 		reader.readAsDataURL(event.getImageData().getThumbData());

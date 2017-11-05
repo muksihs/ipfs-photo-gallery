@@ -3,9 +3,7 @@
 	xmlns:g="urn:import:com.google.gwt.user.client.ui" xmlns:m="urn:import:gwt.material.design.client.ui"
 	xmlns:x="urn:import:muksihs.ipfs.photogallery.ui">
 	<ui:style>
-	img {
-		max-width: 24% !important;
-	}
+	
 	</ui:style>
 	<m:MaterialPanel style='margin: auto; text-align: center; max-width:840px;'>
 		<x:HeaderBlock ui:field="hblock"></x:HeaderBlock>
