@@ -11,10 +11,17 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JsArray;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
+import com.google.gwt.dom.client.AnchorElement;
+import com.google.gwt.dom.client.BRElement;
+import com.google.gwt.dom.client.DivElement;
+import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.HRElement;
+import com.google.gwt.dom.client.ImageElement;
 import com.google.gwt.dom.client.Node;
 import com.google.gwt.dom.client.NodeList;
 import com.google.gwt.dom.client.Style.Clear;
+import com.google.gwt.dom.client.Text;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.Window.Location;
 import com.google.web.bindery.event.shared.binder.EventBinder;
@@ -83,24 +90,33 @@ public class PhotoGalleryWizard implements ScheduledCommand, GlobalEventBus {
 	}
 
 	public void addImage(Element parent, Iterator<ImageData> iter) {
+		Document dom = Document.get();
 		if (!iter.hasNext()) {
-			Element i = DOM.createImg();
-			i.setAttribute("src", "https://ipfs.io/ipfs/" + Consts.PLACEHOLDER);
+			ImageElement i = dom.createImageElement();
+			i.setSrc("https://ipfs.io/ipfs/" + Consts.PLACEHOLDER);
 			parent.appendChild(i);
 			return;
 		}
 		ImageData image;
 		image = iter.next();
 		if (image != null) {
-			Element a = DOM.createAnchor();
-			Element i = DOM.createImg();
+			AnchorElement a = dom.createAnchorElement();
+			ImageElement i = dom.createImageElement();
 			a.appendChild(i);
-			a.setAttribute("href", image.getImageUrl());
-			a.setAttribute("target", "_blank");
-			i.setAttribute("src", image.getThumbUrl());
+			a.setHref(image.getImageUrl());
+			a.setTarget("_blank");
+			i.setSrc(image.getThumbUrl());
 			parent.appendChild(a);
+			Text txt1 = dom.createTextNode("[");
+			a = dom.createAnchorElement();
+			a.setInnerText("View Larger Image");
+			Text txt2 = dom.createTextNode("]");
+			parent.appendChild(dom.createBRElement());
+			parent.appendChild(txt1);
+			parent.appendChild(a);
+			parent.appendChild(txt2);
 		} else {
-			Element i = DOM.createImg();
+			ImageElement i = dom.createImageElement();
 			i.setAttribute("src", "https://ipfs.io/ipfs/" + Consts.PLACEHOLDER);
 			parent.appendChild(i);
 		}
@@ -238,72 +254,70 @@ public class PhotoGalleryWizard implements ScheduledCommand, GlobalEventBus {
 
 	@EventHandler
 	protected void getAppVersion(Event.GetAppVersion event) {
-		fireEvent(new Event.DisplayAppVersion("20171103"));
+		fireEvent(new Event.DisplayAppVersion("20171105"));
 	}
 
 	public Element getGalleryHtml4() {
-		Element gallery = DOM.createDiv();
-		Element hr = DOM.createElement("hr");
+		Document dom = Document.get();
+		DivElement gallery = dom.createDivElement();
+		HRElement hr = dom.createHRElement();
 		hr.getStyle().setClear(Clear.BOTH);
 		try {
 			gallery.appendChild(useDeprecatedHtml4Tags(galleryInfo.getDescription()));
 			gallery.appendChild(hr.cloneNode(true));
 			Iterator<ImageData> iter = imageDataList.iterator();
-			Element imageDiv = DOM.createDiv();
+			DivElement imageDiv = dom.createDivElement();
 			gallery.appendChild(imageDiv);
 			while (iter.hasNext()) {
-				Element row = DOM.createDiv();
+				DivElement row = dom.createDivElement();
 				row.getStyle().setClear(Clear.BOTH);
 				row.addClassName("image-row");
 				imageDiv.appendChild(row);
 
-				Element col1 = DOM.createDiv();
+				DivElement col1 = dom.createDivElement();
 				markPullLeft(col1);
 				row.appendChild(col1);
 
-				Element pic1 = DOM.createDiv();
+				DivElement pic1 = dom.createDivElement();
 				markPullLeft(pic1);
 				addImage(pic1, iter);
 				col1.appendChild(pic1);
 
-				Element pic2 = DOM.createDiv();
+				DivElement pic2 = dom.createDivElement();
 				markPullRight(pic2);
 				addImage(pic2, iter);
 				col1.appendChild(pic2);
 
-				Element col2 = DOM.createDiv();
+				DivElement col2 = dom.createDivElement();
 				markPullRight(col2);
 				row.appendChild(col2);
 
-				Element pic3 = DOM.createDiv();
+				DivElement pic3 = dom.createDivElement();
 				markPullLeft(pic3);
 				addImage(pic3, iter);
 				col2.appendChild(pic3);
 
-				Element pic4 = DOM.createDiv();
+				DivElement pic4 = dom.createDivElement();
 				markPullRight(pic4);
 				addImage(pic4, iter);
 				col2.appendChild(pic4);
 			}
 			gallery.appendChild(hr.cloneNode(true));
 			/*
-			 * add link HTML, this method auto escapes the URL if needed. yeah.. this is
-			 * hacky... but does generate correct HTML structure automatically!
+			 * add link HTML
 			 */
-			Element span1 = DOM.createSpan();
-			span1.setInnerText("Post your own photo gallery!");
-			Element br = DOM.createElement("br");
-			Element span2 = DOM.createSpan();
-			span2.setInnerText("Muksih's Photo Gallery Maker");
-			Element a = DOM.createAnchor();
-			a.setAttribute("href", Location.getHref());
-			a.appendChild(span2);
-			Element pullRight = DOM.createDiv();
+			Text txt1 = dom.createTextNode("Post your own photo gallery!");
+			BRElement br = dom.createBRElement();
+			Text txt2 = dom.createTextNode("Muksih's Photo Gallery Maker");
+			AnchorElement a = dom.createAnchorElement();
+			a.setHref(Location.getHref());
+			a.appendChild(txt2);
+			DivElement pullRight = dom.createDivElement();
 			markPullRight(pullRight);
-			pullRight.appendChild(span1);
+			pullRight.appendChild(txt1);
 			pullRight.appendChild(br);
 			pullRight.appendChild(a);
-			Element linkHtml = DOM.createDiv();
+			DivElement linkHtml = dom.createDivElement();
 			linkHtml.appendChild(pullRight);
 			gallery.appendChild(linkHtml);
 			gallery.appendChild(hr.cloneNode(true));
