@@ -4,7 +4,7 @@ public class Consts {
 	public static final int KB = 1024;
 	public static final double thumbMaxSize = (int) 256;
 	public static final double thumbJpgQuality = 0.70f;
-	public static final double imageMaxSize = (int) (2.5f*1024f);
+	public static final double imageMaxSize = (int) (2f*1024f);
 	public static final double imageJpgQuality = 0.92f;
 	public static final String PLACEHOLDER_HASH = "QmQ4keX7r9YnoARDgq4YJBqRwABcfXsnnE8EkD5EnjtLVH";
 	public static final String PLACEHOLDER = "QmQ4keX7r9YnoARDgq4YJBqRwABcfXsnnE8EkD5EnjtLVH/placeholder.png";
