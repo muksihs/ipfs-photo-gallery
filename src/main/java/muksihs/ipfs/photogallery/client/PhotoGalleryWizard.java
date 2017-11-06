@@ -271,7 +271,7 @@ public class PhotoGalleryWizard implements ScheduledCommand, GlobalEventBus {
 
 	@EventHandler
 	protected void getAppVersion(Event.GetAppVersion event) {
-		fireEvent(new Event.DisplayAppVersion("20171105"));
+		fireEvent(new Event.DisplayAppVersion(Consts.VERSION));
 	}
 
 	public Element getGalleryHtml4() {
