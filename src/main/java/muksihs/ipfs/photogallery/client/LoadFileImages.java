@@ -97,7 +97,7 @@ public class LoadFileImages implements GlobalEventBus {
 	private Void onFileLoaded(FileList files, int ix, ResultUnionType result) {
 		File file = files.getAt(ix);
 		HTMLImageElement image = (HTMLImageElement) DomGlobal.document.createElement("img");
-		image.setAttribute("style", "orientation: from-image;");
+//		image.setAttribute("style", "orientation: from-image;");
 		image.onabort = (e) -> loadNextDataUrl(files, ix + 1);// skip non-image file
 		image.onerror = (e) -> loadNextDataUrl(files, ix + 1);// skip non-image file
 		image.onload = (e) -> resizeImage(files, ix, new ImageData(file.slice(), null, file.name), image);
