@@ -7,60 +7,6 @@ import elemental2.dom.FileList;
 import muksihs.ipfs.photogallery.shared.ImageData;
 
 public interface Event {
-	public class LinkInfo extends GenericEvent {
-
-		private final String author;
-		private final String permLink;
-		private final String category;
-
-		public LinkInfo(String author, String category, String permLink) {
-			this.author = author;
-			this.category = category;
-			this.permLink = permLink;
-		}
-
-		public String getAuthor() {
-			return author;
-		}
-
-		public String getPermLink() {
-			return permLink;
-		}
-
-		public String getCategory() {
-			return category;
-		}
-
-	}
-
-	public class GetViewLinkInfo extends GenericEvent {
-
-	}
-
-	public class PostGalleryDone extends GenericEvent {
-		private final String author;
-		private final String permLink;
-		private final String category;
-
-		public PostGalleryDone(String author, String category, String permLink) {
-			this.author = author;
-			this.category = category;
-			this.permLink = permLink;
-		}
-
-		public String getPermLink() {
-			return permLink;
-		}
-
-		public String getAuthor() {
-			return author;
-		}
-
-		public String getCategory() {
-			return category;
-		}
-	}
-
 	public class AddImages extends GenericEvent {
 		private final FileList files;
 
@@ -176,6 +122,10 @@ public interface Event {
 
 	}
 
+	public class GetViewLinkInfo extends GenericEvent {
+
+	}
+
 	public class ImageDataAdded extends GenericEvent {
 		private final ImageData imageData;
 
@@ -189,6 +139,32 @@ public interface Event {
 	}
 
 	public static class IpfsGatewayReady extends GenericEvent {
+	}
+
+	public class LinkInfo extends GenericEvent {
+
+		private final String author;
+		private final String permLink;
+		private final String category;
+
+		public LinkInfo(String author, String category, String permLink) {
+			this.author = author;
+			this.category = category;
+			this.permLink = permLink;
+		}
+
+		public String getAuthor() {
+			return author;
+		}
+
+		public String getCategory() {
+			return category;
+		}
+
+		public String getPermLink() {
+			return permLink;
+		}
+
 	}
 
 	public static class PostGallery extends GenericEvent {
@@ -237,6 +213,30 @@ public interface Event {
 			return builder.toString();
 		}
 
+	}
+
+	public class PostGalleryDone extends GenericEvent {
+		private final String author;
+		private final String permLink;
+		private final String category;
+
+		public PostGalleryDone(String author, String category, String permLink) {
+			this.author = author;
+			this.category = category;
+			this.permLink = permLink;
+		}
+
+		public String getAuthor() {
+			return author;
+		}
+
+		public String getCategory() {
+			return category;
+		}
+
+		public String getPermLink() {
+			return permLink;
+		}
 	}
 
 	public class RemoveImage extends GenericEvent {

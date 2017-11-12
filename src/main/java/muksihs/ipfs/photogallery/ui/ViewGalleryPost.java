@@ -14,25 +14,25 @@ import muksihs.ipfs.photogallery.client.Event;
 
 public class ViewGalleryPost extends EventBusComposite {
 
+	interface MyEventBinder extends EventBinder<ViewGalleryPost> {
+	}
+	interface ViewGalleryPostUiBinder extends UiBinder<Widget, ViewGalleryPost> {
+	}
+	private static ViewGalleryPostUiBinder uiBinder = GWT.create(ViewGalleryPostUiBinder.class);
 	@UiField
 	protected MaterialButton another;
+
 	@UiField
 	protected MaterialLink steemit;
+
 	@UiField
 	protected MaterialLink chainbb;
+
 	@UiField
 	protected MaterialLink busyorg;
 
-	private static ViewGalleryPostUiBinder uiBinder = GWT.create(ViewGalleryPostUiBinder.class);
-
-	interface ViewGalleryPostUiBinder extends UiBinder<Widget, ViewGalleryPost> {
-	}
-
 	public ViewGalleryPost() {
 		initWidget(uiBinder.createAndBindUi(this));
-	}
-
-	interface MyEventBinder extends EventBinder<ViewGalleryPost> {
 	};
 
 	@Override

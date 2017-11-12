@@ -16,38 +16,6 @@ import muksihs.ipfs.photogallery.ui.GlobalEventBus;
 
 public class LoadFileImages implements GlobalEventBus {
 
-	private Void resizeImage(FileList files, int ix, ImageData imageData, HTMLImageElement image) {
-		double scale;
-		double w = image.width;
-		double h = image.height;
-		/*
-		 * scale image down
-		 */
-		if (w > h) {
-			scale = Consts.imageMaxSize / w;
-		} else {
-			scale = Consts.imageMaxSize / h;
-		}
-		/*
-		 * if image is already small enough, skip resize step
-		 */
-		if (scale > 1) {
-			GWT.log("resizeImage: skip");
-			createThumbnail(files, ix, imageData, image);
-			return null;
-		}
-		// resize image
-		HTMLCanvasElement canvas = (HTMLCanvasElement) DomGlobal.document.createElement("canvas");
-		canvas.width = image.width * scale;
-		canvas.height = image.height * scale;
-		CanvasRenderingContext2D ctx = (CanvasRenderingContext2D) (Object) canvas.getContext("2d");
-		ctx.drawImage(image, 0, 0, image.width * scale, image.height * scale);
-		String mime = image.src.contains(";base64,iVBOR") ? "image/png" : "image/jpeg";
-		canvas.toBlob((resized) -> createThumbnail(files, ix, imageData.setImageData(resized), image), mime,
-				Consts.imageJpgQuality);
-		return null;
-	}
-
 	private Void createThumbnail(FileList files, int ix, ImageData imageData, HTMLImageElement image) {
 		double scale;
 		double w = image.width;
@@ -102,6 +70,38 @@ public class LoadFileImages implements GlobalEventBus {
 		image.onerror = (e) -> loadNextDataUrl(files, ix + 1);// skip non-image file
 		image.onload = (e) -> resizeImage(files, ix, new ImageData(file.slice(), null, file.name), image);
 		image.src = result.asString();
+		return null;
+	}
+
+	private Void resizeImage(FileList files, int ix, ImageData imageData, HTMLImageElement image) {
+		double scale;
+		double w = image.width;
+		double h = image.height;
+		/*
+		 * scale image down
+		 */
+		if (w > h) {
+			scale = Consts.imageMaxSize / w;
+		} else {
+			scale = Consts.imageMaxSize / h;
+		}
+		/*
+		 * if image is already small enough, skip resize step
+		 */
+		if (scale > 1) {
+			GWT.log("resizeImage: skip");
+			createThumbnail(files, ix, imageData, image);
+			return null;
+		}
+		// resize image
+		HTMLCanvasElement canvas = (HTMLCanvasElement) DomGlobal.document.createElement("canvas");
+		canvas.width = image.width * scale;
+		canvas.height = image.height * scale;
+		CanvasRenderingContext2D ctx = (CanvasRenderingContext2D) (Object) canvas.getContext("2d");
+		ctx.drawImage(image, 0, 0, image.width * scale, image.height * scale);
+		String mime = image.src.contains(";base64,iVBOR") ? "image/png" : "image/jpeg";
+		canvas.toBlob((resized) -> createThumbnail(files, ix, imageData.setImageData(resized), image), mime,
+				Consts.imageJpgQuality);
 		return null;
 	}
 }

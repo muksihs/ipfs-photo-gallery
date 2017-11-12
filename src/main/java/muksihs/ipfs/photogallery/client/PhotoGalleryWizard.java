@@ -47,6 +47,9 @@ import steem.SteemError;
 
 public class PhotoGalleryWizard implements ScheduledCommand, GlobalEventBus {
 
+	interface MyEventBinder extends EventBinder<PhotoGalleryWizard> {
+	}
+
 	private static final String STYLE_PULL_LEFT = "float: left; padding: 4px; max-width: 50%;";
 
 	private static final String STYLE_PULL_RIGHT = "float: right; padding: 4px; max-width: 50%;";
@@ -56,9 +59,6 @@ public class PhotoGalleryWizard implements ScheduledCommand, GlobalEventBus {
 	private static final String STEEMIT_PULL_LEFT = "pull-left";
 
 	private static final String STEEMIT_PULL_RIGHT = "pull-right";
-
-	interface MyEventBinder extends EventBinder<PhotoGalleryWizard> {
-	}
 
 	private static final MyEventBinder eventBinder = GWT.create(MyEventBinder.class);
 
@@ -151,6 +151,28 @@ public class PhotoGalleryWizard implements ScheduledCommand, GlobalEventBus {
 	@EventHandler
 	protected void addImagesDone(Event.AddImagesDone event) {
 		fireEvent(new Event.EnableSelectImages(true));
+	}
+
+	private void addTimedImageReloadHooks(Element element) {
+		if ("img".equals(element.getTagName())) {
+			final String src = element.getAttribute("src");
+			new Timer() {
+				@Override
+				public void run() {
+					element.setAttribute("src", "");
+					Scheduler.get().scheduleDeferred(()->element.setAttribute("src", src));
+				}
+			}.scheduleRepeating(500);
+		}
+		if (element.hasChildNodes()) {
+			for (int ix=0; ix<element.getChildCount(); ix++) {
+				Node child = element.getChild(ix);
+				if (child.getNodeType()!=Node.ELEMENT_NODE) {
+					continue;
+				}
+				addTimedImageReloadHooks((Element) child);
+			}
+		}
 	}
 
 	@EventHandler
@@ -256,19 +278,6 @@ public class PhotoGalleryWizard implements ScheduledCommand, GlobalEventBus {
 	}
 
 	@EventHandler
-	protected void onPostGalleryDone(Event.PostGalleryDone event) {
-		this.author = event.getAuthor();
-		this.category = event.getCategory();
-		this.permLink = event.getPermLink();
-		fireEvent(new ShowView(View.ViewPost));
-	}
-
-	@EventHandler
-	protected void getLinkInfo(Event.GetViewLinkInfo event) {
-		fireEvent(new Event.LinkInfo(author, category, permLink));
-	}
-
-	@EventHandler
 	protected void getAppVersion(Event.GetAppVersion event) {
 		fireEvent(new Event.DisplayAppVersion(Consts.VERSION));
 	}
@@ -344,14 +353,9 @@ public class PhotoGalleryWizard implements ScheduledCommand, GlobalEventBus {
 		return gallery;
 	}
 
-	private void markPullRight(Element element) {
-		element.addClassName(STEEMIT_PULL_RIGHT);
-		element.setAttribute(ATTR_STYLE, STYLE_PULL_RIGHT);
-	}
-
-	private void markPullLeft(Element element) {
-		element.addClassName(STEEMIT_PULL_LEFT);
-		element.setAttribute(ATTR_STYLE, STYLE_PULL_LEFT);
+	@EventHandler
+	protected void getLinkInfo(Event.GetViewLinkInfo event) {
+		fireEvent(new Event.LinkInfo(author, category, permLink));
 	}
 
 	@EventHandler
@@ -359,6 +363,24 @@ public class PhotoGalleryWizard implements ScheduledCommand, GlobalEventBus {
 		imageDataList.add(event.getData());
 		fireEvent(new Event.AddToPreviewPanel(event.getData()));
 		fireEvent(new Event.UpdateImageCount(imageDataList.size()));
+	}
+
+	private void markPullLeft(Element element) {
+		element.addClassName(STEEMIT_PULL_LEFT);
+		element.setAttribute(ATTR_STYLE, STYLE_PULL_LEFT);
+	}
+
+	private void markPullRight(Element element) {
+		element.addClassName(STEEMIT_PULL_RIGHT);
+		element.setAttribute(ATTR_STYLE, STYLE_PULL_RIGHT);
+	}
+
+	@EventHandler
+	protected void onPostGalleryDone(Event.PostGalleryDone event) {
+		this.author = event.getAuthor();
+		this.category = event.getCategory();
+		this.permLink = event.getPermLink();
+		fireEvent(new ShowView(View.ViewPost));
 	}
 
 	@EventHandler
@@ -400,28 +422,6 @@ public class PhotoGalleryWizard implements ScheduledCommand, GlobalEventBus {
 		addTimedImageReloadHooks(galleryHtml);
 		fireEvent(new Event.SetPreviewTitle(galleryInfo.getTitle()));
 		fireEvent(new Event.SetPreviewHtml(galleryHtml));
-	}
-
-	private void addTimedImageReloadHooks(Element element) {
-		if ("img".equals(element.getTagName())) {
-			final String src = element.getAttribute("src");
-			new Timer() {
-				@Override
-				public void run() {
-					element.setAttribute("src", "");
-					Scheduler.get().scheduleDeferred(()->element.setAttribute("src", src));
-				}
-			}.scheduleRepeating(500);
-		}
-		if (element.hasChildNodes()) {
-			for (int ix=0; ix<element.getChildCount(); ix++) {
-				Node child = element.getChild(ix);
-				if (child.getNodeType()!=Node.ELEMENT_NODE) {
-					continue;
-				}
-				addTimedImageReloadHooks((Element) child);
-			}
-		}
 	}
 
 	private void useDeprecatedHtml4Tags(Element node) {
