@@ -95,8 +95,8 @@ public class IpfsGatewayCache implements GlobalEventBus {
 			 */
 			tmp = StringUtils.substringBefore(GWT.getHostPageBaseURL(), "/ipfs/");
 			tmp = "{ \"list\": [\"" + tmp + "/ipfs/\"]}";
-			// tmp = "{ \"list\":" + g.writableGateways().getText() + "}";
 		}
+//		tmp = "{ \"list\":" + g.writableGateways().getText() + "}";
 		list = StringListCodec.instance().decode(JSONParser.parseStrict(tmp));
 		nextGateway: for (String e : list.getList()) {
 			Iterator<IpfsGatewayEntry> ig = gateways.iterator();

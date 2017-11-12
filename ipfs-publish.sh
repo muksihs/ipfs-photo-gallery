@@ -8,9 +8,12 @@ IPFS="https://ipfs.macholibre.org/ipfs"
 WAR="ipfs-photo-gallery"
 
 cd "$(dirname "$0")"
-gradle clean build
+z="$(pwd)"
+#gradle clean build
+gradle build
 cd build/libs
 #unpack the war
+rm -rf "$WAR"
 unzip "$WAR".war -d "$WAR"
 #remove servlet stuff
 rm -rf "$WAR"/META-INF
@@ -54,7 +57,13 @@ done
 DIRKEY="$(grep 'Ipfs-Hash:' "$TMP" | cut -f 2 -d ':' | sed 's/[[:space:]]*//g')"
 echo "FINAL DIR URL: $IPFS/$DIRKEY"
 
-xdg-open "$IPFS/$DIRKEY"
+#build iframe holding index page to post to muksihs.com
+cp "$z"/assets/template-index.html "$z/tmp/index.html"
+sed -i "s#_ipfs_link_#$IPFS/$DIRKEY#g" "$z/tmp/index.html"
+ssh muksihs@muksihs.com 'mkdir /var/www/html/ipfs-photo-gallery/||true'
+scp -p -r "$z/tmp/index.html" muksihs@muksihs.com:/var/www/html/ipfs-photo-gallery/index.html
+
+xdg-open "http://muksihs.com/ipfs-photo-gallery/"
 
 echo "DONE."
 

@@ -7,7 +7,7 @@
 	</ui:style>
 	<m:MaterialPanel style="min-width: 840px;">
 		<m:MaterialHeader>
-			<m:MaterialTitle style="margin: 0em;"
+			<m:MaterialTitle style="margin: 0em; margin-top: -50px;"
 				title="Muksihs' Photo Gallery Maker"></m:MaterialTitle>
 			<m:MaterialPanel>
 				<m:MaterialLabel style="display: inline; margin: 0.2em;"

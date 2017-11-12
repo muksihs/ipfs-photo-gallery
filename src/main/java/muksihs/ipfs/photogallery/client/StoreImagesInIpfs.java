@@ -117,6 +117,7 @@ public class StoreImagesInIpfs implements GlobalEventBus, ScheduledCommand {
 		};
 		xhr.onloadend = (e) -> putThumb(state, xhr.getResponseHeader(Ipfs.HEADER_IPFS_HASH), xhr.status);
 		xhr.open("PUT", xhrUrl, true);
+		xhr.setRequestHeader(Ipfs.HEADER_IPFS_HASH, state.getHash());
 		xhr.send(imageData.getImageData());
 		return null;
 	}
@@ -166,6 +167,7 @@ public class StoreImagesInIpfs implements GlobalEventBus, ScheduledCommand {
 		};
 		xhr.onloadend = (e) -> verifyThumbImage(state, xhr.getResponseHeader(Ipfs.HEADER_IPFS_HASH), xhr.status);
 		xhr.open("PUT", xhrUrl, true);
+		xhr.setRequestHeader(Ipfs.HEADER_IPFS_HASH, state.getHash());
 		xhr.send(state.getImageData().getThumbData());
 		return null;
 	}
