@@ -148,7 +148,7 @@ public class StoreImagesInIpfs implements GlobalEventBus, ScheduledCommand {
 	private Void putThumb(PutState state, String newHash, double status) {
 		if ((int) status == 405) {
 			GWT.log("put not supported on this gateway!");
-			fireEvent(new Event.AlertMessage( "IPFS Gateway Error",
+			fireEvent(new Event.AlertMessage("IPFS Gateway Error",
 					"This IPFS gateway does not support uploads via PUT!\nPlease select a different gateway!"));
 			return null;
 		}

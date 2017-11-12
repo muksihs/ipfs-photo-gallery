@@ -327,7 +327,8 @@ public class PhotoGalleryWizard implements ScheduledCommand, GlobalEventBus {
 			BRElement br = dom.createBRElement();
 			Text txt2 = dom.createTextNode("Muksih's Photo Gallery Maker");
 			AnchorElement a = dom.createAnchorElement();
-			a.setHref(Location.getHref());
+//			a.setHref(Location.getHref());
+			a.setHref("http://muksihs.com/ipfs-photo-gallery/");
 			a.appendChild(txt2);
 			DivElement pullRight = dom.createDivElement();
 			markPullRight(pullRight);
