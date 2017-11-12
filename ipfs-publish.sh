@@ -59,7 +59,7 @@ echo "FINAL DIR URL: $IPFS/$DIRKEY"
 
 #build iframe holding index page to post to muksihs.com
 cp "$z"/assets/template-index.html "$z/tmp/index.html"
-sed -i "s#_ipfs_link_#$IPFS/$DIRKEY#g" "$z/tmp/index.html"
+sed -i "s#_ipfs_link_#$IPFS/$DIRKEY/ipfs-photo-gallery/#g" "$z/tmp/index.html"
 ssh muksihs@muksihs.com 'mkdir /var/www/html/ipfs-photo-gallery/||true'
 scp -p -r "$z/tmp/index.html" muksihs@muksihs.com:/var/www/html/ipfs-photo-gallery/index.html
 
