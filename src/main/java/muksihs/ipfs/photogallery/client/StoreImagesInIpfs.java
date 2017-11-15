@@ -168,7 +168,11 @@ public class StoreImagesInIpfs implements GlobalEventBus, ScheduledCommand {
 		xhr.onloadend = (e) -> verifyThumbImage(state, xhr.getResponseHeader(Ipfs.HEADER_IPFS_HASH), xhr.status);
 		xhr.open("PUT", xhrUrl, true);
 		xhr.setRequestHeader(Ipfs.HEADER_IPFS_HASH, state.getHash());
-		xhr.send(state.getImageData().getThumbData());
+		if (state.getImageData().getName().toLowerCase().endsWith(".gif")) {
+			xhr.send(state.getImageData().getImageData());
+		} else {
+			xhr.send(state.getImageData().getThumbData());
+		}
 		return null;
 	}
 

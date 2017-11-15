@@ -87,9 +87,9 @@ public class LoadFileImages implements GlobalEventBus {
 			scale = Consts.imageMaxSize / h;
 		}
 		/*
-		 * if image is already small enough, skip resize step
+		 * if image is already small enough or is a GIF, skip resize step
 		 */
-		if (scale > 1) {
+		if (scale > 1 || imageData.getName().toLowerCase().endsWith(".gif")) {
 			GWT.log("resizeImage: skip");
 			createThumbnail(files, ix, imageData, image);
 			return null;
