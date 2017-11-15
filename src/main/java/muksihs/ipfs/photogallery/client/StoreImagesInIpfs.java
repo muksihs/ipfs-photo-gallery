@@ -275,7 +275,7 @@ public class StoreImagesInIpfs implements GlobalEventBus, ScheduledCommand {
 						GWT.log("image load failed - timeout");
 					}
 				};
-				failsafe.schedule(3000);
+				failsafe.schedule(15000);
 			});
 		}
 		return null;
