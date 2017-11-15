@@ -35,6 +35,7 @@ public class LoadFileImages implements GlobalEventBus {
 		CanvasRenderingContext2D ctx = (CanvasRenderingContext2D) (Object) canvas.getContext("2d");
 		ctx.drawImage(image, 0, 0, image.width * scale, image.height * scale);
 		String mime = image.src.contains(";base64,iVBOR") ? "image/png" : "image/jpeg";
+		mime = image.src.contains(";base64,R0lGODl") ? "image/gif" : mime;
 		canvas.toBlob((blob) -> {
 			fireEvent(new Event.ImageDataAdded(imageData.setThumbData(blob)));
 			loadNextDataUrl(files, ix + 1);
@@ -100,6 +101,7 @@ public class LoadFileImages implements GlobalEventBus {
 		CanvasRenderingContext2D ctx = (CanvasRenderingContext2D) (Object) canvas.getContext("2d");
 		ctx.drawImage(image, 0, 0, image.width * scale, image.height * scale);
 		String mime = image.src.contains(";base64,iVBOR") ? "image/png" : "image/jpeg";
+		mime = image.src.contains(";base64,R0lGODl") ? "image/gif" : mime;
 		canvas.toBlob((resized) -> createThumbnail(files, ix, imageData.setImageData(resized), image), mime,
 				Consts.imageJpgQuality);
 		return null;
