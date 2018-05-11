@@ -4,13 +4,21 @@ set -e
 set -o pipefail
 trap 'echo ERROR' ERR
 
-IPFS="https://ipfs.macholibre.org/ipfs"
+quick=0
+if [ x"$1" = x"--quick" ]; then
+	quick=1
+fi
+
+IPFS="https://hardbin.com/ipfs"
+
 WAR="ipfs-photo-gallery"
 
 cd "$(dirname "$0")"
 z="$(pwd)"
-#gradle clean build
-gradle build
+if [ "$quick" = 0 ]; then
+	#gradle clean build
+	gradle build
+fi
 cd build/libs
 #unpack the war
 rm -rf "$WAR"

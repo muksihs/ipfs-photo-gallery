@@ -22,7 +22,7 @@
 	<m:MaterialDivider></m:MaterialDivider>
 	</m:MaterialPanel>
 	<m:MaterialDivider style='clear: both;'></m:MaterialDivider>
-	<m:MaterialLabel style='text-align: justify;' text="This text is not guarenteed to display the same on steemit.com, as of the date this version of Muksihs' Photo Gallery Maker was published, they only supported a subset of deprecated HTML4 methods for basic text formatting. This program will attempt to convert the inline HTML5 styles to steemit.com compatible HTML4 tags."></m:MaterialLabel>
+<!-- 	<m:MaterialLabel style='text-align: justify;' text="This text is not guarenteed to display the same on steemit.com, as of the date this version of Muksihs' Photo Gallery Maker was published, they only supported a subset of deprecated HTML4 methods for basic text formatting. This program will attempt to convert the inline HTML5 styles to steemit.com compatible HTML4 tags."></m:MaterialLabel> -->
 	</m:MaterialPanel>
 	</m:MaterialPanel>
 </ui:UiBinder> 
