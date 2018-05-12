@@ -15,8 +15,8 @@
 		<m:MaterialPanel style='margin: auto; text-align: left; max-width:840px;'>
 		<m:MaterialTextBox style='display: inline-block; margin: 8px;' ui:field="username" label="Steem Username"
 			title="Steem Username" placeholder="Enter your steem username. Your username will not be saved."></m:MaterialTextBox>
-		<m:MaterialIntegerBox ui:field="tipAmount"  style='min-width: 10em; margin: 8px; display: inline-block;' label="Tip Muksihs by (percent)"
-			value="15" validateOnBlur="true" placeholder="The delegate amount to tip Muksihs with for creating this software. Any value in the range of 0 to 100."></m:MaterialIntegerBox>
+		<m:MaterialIntegerBox ui:field="tipAmount"  style='min-width: 10em; margin: 8px; display: inline-block;' label="Muksihs Beneficiary (percent)"
+			value="1" validateOnBlur="true" placeholder="The beneficiary amount to tip Muksihs with for creating this software. Any value in the range of 0 to 100."></m:MaterialIntegerBox>
 		<m:MaterialTextBox ui:field="postingKey" style='margin: 8px;' label="Private Posting Key"
 			placeholder="Enter your private posting key. The key will not be saved."></m:MaterialTextBox>
 		</m:MaterialPanel>
