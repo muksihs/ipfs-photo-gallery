@@ -14,9 +14,9 @@
 		<m:MaterialLink target="_blank" enabled="false" ui:field="steemit"
 			text="View gallery at steemit.com"></m:MaterialLink>
 		<m:MaterialDivider></m:MaterialDivider>
-		<m:MaterialLink target="_blank" enabled="false" ui:field="chainbb"
-			text="View gallery at chainbb.com"></m:MaterialLink>
-		<m:MaterialDivider></m:MaterialDivider>
+<!-- 		<m:MaterialLink target="_blank" enabled="false" ui:field="chainbb" -->
+<!-- 			text="View gallery at chainbb.com"></m:MaterialLink> -->
+<!-- 		<m:MaterialDivider></m:MaterialDivider> -->
 		<m:MaterialLink target="_blank" enabled="false" ui:field="busyorg"
 			text="View gallery at busy.org"></m:MaterialLink>
 	</m:MaterialPanel>

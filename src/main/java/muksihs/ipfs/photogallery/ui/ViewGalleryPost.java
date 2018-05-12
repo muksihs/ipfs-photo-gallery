@@ -25,8 +25,8 @@ public class ViewGalleryPost extends EventBusComposite {
 	@UiField
 	protected MaterialLink steemit;
 
-	@UiField
-	protected MaterialLink chainbb;
+//	@UiField
+//	protected MaterialLink chainbb;
 
 	@UiField
 	protected MaterialLink busyorg;
@@ -47,8 +47,8 @@ public class ViewGalleryPost extends EventBusComposite {
 		String href = event.getCategory() + "/" + "@" + event.getAuthor() + "/" + event.getPermLink();
 		steemit.setHref("https://www.steemit.com/" + href);
 		steemit.setEnabled(true);
-		chainbb.setHref("https://www.chainbb.com/" + href);
-		chainbb.setEnabled(true);
+//		chainbb.setHref("https://www.chainbb.com/" + href);
+//		chainbb.setEnabled(true);
 		busyorg.setHref("https://www.busy.org/" + href);
 		busyorg.setEnabled(true);
 	}
