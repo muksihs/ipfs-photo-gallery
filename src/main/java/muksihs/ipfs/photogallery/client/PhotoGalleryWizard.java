@@ -198,7 +198,7 @@ public class PhotoGalleryWizard implements ScheduledCommand, GlobalEventBus {
 			metadata.setTags(galleryInfo.getTags().toArray(new String[0]));
 			Element wrapper = DOM.createDiv();
 			wrapper.appendChild(getGalleryHtml4());
-			body = wrapper.getInnerHTML();
+			body = "<html>"+wrapper.getInnerHTML()+"</html>";
 			title = galleryInfo.getTitle();
 			String tmp = galleryInfo.getTitle().toLowerCase().replaceAll("[^a-z0-9]", "-");
 			while (tmp.endsWith("-")) {
